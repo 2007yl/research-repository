@@ -1,0 +1,1069 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 06-26-2023
+format: html
+editor: visual
+---
+
+## Background
+
+There was well-documented racial disparity in postoperative complications in hysterectomy patients. We were interested in intraoperative factors and surgical factors that may contribute to the racial disparity. The knowledge may help develop programs addressing racial disparity.
+
+## Study population
+
+MSQC hysterectomy patients 2015-2018 (N=27,369).
+
+Exclusion criteria:
+
+-cancer patients
+
+-race group \<=1%
+
+-missing values
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'MSQC hysterectomy patients 2015-2018 (N=27,369)'
+      [2]: 'Benign N=21,214'
+      [3]: 'Exclude race group <=1% N=20,075'
+      [4]: 'Participants had complete data  N=18,395'
+      [5]: 'Study population N=18,395'
+      ")
+```
+
+## Objective
+
+To evaluate clinical factors that are associated with racial disparities in major postoperative complications.
+
+## Primary outcome
+
+Major postoperative complications including deep incision/organ ssi, sepsis, septic shock, major cardiovascular complications, pneumonia, and venous thromboembolism.
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, insurance, hospital teaching status, hospital size, ASA class, comorbidities, hematocrit, uterine weight.  
+
+-Intraoperative characteristics: appropriate documentation, preferred antibiotics, abdominal preparation, intraoperative warming, bleeding barrier, perioperative mechanical DVT prophylaxis, Perioperative pharmacological DVT prophylaxis, multimodal pain management.
+
+-Surgical characteristics: surgeon volume, surgery time, surgical approach, same day discharge.
+
+## Methods
+
+Continuous variables were presented in median(IQR) and categorical variables were presented in numbers and percentages. Pearson's Chi-squared test, Fisher's exact, and Wilcoxon rank sum tests were performed. Two-sided p\<0.05 was defined as significant. All data management and analyses were performed using R (version 4.3.0).
+
+## 
+
+Risk factors for major postoperative complications
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(gtsummary)
+library(forcats)
+library(rio)
+require(lme4)
+require(broom.mixed)
+# read rds
+data2 <- readRDS("data2.rds")
+# descriptive summary
+data2 |>  
+  select(calculated_age, bmi, bmigroup1, race1, e_teaching, e_beds, insurance,
+         flg_cmb_sleep_apnea, flg_cmb_diabetes,	flg_cmb_hypertension,	flg_cmb_smoker,	flg_cmb_dvt, functional,	flg_cmb_coronary_artery, asaclass, hct_no, ebl,hct, specmn_weight_grams,  uterine, flg_w_h_cmplt_pap, flg_w_h_cmplt_biopsy, 
+cmplt_image, skin, mech_periop_vte_prophylaxis, pharm_periop_vte_prophylaxis,	
+bleeding_barrier,	prefer, intraop_warming,	flg_intraop_multimodal_pain_med, volume, hb_mis, mis_open, mis_uterine, open_uterine, bleeding_barrier, surgery_time, sameday, cmp_anymajor1) |>
+  tbl_summary(
+    by=cmp_anymajor1) |>
+  add_p() |>
+  modify_header(
+    stat_1 ~ "**No**",
+    stat_2 ~ "**Yes**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Major postoperative complications**")
+```
+
+Significant risk factors identified (p\<.01): BMI, race, insurance, comorbidities (diabetes, DVT), ASA class, anemia, uterine weight, imaging documentation, bleeding barrier, preferred antibiotics, surgeon volume, surgery time, surgical approach, same day discharge (risk factor or outcome?). Among these risk factors, we were particularly interested in race, if there was racial disparity in secondary outcomes (readmission, transfusion, same day discharge, ED visits), and what covariates contributed to the racial disparity in major postoperative complication rates.
+
+## Secondary outcomes in White and Black patients
+
+```{r}
+#| echo: false
+data2 |>
+  select(race1, cmp_anymajor1, cmp_ssi, cmp_sep, cmp_ssep, cmp_pn, cmp_cardivas, cmp_vte, event_edorur, event_return, sameday, cmp_trans,event_readmit)|>
+   tbl_summary(
+    by=race1,
+    missing = "no",
+    label=sameday ~ "Same day discharge",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  add_ci() |>
+  modify_spanning_header(
+    all_stat_cols() ~ "**Hysterectomy Patients**") |>
+  modify_caption("**Postop Characteristics**")
+```
+
+## Unmodifiable and modifiable factors
+
+We then categorized significant risk factors into unmodifiable and modifiable factors (surgeons' decision-making). Unmodifiable factors included BMI, ASA class, anemia, uterine weight, comorbidities (diabetes, DVT) and insurance.
+
+Modifiable factors included intraoperative events such as appropriate imaging documentation, preferred antibiotics, bleeding barrier, and surgical events such as surgeon volume, surgery time, and surgical approach. This knowledge could have implications to develop programs addressing disparities.
+
+## Bivariate analysis: unmodifiable events
+
+```{r}
+#| echo: false
+data2 |>
+  select(race1, bmi, bmigroup1, insurance, flg_cmb_diabetes,	flg_cmb_dvt,
+        asaclass, ebl,  hct, specmn_weight_grams,  uterine) |>
+  tbl_summary(
+    by=race1,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+## Bivariate analysis: modifiable events
+
+```{r}
+#| echo: false
+data2 |>
+  select(race1, bmi, bmigroup1, insurance, flg_cmb_diabetes,	flg_cmb_dvt,
+        asaclass, ebl,  hct, specmn_weight_grams,  uterine) |>
+  tbl_summary(
+    by=race1,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+    add_p() 
+```
+
+Black patients had higher rates of appropriate imaging documentation and preferred antibiotics compared to White patients.
+
+These modifiable factors may contribute to the racial disparity: bleeding barrier, surgical approach, operative time, and surgeon volume.
+
+## Univariate logistic regression
+
+A univariate logistic regression was used to investigate the association of variables including both unmodifiable and modifiable, and major postoperative complications. Considering ebl and anemia are highly correlated, only anemia was included. History of DVT was excluded due to the high rate of missing values. Categorical BMI and uterine weight were included.
+
+```{r}
+#| echo: false
+data2 |>
+  select(race1, bmigroup1, insurance, asaclass, flg_cmb_diabetes,  hct, uterine, 
+         bleeding_barrier, volume, hb_mis, surgery_time, cmp_anymajor1) |>
+  tbl_uvregression(method = glm, 
+                   y= cmp_anymajor1,
+                   method.args = list(family = binomial),
+                   exponentiate = TRUE) |>
+  #  add_global_p()|>
+  modify_caption("**Univariate logistic regression**")
+```
+
+## Mixed effects logistic regression
+
+Significant risk factors (p \<.01) were included in multiple logistic regression. Considering the random effect of the surgeon, a generalized linear model was used.  The random factor was the surgeon, other risk factors were fixed. The finalized model was mixed effects logistic regression.
+
+Results: Black patients had increased odds of major postoperative complications compared to White patients after adjusting for BMI, ASA class, insurance, uterine weight, anemia, diabetes, bleeding barrier, surgical approach, surgery time, and random effect of surgeon (aOR 1.40, 95%CI 1.05-1.89, P=.024).
+
+```{r}
+#| echo: false
+#full model
+glmer(cmp_anymajor1 ~ race1 + bmigroup1 +  insurance + asaclass  + flg_cmb_diabetes
+       + hct + uterine +  bleeding_barrier + hb_mis + surgery_time + 
+        (1 | physician_cid), data=data2, family=binomial, control = glmerControl(optimizer = "bobyqa"),
+      nAGQ = 10)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Mixed effects logistic regression**") 
+
+```
+
+## Modifiable factors
+
+To further understand how modifiable factors contributed to racial disparity in major postoperative complications, we first generated a baseline model that included unmodifiable factors only.
+
+```{r}
+#| echo: false
+# base model
+glm(cmp_anymajor1 ~ race1 + bmigroup1 +  insurance + asaclass  + flg_cmb_diabetes
+      + hct + uterine, data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)
+```
+
+We then added individual modifiable factors and combinations to the baseline model. The adjusted odds ratios for race are listed in this table:![](images/Picture1.png)
+
+## Conclusion
+
+Our data suggested that combining minimal use of bleeding barrier, shortened operative time, and minimally invasive surgical approach may help address racial disparity in major postoperative complication rates.
+
+## Updates
+
+### Questions 2-26-2024:
+
+need to explain how we did surgeon volume from the Michigan study:
+
+Surgeons who performed more than 11 hysterectomies per year were considered high volume. Those performing 11 or fewer hysterectomies per year were considered low volume. reference: Emily English, etc. 2019
+
+Did we look at preoperative hormonal suppression or other preoperative treatment prior to surgery?
+
+Alternative hormonal treatment
+
+Table2_0428
+
+Yes, we had included alternative treatments data but removed those later, don't remember why we did that......
+
+Why/why not transfusion included here? Should we include this here or somewhere later like discussion?
+
+Complication or utilization (transfusion, readmission, ER or urgent care)
+
+Dan's message: "About the issue of complications vs utilization, I'd like to suggest that we look at how various events contribute to the primary outcome as it could have implications regarding how to fix, develop programs to address disparities."
+
+Sara's message: "I'm wondering about how to best categorize transfusion. Particularly as our transfusion variable is specific to transfusion within 72 hours, I would assume that most of these events are happening during the initial hospitalization rather than readmission or ED visit. I think that transfusion right after a surgery would be driven almost entirely by preop anemia and EBL, which could be reflective of either patient factors (uterine size/fibroids) verses surgeon decision making (whether to proceed with surgery despite anemia, surgical skill in minimizing blood loss). Certainly difficult to separate all of that from access (did surgeons recommend preop hormonal suppression or IV iron, etc) but I feel like is overall more similar to infectious complications than to readmission/presentation to ED."
+
+\*\*need help from data team with this table/explanation. Also why did random surgeon effect fall out of the model\*\*??- will need to touch base w Yang here, specifically surgeon volume\*\*
+
+Explaining the last table:
+
+Sara "We are specifically trying to look at the effect of surgeon decision making/clinical best practices on postop complications, with the goal of better explaining well documented racial disparities relative to hysterectomy outcomes. "
+
+Dan "My thoughts are that social determinants of health might be significantly associated with higher rates of utilization.  We have some tools to examine this (social vulnerability index (which we used in MVC) and area deprivation index which we have not used).  These indices can be linked with zip code.  I'm going to meet Wenjing about this, hopefully this week.  I hope that this could add to our understanding of why there are differences between black and white patients undergoing hysterectomy."
+
+After adjusting for modifiable factors, the probability of major complications in Black patients changed from 58% to 40% higher than White patients compared to the baseline model. These data indicate:
+
+1.  Surgeon decision-making/clinical best practices had effects on postop complications; minimal use of bleeding barrier, shortened operative time, and minimally invasive surgical approach may help address racial disparity in major postoperative complication rates.
+
+2.  Other determinants such as social vulnerability, and systemic racism that we are unable to capture may contribute to the primary outcome.
+
+ how we built the model & more details
+
+#update 2-28-24
+
+```{r}
+#update 2-28-24 add alternative treatment data to table 1 
+data2 |>  
+  select(flg_hyster_alt_embolization, flg_hyster_alt_myomectomy, flg_hyster_alt_hormone, flg_hyster_alt_iud, flg_hyster_alt_ablation, cmp_anymajor1) |>
+  tbl_summary(
+    by=cmp_anymajor1) |>
+  add_p() |>
+  modify_header(
+    stat_1 ~ "**No**",
+    stat_2 ~ "**Yes**"
+  ) #2041 missing
+```
+
+```{r}
+#update 2-28-24 add alternative treatment data to table3
+data2 |>
+  select(race1,flg_hyster_alt_embolization, flg_hyster_alt_myomectomy, flg_hyster_alt_hormone, flg_hyster_alt_iud, flg_hyster_alt_ablation) |>
+  tbl_summary(
+    by=race,
+    #  missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() #2041 missing
+```
+
+```{r}
+#regression model: replace mixed model
+glm(cmp_anymajor1 ~ race1 + bmigroup1 + asaclass + insurance  + 
+      surgery_time + bleeding_barrier + flg_cmb_diabetes + prefer + volume + hct + hb_mis+uterine, 
+    data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+#baseline model
+glm(cmp_anymajor1 ~ race1 + bmigroup1 +  insurance + asaclass  + flg_cmb_diabetes
+      + hct + uterine, data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)
+#modifiable factors
+glm(cmp_anymajor1 ~ race1 + bmigroup1 +  insurance + asaclass  + flg_cmb_diabetes
+      + hct + uterine + bleeding_barrier + surgery_time, data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)
+```
+
+### 04/10/2024 questions and requests: email attachments
+
+-   Table 3: CAD, OSA, HTN, tobacco use according to race
+
+**(flg_cmb_coronary_artery, flg_cmb_sleep_apnea,flg_cmb_hypertension,flg_cmb_smoker)**
+
+```{r}
+data2 |>
+  select(race1,flg_cmb_coronary_artery, flg_cmb_sleep_apnea,flg_cmb_hypertension,flg_cmb_smoker) |>
+  tbl_summary(
+    by=race1,
+    #  missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() 
+```
+
+-   Table 4: tobacco use, EBL \>400 (I'm sure that there is a correlation between this and preop anemia but I feel like they are actually very independent from a surgical/modifiable standpoint and from a complication risk factor standpoint), and preferred abx used (it's already added to the multivariable version of table 5 and I like it! Just want to add to table 4)
+
+````         
+**variable: flg_cmb_smoker, ebl, prefer**
+
+```{r}
+data2 |>
+  select(race1, bmigroup1, insurance, asaclass, hct, flg_cmb_diabetes,flg_cmb_smoker,  uterine, ebl, surgery_time, hb_mis,bleeding_barrier, prefer, volume, cmp_anymajor1) |>
+  tbl_uvregression(method = glm, 
+                   y= cmp_anymajor1,
+                   method.args = list(family = binomial),
+                   exponentiate = TRUE) |>
+  #  add_global_p()|>
+  modify_caption("**Univariate logistic regression**")
+```
+````
+
+-   Table 5: IF tobacco use and EBL\>400 are significant in univariate model, can we add to multivariable model?
+
+    ```{r}
+    #regression model
+    glm(cmp_anymajor1 ~ race1 + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes + flg_cmb_smoker + uterine + ebl + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+        data=data2, family=binomial)|>
+      tbl_regression(exponentiate = TRUE)|>
+      modify_caption("**Multivariable logistic regression**") 
+    ```
+
+-   For the updated manuscript draft, I had a few clarification questions in methods for Yang -- should all be in comment boxes.
+
+-   MSQC: 69 hospitals https://msqc.org/about/
+
+-   benign indication: Were cases that had final path that was malignant still included?
+
+    ```{r}
+    data2|>
+      select(e_w_h_endo_pth_adenocarcinoma, e_w_h_endo_sx_adenocarcinoma, e_w_h_endo_bx_src_pth_ab_cncr)|>
+      tbl_summary()
+    ```
+
+e_w_h_endo_pth_adenocarcinoma: Workup for hysterectomy - Endometrial biopsy - pathology report abnormal - endometrioid adenocarcinoma grade 1- 21, grade2- 1, grade3 -3
+
+e_w_h_endo_sx_adenocarcinoma: Workup for hysterectomy - Endometrial biopsy - surgeon description abnormal - cancer- Endometrioid Adenocarcinoma grade3- 1
+
+e_w_h_endo_bx_src_pth_ab_cncr: Workup for hysterectomy - Endometrial biopsy - pathology report - abnormal - cancer pathology 5 - Endometrioid Adenocarcinoma -28; 6 - Non-endometrioid cancer -65
+
+-   how did we categorize patients who had multiple races identified. I assume that if they selected Black and white, we categorized as Black. What about White and other? Or Black and other?
+
+    ```{r}
+    data<- read.csv("C:/Users/ylyl/OneDrive - Michigan Medicine/ResidentsResearch/Residents/2025/Darington Richardson/Racial disparity/Raw data/t1184_liu_04_28_23.csv")
+    data |>
+      select(race)|>
+      tbl_summary()   # N=27369
+    data2 |>
+      select(race,race1)|>
+      tbl_summary() # N=18395
+    ```
+
+    MSQC hysterectomy patients 2015-2018 (N=27,369):
+
+    Black and white (n=2), White and other (n=6), Black and other (n=0)
+
+    These 8 patients were excluded in our study.
+
+Study population in our study (N=18395) included: White (n=15158), White and Unknown (n=6); Black (n=3230), Black and unknown (n=1)
+
+### 04/17/2024 questions
+
+Q1: did ebl correlate with other variables?
+
+Answer: agree that not include ebl, since anemia, surgical approach and ebl were too closely related to each other.
+
+Dr. Till "undefined
+
+```{r}
+l1 = glm(cmp_anymajor1 ~ race1 + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes + flg_cmb_smoker + uterine + ebl + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+    data=data2, family=binomial)
+#check multicollinearity 
+library(car)
+car::vif(l1) #ebl=1.4
+summary(l1)
+
+```
+
+```{r}
+require(ggplot2)
+require(GGally)
+require(reshape2)
+require(lme4)
+require(compiler)
+require(parallel)
+require(boot)
+require(lattice)
+require(forcats) #set reference level
+require(gtsummary)
+require(broom.mixed)
+require(flexplot)
+require(lmtest)
+require(ResourceSelection)
+require(Deducer)
+require(car)
+library(visdat)
+
+l2 = glm(cmp_anymajor1 ~ race1  + bmigroup1 + insurance+ asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+    data=data2, family=binomial)
+summary(l2)
+l3 = glm(cmp_anymajor1 ~ race1  + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+    data=data2, family=binomial)
+summary(l3)
+#Assessing fitting of the model: goodness of fit (Hosmer-Lemeshow tests)
+#p>=0.05 indicates model fits
+hoslem.test(l2$y, fitted(l2)) #p=0.27
+hoslem.test(l3$y, fitted(l3))  #p=0.56
+#change of coefficients
+delta.coef=abs((coef(l2)-coef(l3)[-5])/coef(l2)[-5])
+round(delta.coef, 3)
+#model comparison
+library(easystats)
+#https://easystats.github.io/performance/
+performance::model_performance(l2) 
+performance::model_performance(l3) 
+compare_performance(l2, l3, rank = TRUE, verbose = FALSE) #similar
+#check multicollinearity
+car::vif(l2) #pass
+car::vif(l3) #pass
+#likelihood ratio test
+lmtest::lrtest(l2, l3) #p=0.006
+#regression model
+#l2
+glm(cmp_anymajor1 ~  race1  + bmigroup1 + insurance+ asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+    data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+#l3
+glm(cmp_anymajor1 ~  race1  + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume, 
+    data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+
+```
+
+better fitting model:
+
+lower aic, lower bic,
+
+```         
+AIC      |     AICc |      BIC | Tjur's R2 |  RMSE | Sigma | Log_loss | Score_log | Score_spherical |   PCP
+-----------------------------------------------------------------------------------------------------------
+3012.350 | 3012.391 | 3160.927 |     0.009 | 0.127 | 1.000 |    0.081 |    -5.025 |           0.004 | 0.968
+```
+
+```         
+AIC      |     AICc |      BIC | Tjur's R2 |  RMSE | Sigma | Log_loss | Score_log | Score_spherical |   PCP
+-----------------------------------------------------------------------------------------------------------
+3008.376 | 3008.422 | 3164.772 |     0.010 | 0.127 | 1.000 |    0.081 |    -5.027 |           0.004 | 0.968
+```
+
+Q2: remove insurance from the model?
+
+Q3: How to select variables?
+
+1.  there is no definite answer to this question. Sometimes, we need to combine clinic knowledge, public health science, social study, statistics, and common sense. This is hard.
+
+2.  We can include all the variables that were statistically significant in bivariate analysis or univariate logistic regression, but we need to be careful for those too similar, or too closely related to each other.
+
+3.  We can include some variables that were not statistically significant but have clinical significance.
+
+4.  We need to have a theory for each variable included in the model.
+
+    reference: In an explanatory model, the goal is to correctly characterize the relationship of each predictor to the outcome variable. For that purpose, the identities of the variables in the model are critical, and the analyst must take great care in choosing which variables to include and in what mathematical form.
+
+```         
+Q4: model performance, measures of goodness of fit
+
+R2 is commonly used as a measure of goodness of fit in linear regression. R2 doesn't quantify goodness of fit in logistic regression.
+```
+
+Previous question: why switched to mixed effects model?
+
+the independent observation assumption was violated.
+
+Why switched back to multivariable logistic regression model? I think adjusting for surgeon volume is equivalent to adjusting for random effects (surgeon).
+
+email 04-10-24 Dr. Till preferred this model over mixed effects
+
+```{r}
+data2 <- data2 |>
+  mutate(race1=case_when(race1 %in% c("{0|10}", "{10|70}", " {70|10}") ~ "White",
+                        race1 %in% c("{0|20}", "{20|70}", " {70|20}") ~ "Black",
+                        TRUE ~ race1))
+data2$race1 <- forcats::fct_relevel(data2$race1, "White")
+```
+
+```{r}
+require(lmtest)
+lrtest(l3, l2)
+```
+
+response:
+
+In terms of selecting variables:
+
+-unfortunately, there is no definite answer to this question, it's a combination of clinical knowledge, public health science, statistics and common sense. This is hard......
+
+-include statistically significant variables, but be careful for those too similar, or too closely related to each other. For example, surgical approach and ebl. I agree with Dr.Till's comments on these two variables, let's remove ebl;
+
+-include clinically significant variables;
+
+-have a theory for each variable included/excluded in the model. I like Dr. Till's comments on "insurance".
+
+In terms of model performance:
+
+-R2 is most commonly used as a measure of goodness of fit in linear regression;
+
+For logistic regression model:
+
+-Hosmer-Lemeshow goodness of fit test could be used to evaluate individual models. A good fit (p\>=0.05) indicates that the estimated probabilities are in agreement with observed probabilities;
+
+-Likelihood ratio test could be used to compare the goodness of fit of two models (full vs nested).
+
+What I have done:
+
+Model#1 (full): race, BMI, insurance, ASA, anemia, diabetes, uterine weight, op time, MIS approach, bleeding barrier, abx, surgeon volume
+
+Model#2 (nested): race, BMI, ASA, anemia, diabetes, uterine weight, op time, MIS approach, bleeding barrier, abx, surgeon volume
+
+1.  Hosmer-Lemeshow test on models:
+
+    Model#1 p=0.27
+
+Model#2 p=0.56
+
+Interpretation: both models fit
+
+2.  Likelihood ratio test:
+
+    P=0.006
+
+Interpretation: removing "insurance" significantly changes model fit, "insurance" should be added back. However, scientific context is more critical than measures.
+
+Here is our final model:
+
+race, BMI, ASA, anemia, diabetes, uterine weight, op time, MIS approach, bleeding barrier, abx, surgeon volume
+
+### 05/09/2024 final thoughts
+
+**theory of removing "insurance"**
+
+Dr. Till "On a similar note, I'm wondering whether we should remove insurance type from the model? I know that there is data suggesting that insurance and complications are strongly associated, however it is not actually the insurance type that carries risk for complications. Rather, patients who are on public insurance have higher rates of medical comorbidities or social stressors that likely contribute to complication rates. Similarly, I suspect that patients with public insurance may have less access to high volume surgeons or MIS surgical approach than patients who are on commercial insurance."
+
+**theory of removing "ebl"**
+
+Dr. Till: "correlated with uterine size";
+
+"MIS approach is a) more impactful on complication rate than EBL based on existing literature and b) more potentially modifiable than EBL."
+
+correlated with anemia or surgical approach?
+
+**Anemia: modifiable or non-modifiable?**
+
+**theory of removing "tobacco"**
+
+not statistically significant in bivariate analysis (White vs Black), but significant in bivariate analysis (major complication Yes or No)
+
+clinically significant
+
+statistically significant in univariate logistic regression, not significant in multivariable logistic regression (after adjusting for other risk factors)
+
+**why removed:** have a weak association with the outcome (major complication), p=0.032; risk factors p \< 0.01 were included in multivariable logistic regression.
+
+### 09/13/2024
+
+respond to reviewers: add ci and each major complication
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+library(rio)
+data2 <- data2 |>
+  mutate(race_new=case_when(race1=="{0|10}" ~"White",
+                            race1=="{10|70}" ~ "White",
+                            race1=="{20|70}" ~ "Black",
+                            race1=="{0|20}" ~ "Black",
+                            TRUE ~ race1))
+data2$race_new <- forcats::fct_relevel(data2$race_new, "White")
+```
+
+```{r}
+#table 1 
+data2 |>  
+  select(calculated_age, race_new,insurance, bmigroup1, asaclass,hct, flg_cmb_coronary_artery,flg_cmb_diabetes, flg_cmb_sleep_apnea,flg_cmb_hypertension,flg_cmb_smoker,flg_cmb_dvt, flg_hyster_alt_hormone,flg_hyster_alt_iud,flg_hyster_alt_myomectomy, flg_hyster_alt_embolization,   flg_hyster_alt_ablation,cmplt_image,flg_w_h_cmplt_pap, flg_w_h_cmplt_biopsy, prefer, skin,mech_periop_vte_prophylaxis,intraop_warming,sameday, surgery_time,hb_mis, mis_open,uterine,specmn_weight_grams,mis_uterine, open_uterine,ebl,bleeding_barrier,e_teaching, e_beds, volume,cmp_anymajor1) |>
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    by=cmp_anymajor1,
+     digits = list(all_categorical() ~ c(0, 1))) |>
+  add_p() |>
+  add_ci(style_fun = everything() ~ purrr::partial(style_percent, digits = 1)) 
+```
+
+```{r}
+
+```
+
+```{r}
+#table2
+data2 |>
+  select(race_new, cmp_anymajor1, cmp_ssi, cmp_sep, cmp_ssep, cmp_pn, cmp_cardivas, cmp_vte, event_edorur, event_return, sameday, cmp_trans,event_readmit)|>
+  tbl_summary(
+    by=race_new,
+    missing = "no",
+    label=sameday ~ "Same day discharge",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  add_ci() |>
+  modify_spanning_header(
+    all_stat_cols() ~ "**Hysterectomy Patients**") |>
+  modify_caption("**Postop Characteristics**")
+```
+
+```{r}
+#table 3
+data2 |>
+  select(race_new, insurance,bmigroup1, asaclass, flg_cmb_coronary_artery,flg_cmb_diabetes, flg_cmb_sleep_apnea,flg_cmb_hypertension,flg_cmb_dvt,uterine,specmn_weight_grams,mis_uterine, open_uterine, flg_hyster_alt_hormone,flg_hyster_alt_iud,flg_hyster_alt_myomectomy, flg_hyster_alt_embolization,   flg_hyster_alt_ablation,flg_cmb_smoker, cmplt_image, hct, prefer,	surgery_time,
+	 hb_mis, approach, mis_open, ebl, bleeding_barrier,volume) |>
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    by=race_new,
+    missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()|>
+  add_ci(style_fun = everything() ~ purrr::partial(style_percent, digits = 1))
+```
+
+### 05/29/2025 resubmission
+
+create tertiles for surgeon annual case volume:
+
+low volume (1-33^th^ percentile), medium volume (34-66^th^ percentile), high volume (67^th^ percentile and above)
+
+old codes: \>= 12 cases per year is defined as "high volume" based on a literature (English ebl MSQC paper)
+
+```{r}
+#calculate by year
+s_all <-
+  data|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  )  
+s2015 <-
+  data|>
+  filter(surgery_year==2015)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(surgeon2015=case_when(frequency<6 ~"low",
+                               frequency>=6 ~"high")) # 2015 data collected for 6 months not the whole year  
+s2016 <-
+  data|>
+  filter(surgery_year==2016)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(surgeon2016=case_when(frequency<12 ~"low",
+                           frequency>=12 ~"high"))
+
+s2017 <-
+  data|>
+  filter(surgery_year==2017)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(surgeon2017=case_when(frequency<12 ~"low",
+                               frequency>=12 ~"high"))
+
+s2018 <-
+  data|>
+  filter(surgery_year==2018)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(surgeon2018=case_when(frequency<12 ~"low",
+                               frequency>=12 ~"high"))
+test0 <-
+  s2015 |>
+  select(physician_cid, surgeon2015)|>
+  full_join(s_all, s2015,by=join_by(physician_cid), relationship="many-to-many")
+
+test <-
+  s2016 |>
+  select(physician_cid, surgeon2016)|>
+  full_join(test0, s2016,by=join_by(physician_cid), relationship="many-to-many")
+
+test1 <-
+  s2017 |>
+  select(physician_cid, surgeon2017)|>
+  full_join(test, s2017,  by=join_by(physician_cid), relationship="many-to-many")
+
+test2 <-
+  s2018 |>
+  select(physician_cid, surgeon2018)|>
+  full_join(test1, s2018,  by=join_by(physician_cid), relationship="many-to-many")
+
+data0 <-
+  full_join(data, test2,  by=join_by(physician_cid), relationship="many-to-many")
+
+data0<-
+  data0 |>
+  mutate(volume=case_when(c(surgery_year==2015 & surgeon2015=="low")~"low",
+                          c(surgery_year==2015 & surgeon2015=="high")~"high",
+                          c(surgery_year==2016 & surgeon2016=="low")~"low",
+                          c(surgery_year==2016 & surgeon2016=="high")~"high",
+                          c(surgery_year==2017 & surgeon2017=="low")~"low",
+                          c(surgery_year==2017 & surgeon2017=="high")~"high",
+                          c(surgery_year==2018 & surgeon2018=="low")~"low",
+                          c(surgery_year==2018 & surgeon2018=="high")~"high"))
+
+```
+
+New codes:
+
+For example, in 2016, total 5,545 surgeries, 712 unique surgeons, tertile surgeries T1=3, T2=7, max=104. #surgeries \<=3-low, \>3 and \<=7 medium, \>7-high. among those, 242 (34%) are high volume surgeon, 170 (24%) are medium, 300 (42%) are low volume. Median number of surgeries by high, medium, low volume surgeons are 13, 5, 2. Total number of surgeries by high, medium, low volume surgeons are 4102, 896, 547.
+
+```{r}
+###calculate annual surgeon volume: tertile###
+volume <-
+  data2|>
+  filter(surgery_year==2016)|> # do the same thing for 2016-2018
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() 
+
+volume <-
+  volume|>
+  summarise(
+    q1 = quantile(frequency, 0.33),
+    q2 = quantile(frequency, 0.66),
+    q3 = max(frequency))
+volume
+#2015, 1, 3, 24
+#2016, 3, 7, 104
+#2017, 3, 9, 94
+#2018, 4, 10, 90
+
+s_all <-
+  data2|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  )  # total 898 surgeons
+s2015 <-
+  data2|>
+  filter(surgery_year==2015)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2015=case_when(frequency<=1 ~"low",
+                              frequency<=3 ~"medium",
+                               frequency>3 ~"high"))  
+
+s2016 <-
+  data2|>
+  filter(surgery_year==2016)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2016=case_when(frequency<=3 ~"low",
+                              frequency<=7 ~"medium",
+                           frequency>7 ~"high"))
+#calculate #cases in each category
+s2016 |>
+  select(frequency,volume2016)|>
+  tbl_summary(by=volume2016)
+sum <- s2016 |> 
+  select(frequency, volume2016) |> 
+  group_by(volume2016) |> 
+  summarise(
+    total_frequency = sum(frequency) 
+  ) |> 
+  ungroup()
+sum
+
+s2017 <-
+  data2|>
+  filter(surgery_year==2017)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2017=case_when(frequency<=3 ~"low",
+                               frequency<=9 ~"medium",
+                               frequency>9 ~"high"))
+
+s2018 <-
+  data2|>
+  filter(surgery_year==2018)|>
+  select(physician_cid)|>
+  group_by(physician_cid) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2018=case_when(frequency<=4 ~"low",
+                               frequency<=10 ~"medium",
+                               frequency>10 ~"high"))
+test0 <-
+  s2015 |>
+  select(physician_cid, volume2015)|>
+  full_join(s_all, s2015,by=join_by(physician_cid), relationship="many-to-many")
+
+test <-
+  s2016 |>
+  select(physician_cid, volume2016)|>
+  full_join(test0, s2016,by=join_by(physician_cid), relationship="many-to-many")
+
+test1 <-
+  s2017 |>
+  select(physician_cid, volume2017)|>
+  full_join(test, s2017,  by=join_by(physician_cid), relationship="many-to-many")
+
+test2 <-
+  s2018 |>
+  select(physician_cid, volume2018)|>
+  full_join(test1, s2018,  by=join_by(physician_cid), relationship="many-to-many")
+
+data2 <-
+  full_join(data2, test2,  by=join_by(physician_cid), relationship="many-to-many")
+
+data2<-
+  data2 |>
+  mutate(volume_new=case_when(c(surgery_year==2015 & volume2015=="low")~"low",
+                          c(surgery_year==2015 & volume2015=="medium")~"medium",                              c(surgery_year==2015 & volume2015=="high")~"high",
+                          c(surgery_year==2016 & volume2016=="low")~"low",
+                          c(surgery_year==2016 & volume2016=="medium")~"medium", 
+                          c(surgery_year==2016 & volume2016=="high")~"high",
+                          c(surgery_year==2017 & volume2017=="low")~"low",
+                          c(surgery_year==2017 & volume2017=="medium")~"medium", 
+                          c(surgery_year==2017 & volume2017=="high")~"high",
+                          c(surgery_year==2018 & volume2018=="low")~"low",
+                          c(surgery_year==2018 & volume2018=="medium")~"medium", 
+                          c(surgery_year==2018 & volume2018=="high")~"high"))
+
+library(Hmisc)
+data2$volume_new <- forcats::fct_relevel(data2$volume_new, "high", "medium", "low")
+label(data2$volume_new) <- "Surgeon volume"
+#save dataset 
+export(data2, "data2.rds")
+
+```
+
+Table 1
+
+```{r}
+#table 1 
+data2 |>  
+  select(volume_new,cmp_anymajor1) |>
+  tbl_summary(
+    by=cmp_anymajor1,
+     digits = list(all_categorical() ~ c(0, 1))) |>
+  add_p() 
+```
+
+Table 3
+
+```{r}
+#table 3
+data2 |>
+  select(race_new, sameday, volume_new) |>
+  tbl_summary(
+    by=race_new,
+    missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+Table 4
+
+```{r}
+data2 |>
+  select(race_new, insurance, bmigroup1, asaclass,  hct,flg_cmb_diabetes, flg_cmb_smoker, uterine, surgery_time, hb_mis,ebl, bleeding_barrier, prefer, volume_new,  cmp_anymajor1) |>
+  tbl_uvregression(method = glm, 
+                   y= cmp_anymajor1,
+                   method.args = list(family = binomial),
+                   exponentiate = TRUE)
+```
+
+Table 5
+
+```{r}
+glm(cmp_anymajor1 ~  race_new  + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume_new, 
+    data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+```
+
+### 9/2/2025 AJOG revision
+
+Reviews' requests:
+
+1.  insurance should be included in the final multivariable model in Table 5
+
+```{r}
+glm(cmp_anymajor1 ~  race_new  + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume_new, 
+    data=data2, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+```
+
+2.  add prior surgery
+
+    Table 1 (complication vs no complication) and Table 3 (White vs Black): any laparoscopy, any laparotomy, cesarean, myomectomy, oopherectomy, tubal ligation?
+
+    37% missing data
+
+    ```{r}
+    #table 1 
+    data2 |>  
+      select(flg_prior_pelvic_pr_lapscopy,flg_prior_pelvic_pr_laptomy,flg_prior_pelvic_pr_csection,flg_prior_pelvic_pr_myome,flg_prior_pelvic_pr_oopho,flg_prior_pelvic_pr_tubal,cmp_anymajor1) |>
+      tbl_summary(
+        by=cmp_anymajor1,
+         digits = list(all_categorical() ~ c(0, 1))) |>
+      add_p() 
+    #table 3
+    data2 |>
+      select(flg_prior_pelvic_pr_lapscopy,flg_prior_pelvic_pr_laptomy,flg_prior_pelvic_pr_csection,flg_prior_pelvic_pr_myome,flg_prior_pelvic_pr_oopho,flg_prior_pelvic_pr_tubal,race_new) |>
+      tbl_summary(
+        by=race_new,
+        digits = list(all_categorical() ~ c(0, 1)))|>
+      add_p()
+    ```
+
+### 9/18/2025
+
+```{r}
+#checking missing data 
+data2 |>  
+  select(calculated_age, bmi, bmigroup1, race1, e_teaching, e_beds, insurance,
+         flg_cmb_sleep_apnea, flg_cmb_diabetes,	flg_cmb_hypertension,	flg_cmb_smoker,	flg_cmb_dvt, functional,	flg_cmb_coronary_artery, asaclass, hct_no, ebl,hct,  uterine, flg_w_h_cmplt_pap, flg_w_h_cmplt_biopsy, 
+cmplt_image, skin, mech_periop_vte_prophylaxis, pharm_periop_vte_prophylaxis,	
+bleeding_barrier,	prefer, intraop_warming,	flg_intraop_multimodal_pain_med, volume, hb_mis, mis_open, bleeding_barrier, surgery_time, sameday, cmp_anymajor) |>
+  tbl_summary(
+   # missing = "no",
+    by=cmp_anymajor) |>
+  add_p() |>
+  modify_header(
+    stat_1 ~ "**No**",
+    stat_2 ~ "**Yes**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Major postoperative complications**")
+```
+
+```{r}
+#checking missing data
+data2 |>  
+  select(flg_hyster_alt_hormone,flg_hyster_alt_iud,flg_hyster_alt_myomectomy, flg_hyster_alt_embolization,   flg_hyster_alt_ablation) |>
+  tbl_summary(
+    ) 
+```
+
+Editor's questions:
+
+2\) Please comment on the extent of missing data and how that was handled in the analysis.\
+3) The methods section is well written, yet a few details are missing from the model building process. The final results are contingent on decisions made at each step, impacting interpretation of the findings and, potentially, reproducibility. Specifically:\
+3a) Explain why not all factors associated with p\<0.05 in Table 1 are included in Table 3. If other criteria were applied, please describe in the methods (see lines 227-229).\
+3b) Add the statistical criteria used in the backwards elimination process, e.g., p\<0.05, AIC, BIC, or something else.\
+3c) If the focus was on identifying modifiable factors, did you consider forcing in important non-modifiable factors selected from the univariable models? For example, insurance seems to fall out but one could justify keeping it in the model anyway.
+
+Responses:
+
+2). Missing data:
+
+We appreciate the editor’s question regarding missing data. To maintain the clarity and readability of our tables, we didn’t list the extent of missing data directly within them due to space constraints. We also didn’t perform imputation for missing data.
+
+For reference, the following variables had complete data: age, BMI, race, teaching hospital, hospital size, insurance type, obstructive sleep apnea, diabetes, hypertension, tobacco use, coronary artery disease, ASA class, preop hematocrit value, anemia, uterine weight, bleeding barrier, preferred antibiotics administered, surgeon volume, surgical approach, MIS converted to open surgery, and operative times.
+
+The estimated blood loss (EBL) variable had \<0.01% missing data.
+
+History of DVT, appropriate abdominal prep, perioperative mechanical DVT prophylaxis, perioperative pharmacological DVT prophylaxis, and same day discharge all had 1-10% missing data.
+
+Pap smear documented (17%), biopsy documented (17%), imaging documented (17%), prior pelvic surgery (37%), previous trials for symptom management (11%),  and intraop warming (31%) had \>10% missing data.
+
+We will add appropriate notations in the relevant tables to indicate variables with \>10% missing data to further clarify this for readers.
+
+3a).
+
+Thank you for highlighting the need for clarification. We apologize for any confusion. All factors associated with p\<0.05 in Table 1 were included in Table 3. Table 1 is organized by demographic, clinical, perioperative clinical best practice, surgical, hospital and surgeon characteristics; Table 3 is structured to present results by nonmodifiable and modifiable factors, which may account for differences in presentation.
+
+3b).
+
+We utilized a backwards elimination process with a significance threshold of p\<0.05. We have added this detail to the Methods section for clarity.
+
+3c).
+
+We appreciate the reviewers and editor’s insightful comment about the inclusion of important nonmodifiable factors such as insurance type. Initially, we included insurance type in our multivariable regression model and engaged in extensive discussions regarding its role in healthcare. Recent literature suggests that public insurance is highly correlated with race, socioeconomic status, comorbidities, and chronic diseases. For this reason, we decided to remove insurance from the final model. Nevertheless, we agree that insurance is an important factor in its own role. We will include it in our multivariable regression model.
+
+### 09-24-2025 Supplemental tables
+
+univariable logistic regression for those with prior surgical history N=11,530
+
+```{r}
+data2 |> 
+  filter(!is.na(flg_prior_pelvic_pr_csection))|>
+  select(race_new, insurance, bmigroup1, asaclass,  hct,flg_cmb_diabetes, flg_cmb_smoker, uterine, surgery_time, hb_mis,ebl, bleeding_barrier, prefer, volume_new, flg_prior_pelvic_pr_csection,flg_prior_pelvic_pr_myome, cmp_anymajor1) |>   
+  tbl_uvregression(method = glm,  y= cmp_anymajor1, method.args = list(family = binomial), exponentiate = TRUE)
+
+```
+
+multivariable logistic regression for those with prior surgical history N=11,530
+
+```{r}
+data3 <- data2 |> 
+  filter(!is.na(flg_prior_pelvic_pr_csection))
+glm(cmp_anymajor1 ~  race_new  + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume_new + flg_prior_pelvic_pr_myome, 
+    data=data3, family=binomial)|>
+  tbl_regression(exponentiate = TRUE)|>
+  modify_caption("**Multivariable logistic regression**") 
+```
+
+univariable logistic regression for those with alternative treatment myomectomy data N=16,354
+
+```{r}
+data2 |>    
+  filter(!is.na(flg_hyster_alt_myomectomy))|>   select(race_new, insurance, bmigroup1, asaclass,  hct,flg_cmb_diabetes, flg_cmb_smoker, uterine, surgery_time, hb_mis,ebl, bleeding_barrier, prefer, volume_new, flg_hyster_alt_myomectomy, cmp_anymajor1) |>      
+  tbl_uvregression(method = glm,  y= cmp_anymajor1, method.args = list(family = binomial), exponentiate = TRUE) 
+```
+
+multivariable logistic regression for those with alternative treatment myomectomy data N=16,354
+
+```{r}
+glm(cmp_anymajor1 ~  race_new  + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume_new + flg_hyster_alt_myomectomy,      data=data2, family=binomial)|>   tbl_regression(exponentiate = TRUE)|>   modify_caption("**Multivariable logistic regression**") 
+```
+
+```{r}
+#check for multicollinearity 
+model <- glm(cmp_anymajor1 ~  race_new  + insurance + bmigroup1 + asaclass +hct + flg_cmb_diabetes +  uterine  + surgery_time +hb_mis + bleeding_barrier  + prefer + volume_new + flg_hyster_alt_myomectomy,      data=data2, family=binomial)
+car::vif(model) #value greater than 5 indicates potentially severe correlation
+```
