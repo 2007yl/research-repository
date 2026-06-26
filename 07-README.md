@@ -10,8 +10,7 @@ This project analyzes perioerative outcomes and Epidural analgesia
 - Bivariate analysis
 
 ## Files
-- `07-analysis.R`: cleanup and analysis
-- `07-report.qmd`: report
+- `07-report.qmd`: cleanup, analysis and report
 
 ## Notes
 Original data are not included due to privacy/research restrictions.
