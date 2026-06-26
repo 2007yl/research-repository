@@ -1,0 +1,671 @@
+---
+title: "EC patients Genetic Counseling Referral"
+author: ""
+date: 
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title:
+
+Characterizing Genetic Counseling Referral Patterns and Completion of Testing for Endometrial Cancer Patients Less than 50 Years of Age
+
+## Team
+
+Jodi Llanora, Monica Janke, Gabrielle Schweitzer, Caroline Hayse, Aimee Rolston
+
+## Background
+
+-   Hereditary syndromes account for \~5% of all endometrial cancer (EC) cases.
+
+-   Overall referral rates for Genetic Counseling for patients with EC are low in comparison to other malignancies (e.g., breast).
+
+-   There are limited, recent data regarding referral patterns and genetic counseling outcomes for patients with EC.
+
+## Study population
+
+Endometrial cancer patients received care at Michigan Medicine from 01-01-2000 - 01-31-2025
+
+age 18-49
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'N='
+      [2]: 'N='
+      [3]: 'Exclude N='
+      [4]: 'Participants had complete data  N='
+      [5]: 'Study population N=178'
+      ")
+```
+
+## Objective
+
+1.  Characterize referral patterns: % of referrals, % of patients who actually complete consultation after referral, % of patients who actually get testing after completing consultation
+
+2.  Identify factors associated with referrals and completed consultations
+
+3.  Identify the percentage of patients with positive testing after Genetic Counseling referral.
+
+4.  Compare institutional percentage of patients who meet NCCN guideline recommendations who were referred to Genetic Counseling in comparison to national reports.
+
+## Primary outcome
+
+Percent of patients referred to GC, completed GT, positive mutation via GT
+
+## Secondary outcome
+
+Comparing age, race, ethnicity, insurance type, etc. between all high-risk patients with and without a referral
+
+## Variables of interest
+
+-Demographic and clinical characteristics: race, ethnicity, bmi, gravida, para, insurance, primary language, social driver for health, comorbidities
+
+-Endometrial cancer characteristics: histology, grade, stage
+
+-Genetic counseling characteristics: referral rate, testing rate, positive rate
+
+## Data management (Import, Cleaning, Variable Creation)
+
+### Load Packages
+
+```{r}
+library(tidyverse) #for import, cleaning, wrangling
+library(gtsummary) #for summarizing
+library(labelled) #for variable labelling
+library(rio) #import/export 
+library(janitor) #for cleaning and tabulation helpers
+library(visdat) #data visualization for missingness
+library(Hmisc)
+```
+
+### Import and Merge data
+
+```{r}
+#--- Import raw datasets from REDCap ---
+data <- read_csv("rawdata/EndometrialCancerGen_DATA_2025-09-15_0729.csv")
+ruca <- read_csv("rawdata/Endometrial Cancer Genetic Counseling_FULL DATA_2025-09-03.csv")
+
+#--- Select and format MRN and RUCA data ---
+ruca <- ruca |>
+  select(mrn, `Primary RUCA`) |>
+  mutate(mrn = as.character(mrn))
+
+#--- Merge RUCA to main data on MRN ---
+data <- left_join(data, ruca, by = "mrn")
+```
+
+### Initial Data Check and Cleaning
+
+```{r}
+#--- Basic structure and missingness checks ---
+str(data)          # Data structure
+head(data)         # First 6 rows
+dim(data)          # Number of rows & columns
+names(data)        # Variable names
+visdat::vis_miss(data) # Visualize missing data
+
+#--- Custom NA summary function ---
+check_na <- function(df) {
+  total_na <- sum(is.na(df))
+  na_per_column <- colSums(is.na(df))
+  list(total_na = total_na, na_per_column = na_per_column)
+}
+check_na(data)
+
+#--- Duplicates ---
+data |> get_dupes()
+data |> get_dupes(mrn)
+```
+
+### **Variable Transformation and Labeling**
+
+```{r}
+#--- Recode variables for analysis ---
+data <- data |>
+  mutate(
+    ethnic = factor(
+      ethnic,
+      levels = c(1:2, 990, 998),
+      labels = c(
+        "Hispanic or Latino",
+        "Not Hispanic or Latino",
+        "Prefer Not to Answer",
+        "Unknown/Not Reported"
+      )
+    ),
+    race = case_when(
+      race___white == 1 ~ "White",
+      race___black == 1 ~ "Black or African American",
+      race___asian == 1 ~ "Asian",
+      race___amind == 1 ~ "American Indian or Alaska Native",
+      race___nahaw == 1 ~ "Native Hawaiian or Other Pacific Islander",
+      race___other == 1 ~ "Other",
+      race___unk == 1 ~ "Unknown/Not Reported",
+      race___pnta == 1 ~ "Prefer Not to Answer"
+    ),
+    insurance_type = factor(
+      insurance_type,
+      levels = c(1:3, 5),
+      labels = c(
+        "Government", "Private/Commercial", "Uninsured/Self-Pay", "Unknown/Not Reported"
+      )
+    ),
+    primary = case_when(
+      primary_language == 1 ~ "English",
+      primary_language %in% 2:10 ~ "Other",
+      primary_language == 11 ~ "Unknown/Not Reported"
+    ),
+    tumor_histology = factor(
+      tumor_histology,
+      levels = c(1,3,4,5),
+      labels = c("Endometrioid", "Clear Cell", "Carcinosarcoma", "Other")
+    ),
+    grade = factor(
+      grade,
+      levels = 1:4,
+      labels = c("1", "2", "3", "Other/Not Reported")
+    ),
+    stage = case_when(
+      stage___1 == 1  ~ "IA",
+      stage___2 == 1  ~ "IB",
+      stage___3 == 1  ~ "II",
+      stage___4 == 1 | stage___5 == 1 | stage___6 == 1 | stage___7 == 1 ~ "IIIA-C2",
+      stage___8 == 1 | stage___9 == 1 ~ "IVA-IVB",
+      stage___999 == 1 ~ "Other/Not Reported"
+    )
+  )
+```
+
+### **Derived Variables for Timeline and Demographics**
+
+```{r}
+#--- Calculate time from diagnosis to genetic referral ---
+data <- data |>
+  mutate(
+    date_of_diagnosis1 = ymd(date_of_diagnosis),
+    date_of_referral_to_gc1 = ymd(date_of_referral_to_gc),
+    time = as.numeric(date_of_referral_to_gc1 - date_of_diagnosis1, units = "days"),
+
+    # Age at diagnosis in years
+    date_of_birth1 = ymd(date_of_birth),
+    age = as.duration(date_of_birth1 %--% date_of_diagnosis1) / dyears(1)
+  )
+```
+
+### **Generate Cumulative Sums**
+
+```{r}
+#--- Summing social drivers and comorbidities for each row ---
+data <- data |>
+  rowwise() |>
+  mutate(
+    number_drive = sum(c_across(social_drivers_of_health___1:social_drivers_of_health___17), na.rm = TRUE),
+    number_comor = sum(c_across(comorbidities___1:comorbidities___16), na.rm = TRUE)
+  ) |>
+  ungroup()
+```
+
+### **Genetics-related Derived Variables**
+
+```{r}
+#--- Genetic testing flags and results ---
+data <- data |>
+  mutate(
+    germline_testing_performed = factor(
+      germline_testing_performed, levels = 1:3,
+      labels = c("Yes", "No", "Other/Not Reported")),
+    result = case_when(
+      completion_of_genetic_test == 1 & genetic_testing_result == 1 ~ "Positive for mutation",
+      completion_of_genetic_test == 1 & genetic_testing_result == 2 ~ "Negative for mutation",
+      completion_of_genetic_test == 1 & is.na(genetic_testing_result) ~ "Missing")
+  )
+```
+
+### **Family History & Appointment Variables**
+
+```{r}
+#--- Family and genetic counseling appointment details ---
+data <- data |>
+  mutate(
+    first_deg_relative_cancer = factor(
+      first_deg_relative_cancer, levels = 1:2, labels = c("Yes", "No")),
+    sec_deg_relative_cancer = factor(
+      sec_deg_relative_cancer, levels = 1:3, labels = c("Yes", "No", "Other/Not Reported")),
+    third_deg_relative_cancer = factor(
+      third_deg_relative_cancer, levels = 1:3, labels = c("Yes", "No", "Other/Not Reported")),
+    location_of_gc_appt = factor(
+      location_of_gc_appt, levels = 1:3,
+      labels = c("Internal_University of Michigan", "External", "Other/Not Listed")),
+    recommended_cascade_test = factor(
+      recommended_cascade_test, levels = 1:3,
+      labels = c("Yes", "No", "Other/Not Reported"))
+  )
+```
+
+### **Numeric Conversion for Summaries**
+
+```{r}
+#--- Convert cumulative indexes to numeric ---
+data <- data |>
+  mutate(
+    drive = as.integer(number_drive),
+    comor = as.integer(number_comor),
+    ruca = as.integer(`Primary RUCA`)
+  )
+```
+
+### **Variable Grouping for Statistical Analysis**
+
+```{r}
+#--- Re-level and create grouped categorical/factor variables for analysis ---
+data <- data |>
+  mutate(
+    race = as.character(race),
+    ethnic = as.character(ethnic),
+    race1 = if_else(race %in% c("Prefer Not to Answer", "Unknown/Not Reported"), "Not reported", race),
+    ethnic1 = if_else(ethnic %in% c("Prefer Not to Answer", "Unknown/Not Reported"), "Not reported", ethnic),
+    ruca1 = if_else(ruca %in% 1:3, "Metropolitan area", "Non-Metropolitan area"),
+    drive1 = case_when(
+      drive == 0 ~ "None",
+      drive == 1 ~ "One",
+      drive == 2 ~ "Two",
+      drive >= 3 ~ ">=Three"
+    ),
+    comor1 = case_when(
+      comor == 0 ~ "None",
+      comor == 1 ~ "One",
+      comor == 2 ~ "Two",
+      comor >= 3 ~ ">=Three"
+    ),
+    histo = if_else(
+      tumor_histology %in% c("Clear Cell", "Carcinosarcoma", "Other"), "Other", as.character(tumor_histology)
+    ),
+    stage1 = case_when(
+      is.na(stage) | stage == "Other/Not Reported" ~ "Unstaged",
+      TRUE ~ stage
+    )
+  )
+```
+
+### **Factor Level Orders & Additional Recoding**
+
+```{r}
+#--- Set factor reference/level orders for plotting/stats ---
+data <- data |>
+  mutate(
+    race = forcats::fct_relevel(as.factor(race), "White", "Black or African American", "Asian", "Other", "Prefer Not to Answer", "Unknown/Not Reported"),
+    ethnic = forcats::fct_relevel(as.factor(ethnic), "Not Hispanic or Latino", "Hispanic or Latino", "Prefer Not to Answer", "Unknown/Not Reported"),
+    race1 = forcats::fct_relevel(race1, "White", "Black or African American", "Asian", "Other", "Not reported"),
+    ethnic1 = forcats::fct_relevel(ethnic1, "Not Hispanic or Latino", "Hispanic or Latino", "Not reported"),
+    drive1 = forcats::fct_relevel(drive1, "None", "One", "Two", ">=Three"),
+    comor1 = forcats::fct_relevel(comor1, "None", "One", "Two", ">=Three")
+  )
+
+#--- Convert refer variable and set preferred level order ---
+data <- data |>
+  mutate(
+    refer = factor(referral_to_gc, levels = 0:1, labels = c("No", "Yes")),
+    refer = forcats::fct_relevel(refer, "Yes", "No"),
+    result = forcats::fct_relevel(result, "Positive for mutation", "Negative for mutation", "Missing")
+  )
+
+```
+
+### **Additional Grouping: Para (Parity)**
+
+```{r}
+#--- Create grouped parity categories ---
+data <- data |>
+  mutate(
+    para = as.integer(para),
+    para1 = case_when(
+      para == 0 ~ "0",
+      para == 1 ~ "1",
+      para >= 2 ~ ">=2"
+    ),
+    para1 = forcats::fct_relevel(para1, "0", "1", ">=2")
+  )
+```
+
+### **Variable Labeling**
+
+```{r}
+#--- Label variables for reporting/plotting ---
+label(data$age)    <- "Age at diagnosis (yr)"
+label(data$ethnic) <- "Ethnicity"
+label(data$race)   <- "Race"
+label(data$ethnic1)<- "Ethnicity"
+label(data$race1)  <- "Race"
+label(data$bmi)    <- "BMI"
+label(data$bmi_new)    <- "BMI>=40"
+label(data$bmi_new1)    <- "BMI"
+label(data$primary)<- "Primary Language"
+label(data$insurance_type) <- "Primary Insurance"
+label(data$grade)  <- "Grade"
+label(data$stage)  <- "Stage"
+label(data$stage1) <- "Stage"
+label(data$time)   <- "Time to Genetic Counseling Appointment (d)"
+label(data$gravida) <- "Gravida"        
+label(data$number_drive) <- "Social Drivers of Health" 
+label(data$number_comor) <- "Comorbidities"
+label(data$drive)  <- "Social Drivers of Health" 
+label(data$comor)  <- "Comorbidities"
+label(data$ruca)   <- "Primary RUCA"
+label(data$drive1) <- "Social Drivers of Health" 
+label(data$comor1) <- "Comorbidities"
+label(data$ruca1)  <- "Primary RUCA"
+label(data$tumor_histology) <- "Histology"
+label(data$histo)   <- "Histology"
+label(data$germline_testing_performed) <- "Prior Germline Testing"
+label(data$completion_of_genetic_test) <- "Completion of genetic testing"
+label(data$genetic_testing_result) <- "Genetic testing result" 
+label(data$result) <- "Genetic testing result" 
+label(data$refer)  <- "Referred to genetic counseling"
+label(data$attended_gc_appt) <- "Attended Genetic Counseling Appointment"
+label(data$location_of_gc_appt) <- "Location of Genetic Counseling Appointment"
+label(data$recommended_cascade_test) <- "Recommendation for Cascade Testing"
+label(data$concurrent_cancer) <- "Concurrent Cancer"
+label(data$first_deg_relative_cancer) <- "First-Degree Relative with Cancer"
+label(data$sec_deg_relative_cancer) <- "Second-Degree Relative with Cancer"
+label(data$third_deg_relative_cancer) <- "Third-Degree Relative with Cancer"
+label(data$gravida) <- "Gravida"
+label(data$para) <- "Para"
+label(data$para1) <- "Para"
+```
+
+### **Distribution & Missing Data Checks**
+
+```{r}
+#--- Normality tests ---
+shapiro.test(data$age)     
+shapiro.test(data$bmi)     
+shapiro.test(data$comor)   
+shapiro.test(data$drive)   
+shapiro.test(data$para)    
+shapiro.test(data$gravida) 
+
+#--- List MRNs with missing info ---
+data |>
+  filter(is.na(third_deg_relative_cancer)) |>
+  select(mrn) |>
+  print(n = 100)
+```
+
+### **Save Final Data**
+
+```{r}
+#--- Save cleaned/curated dataframe ---
+export(data, "data.rds")
+```
+
+```         
+```
+
+## Descriptive summary
+
+### Table 1 overview and by GC referral yes/no
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(gtsummary)
+
+# read rds
+data <- readRDS("data.rds")
+# descriptive summary; Wilcoxon rank-sum test, Chi-square test, Fisher's Exact test
+data |>  
+  select(age, bmi, race1, ethnic1, primary, ruca1,insurance_type, gravida, para1,drive1, comor1, histo, grade, stage1, refer, concurrent_cancer, germline_testing_performed) |>
+  tbl_summary(
+    by=refer,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p() |>
+  modify_spanning_header(all_stat_cols() ~ "**Referred to Genetic Counseling**")|>
+  modify_caption("**Data summary**")
+
+#Manually calculate median, Q1, Q3
+median(data$para, na.rm = TRUE)
+quantile(data$para, probs = c(0.25, 0.75), na.rm = TRUE)
+# Calculate median, Q1, and Q3 by group
+summary_stats <- data %>%
+  group_by(refer) %>%
+  summarise(
+    median_score = median(para, na.rm = TRUE),
+    Q1 = quantile(para, 0.25, na.rm = TRUE),
+    Q3 = quantile(para, 0.75, na.rm = TRUE)
+  )
+
+print(summary_stats)
+# Run the Wilcoxon rank sum test
+wilcox_test <- wilcox.test(para ~ refer, data = data)
+print(wilcox_test)
+
+```
+
+### Table 2 family history
+
+```{r}
+data |> 
+  filter(family_hx_cancer==1)|>
+  select(refer, first_deg_relative_cancer ,sec_deg_relative_cancer, third_deg_relative_cancer, germline_testing_performed) |>
+  tbl_summary(
+    by=refer,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p() |>
+  modify_spanning_header(all_stat_cols() ~ "**Referred to Genetic Counseling**")|>
+  modify_caption("**Data summary of patients who had family cancer history**")
+```
+
+### Table 3 Evaluation of Patients with a Genetic Counseling Referral
+
+```{r}
+#Table 3
+data |>
+  filter(refer=="Yes")|>
+  select(germline_testing_performed, time,  attended_gc_appt,location_of_gc_appt,completion_of_genetic_test, result, recommended_cascade_test)|>
+  tbl_summary(digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Evaluation of Patients with a Genetic Counseling Referral**")
+
+```
+
+## Multivariable Logistic Regression
+
+### Outcome: genetic counseling referral
+
+-   Multivariable logistic regression for estimated odds ratios (ORs) and 95% confidence intervals (CIs) for likelihood of genetic counseling referral (primary independent variable = genetic counseling referral) . Covariates include race/ethnicity, BMI, RUCA code, primary language, social drivers of health, comorbidity index, insurance status, cancer stage.
+
+    ```{r}
+    glm(referral_to_gc ~ age + race1 + ethnic1 + bmi + ruca1 + primary + drive1 + comor1 + insurance_type + stage1, data=data, family = binomial) |>
+    tbl_regression(exponentiate = TRUE) |>
+    modify_caption("**Multivariable logistic regression**")
+
+    ```
+
+### Outcome: genetic testing completion
+
+-   genetic testing completion (primary independent variable = genetic testing completion). Covariates include race/ethnicity, BMI, RUCA code, primary language, social drivers of health, comorbidity index, insurance status, cancer stage.
+
+    ```{r}
+    data1 <- data |>
+      filter(refer=="Yes")|>
+    glm(completion_of_genetic_test ~ age + race1 + ethnic1 + bmi + ruca1 + primary + drive1 + comor1 + insurance_type + stage1, data=data1, family = binomial) |>
+    tbl_regression(exponentiate = TRUE) |>
+    modify_caption("**Multivariable logistic regression**")
+    ```
+
+## Conclusion
+
+## References
+
+## SGO 2026 Abstract
+
+**Title:** Identifying patterns and predictors of genetic counseling evaluation and germline testing completion among patients with endometrial cancer under 50 years of age
+
+**Authors:** Josie D. Llanora, Caroline Hayse, Yang Liu, Monica Janke, Aimee Rolston
+
+**Objectives:** The purpose of this study is to identify factors associated with genetic counseling referral and completion of genetic testing in patients with endometrial cancer less than 50 years of age.
+
+**Methods:** This is a single-institution, retrospective cohort study evaluating patients less than 50 years of age with a diagnosis of endometrial cancer between January 01, 2012 and July 1, 2025. Patients less than 18 years of age and/or with an endometrial cancer diagnosis determined at an external facility without pathology review at the primary institution were excluded. In addition to patient demographics and hereditary syndrome risk factors, the time to genetic counseling referral from diagnosis, attendance to genetic counseling appointment, completion and result of germline testing, and recommendation for cascade testing of relatives were determined. Statistical analyses were performed using Wilcoxon rank sum, Pearson’s chi-squared and Fischer’s exact tests for categorical variables, and multivariable logistic regression for comparative analyses.
+
+**Results:** Of the 380 evaluable patients, 178 were included for analyses. A total of 60.2% (n=106) of patients were referred to genetic counseling. The median time from diagnosis to genetic counseling evaluation was 79 days. Factors associated with referral include older age (aOR 1.09, 95% CI 1.02-1.17, p=0.013) and non-metropolitan area of residence (aOR 2.33, 95% CI 1.10-5.08, p=0.03). Compared to those with stage IA disease, patients with stage IV (aOR 0.2, 95% CI 0.05-0.75, p=0.18) and unstaged disease (aOR 0.35, 95% CI 0.12-0.95, p=0.04) were less likely to be referred. Once referred, 69.2% (n=72) completed genetic counseling evaluation, and 62.3% (n=66) completed germline testing. There were no identifiable factors associated with completion of germline testing. Among those who completed testing, 12.1% (n=8) had a positive mutation detected, and 17.7% (n=11) were recommended for cascade testing. 
+
+**Conclusions:** In this study, 60% of patients eligible for genetic counseling evaluation per National Comprehensive Cancer Network guidelines received a genetic counseling referral. Furthermore, approximately 70% completed genetic evaluation, 62% completed germline testing, and 12% had a positive mutation detected. These findings are comparable to prior published rates. In contrast to other studies, we identified that younger patients from metropolitan areas of residence with advanced stage disease may be at risk for missed genetic counseling evaluation. Future studies should continue to assess genetic evaluation patterns and identify interventions to improve identification of hereditary syndromes in patients who warrant assessment.
+
+## Manuscript Discussions
+
+### 10-01-2025
+
+```{r}
+#--- List MRNs with missing info ---
+data |>
+  filter(refer=="Yes")|>
+  filter(is.na(time)) |>
+  select(mrn) |>
+  print( )
+data |>
+  filter(refer=="Yes")|>
+  filter(is.na(attended_gc_appt)) |>
+  select(mrn) |>
+  print( )
+data |>
+  filter(refer=="Yes")|>
+  filter(result=="Missing") |>
+  select(mrn) |>
+  print( )
+
+```
+
+### 03/10/2026
+
+BMI: 40.0 cut off
+
+```{r}
+data <- data |>
+  mutate(bmi_new=if_else(bmi<40, 0,1))
+data <- data |>
+  mutate(bmi_new1=if_else(bmi<40, "<40",">=40"))
+```
+
+excluding ID #58, 124, 125, 128, 139, 157
+
+```{r}
+data <- data |>
+  filter(!record_id %in% c(58, 124, 125, 128, 139, 157))
+```
+
+Table 1
+
+```{r}
+# descriptive summary; Wilcoxon rank-sum test, Chi-square test, Fisher's Exact test
+data |>  
+  select(age, bmi, bmi_new, race1, ethnic1, primary, ruca1,insurance_type, gravida, para1,drive1, comor1, histo, grade, stage1, refer, concurrent_cancer, germline_testing_performed) |>
+  tbl_summary(
+    by=refer,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p() |>
+  modify_spanning_header(all_stat_cols() ~ "**Referred to Genetic Counseling**")
+```
+
+calculate median(IQR)
+
+```{r}
+#Manually calculate median, Q1, Q3
+median(data$gravida, na.rm = TRUE)
+quantile(data$gravida, probs = c(0.25, 0.75), na.rm = TRUE)
+# Calculate median, Q1, and Q3 by group
+summary_stats <- data %>%
+  group_by(refer) %>%
+  summarise(
+    median_score = median(gravida, na.rm = TRUE),
+    Q1 = quantile(gravida, 0.25, na.rm = TRUE),
+    Q3 = quantile(gravida, 0.75, na.rm = TRUE)
+  )
+
+print(summary_stats)
+# Run the Wilcoxon rank sum test
+wilcox_test <- wilcox.test(gravida ~ refer, data = data)
+print(wilcox_test)
+# 0(0,1); 0(0,1);0(0,1);p=0.44
+```
+
+Table 2 family history
+
+```{r}
+data |>   
+  filter(family_hx_cancer==1)|>   
+  select(refer, first_deg_relative_cancer ,sec_deg_relative_cancer, third_deg_relative_cancer, germline_testing_performed) |>   
+  tbl_summary(    
+  by=refer,     
+  digits = list(all_categorical() ~ c(0, 1)))|>   
+  add_overall()|>   
+  add_p() |>   
+  modify_spanning_header(all_stat_cols() ~ "**Referred to Genetic Counseling**")|>   modify_caption("**Data summary of patients who had family cancer history**")
+```
+
+Table 3 Evaluation of Patients with a Genetic Counseling Referral
+
+```{r}
+#Table 3 
+data |>   
+  filter(refer=="Yes")|>   
+  select(germline_testing_performed, time,  attended_gc_appt,location_of_gc_appt,completion_of_genetic_test, result, recommended_cascade_test)|>   
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>   
+  modify_caption("**Evaluation of Patients with a Genetic Counseling Referral**") 
+```
+
+Regression: Outcome=genetic counseling referral
+
+```{r}
+glm(referral_to_gc ~ age + race1 + ethnic1 + bmi_new1 + ruca1 + primary + drive1 + comor1 + insurance_type + stage1, data=data, family = binomial) |>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+```
+
+Regression: outcome=genetic testing completion
+
+```{r}
+data1 <- data |>
+  filter(refer=="Yes")
+glm(completion_of_genetic_test ~ age + race1 + ethnic1 + bmi_new1 + ruca1 + primary + drive1 + comor1 + insurance_type + stage1, data=data1, family = binomial) |>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+```
+
+```{r}
+data$drive1 = forcats::fct_relevel(data$drive1, "None", "One", "Two", ">=Three")
+data$comor1 = forcats::fct_relevel(data$comor1, "None", "One", "Two", ">=Three")
+  
+```
+
+### 5/6/2026
+
+Q: Our manuscript was recently submitted to *Gynecologic Oncology*, and the reviewers asked for revisions. One of the specific questions they had was: "Did any of the social drivers of health account for differences seen in metropolitan vs non-metropolitan residing patients?" 
+
+Based on our data set,  do you know if we can determine an answer to this? The difference seen in metropolitan and non-metropolitan residing patients would be in relation to genetic counseling referral, as this was the only significant difference that we saw in our data. However, I think it would be helpful to also look at genetic testing completion.
+
+```{r}
+data|>
+  select(drive1,ruca1)|>
+  tbl_summary(by=ruca1)|>
+  add_p() #p=0.8
+```
