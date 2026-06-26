@@ -9,8 +9,7 @@ This project analyzes Chronic pelvic pain among transgender and nonbinary indivi
 - Bivariate analysis
 
 ## Files
-- `01-cleanup.R`: cleans and prepares the dataset
-- `01-analysis.R`: runs statistical models
+- `06-analysis.R`: cleanup and analysis
 - `06-report.qmd`: report
 
 ## Notes
