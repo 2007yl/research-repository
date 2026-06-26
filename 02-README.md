@@ -3,9 +3,9 @@
 This project analyzes genetic counseling referral patterns
 
 ## Methods
-Data cleaning in R
-Descriptive statistics
-Logistic regression model
+- Data cleaning in R
+- Descriptive statistics
+- Logistic regression model
 
 ## Files
 02-report.qmd: clean, analysis and report
