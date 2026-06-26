@@ -1,7 +1,7 @@
 #Clear existing data and graphics
 rm(list=ls())
 graphics.off()
-#Load Hmisc library
+#Load library
 library(Hmisc)
 library(tidyverse)
 library(rio)
@@ -11,7 +11,6 @@ library(gtsummary)
 #Read Data
 data=read.csv('rawdata/VirtualVsInPersonChe_DATA_2023-09-01_0906.csv')
 #Setting Labels
-
 label(data$record_id)="Record ID"
 label(data$redcap_survey_identifier)="Survey Identifier"
 label(data$patient_preference_survey_timestamp)="Survey Timestamp"
