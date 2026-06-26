@@ -8,7 +8,9 @@ This project analyzes intervention for OBGYN residents improving Serious Illness
 - paired analysis
 
 ## Files
-04-report.qmd: clean, analysis and report
+- 04-clean.R: clean
+- 04-analysis.R: analysis
+- 04-report.qmd: report
 ## Notes
 Original data are not included due to privacy/research restrictions.
 
