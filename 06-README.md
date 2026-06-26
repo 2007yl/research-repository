@@ -15,5 +15,5 @@ This project analyzes Chronic pelvic pain among transgender and nonbinary indivi
 ## Notes
 Original data are not included due to privacy/research restrictions.
 
-## Publication
+## Manuscript
 Russell, C. B., DeBlanc, J., Foxx, A. M., Liu, Y., Stroumsa, D., & As-Sanie, S. (2026). Chronic pelvic pain among transgender and nonbinary individuals: A retrospective analysis of a tertiary care chronic pelvic pain clinic. LGBT Health. Accepted.
