@@ -1,0 +1,224 @@
+---
+title: "Summary"
+author: "Yang Liu"
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+Dataset log: See README
+
+Notes:
+
+12-12-2023
+
+1.  MRN multiple entries: keep the one that had most recent survey (Dos)
+2.  PROMISE converted to T-scores.
+
+Sensitivity analysis: analyze patients that didn't have gender_identity data. (missing)
+
+## Study population
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      tab7 [label = '@@7']
+      
+      # edge definitions with the node IDs
+      tab1 -> tab2;  tab1-> tab3; tab3 -> tab4;tab2 -> tab5; tab4 -> tab5; tab5 -> tab6; tab5 -> tab7
+      }
+
+      [1]: 'CPP Patients 2019-2022? (N=2,123)'
+      [2]: 'Self-reported gender n=418'
+      [3]: 'did not report gender n=1705'
+      [4]: 'Dysphoria n=6'
+      [5]: 'Study cohort n=424'
+      [6]: 'Cis female cohort n=397'
+      [7]: 'Non-cis female cohort n=27'
+      ")
+```
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      
+      # edge definitions with the node IDs
+      tab1 -> tab2;  tab1-> tab3; tab1 -> tab4;tab2 -> tab5; tab3 -> tab5;
+      }
+
+      [1]: 'CPP Patients 2019-2022? (N=2,123)'
+      [2]: 'Gender Dysphoria n=18 (11 previously identified TGNB with survey, 1 self-identified Cis female)'
+      [3]: 'Self-identified TGNB n=21'
+      [4]: 'Self-identified Cis female n=397'
+      [5]: 'TGNB cohort n=27'
+      ")
+```
+
+## Objective
+
+To characterize pelvic pain severity and pain comorbidities among transgender-nonbinary (TGNB) patients compared to cisgender women presenting to an Endometriosis and Chronic Pelvic Pain Consultative Clinic.
+
+## Primary outcome
+
+pelvic pain severity and pain comorbidities
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, insurance, hospital teaching status, hospital size, ASA class, comorbidities,  
+
+## Descriptive summary
+
+```{r}
+#| echo: false
+#load libraries
+library(tidyverse)
+library(gtsummary)
+library(rio)
+#read rds
+pelvic1 <- readRDS("pelvic1.rds")
+#summary
+pelvic1 |>
+  select(-MRN)|>
+  drop_na(gender)|>
+  tbl_summary(
+    by = gender,
+  ) |>
+  add_p() |>
+  bold_p() |>
+  modify_spanning_header(
+    all_stat_cols() ~ "**Gender Identity**"
+
+```
+
+## Abstract
+
+Pelvic pain in the transgender-nonbinary population
+
+C. B. Russell, A. Foxx, Y. Liu, S. As-Sanie
+
+OBGYN, University of Michigan, Ann Arbor, MI
+
+OBJECTIVES: In this retrospective cross-sectional study, we aim to characterize pelvic pain severity and pain comorbidities among transgender-nonbinary (TGNB) patients compared to cisgender women presenting to an Endometriosis and Chronic Pelvic Pain Consultative Clinic at a large academic center.
+
+MATERIALS AND METHODS: As part of routine clinical care, all patients completed an online intake history prior to their first appointment, including demographics, pain severity and frequency, and a series of validated Patient-Reported Outcomes Measurement Information System (PROMIS) measures. Patients were categorized by self-reported gender, creating a TGNB group, including genderqueer, nonbinary, and transmasculine patients, and compared to a cisgender female (cis) group. Fisher's exact and Wilcoxon rank sum tests were performed. Two-sided p\<0.05 was defined as significant. All data management and analyses were performed using SAS for Windows V9.4 (SAS Institute) and R (version 4.2.1). The Institutional Review Board approved the study (HUM00003797).
+
+RESULTS: Of the 1,100 patients seen from 2019-2021, 261 patients had self-identified gender documented, with 10 identifying as TGNB and 251 as cis. The median TGNB age was 25 years and 32 years for the cis cohort. Nine (90%) TGNB and 201 (80.1%) cis patients were White. The median age of onset of pelvic pain for the TGNB and cis cohorts was 10 and 13 years, respectively. Three (30%) TGNB patients had prior endometriosis, 1 (10%) with fibromyalgia, and 9 (90%) with depression. Of the cis cohort, 122 (48.6%) had prior endometriosis, 32 (12.8%) fibromyalgia, and 162 (64.5%) depression. No TGNB and 31 (12.4%) cis patients used narcotic medications. There were no statistically significant differences in demographics or medical history. Six (60%) TGNB and 41 (16%) cis patients endorsed childhood physical abuse (p\<0.01), 5 (50%) TGNB and 47 (19%) cis patients suffered childhood sexual abuse (p¼0.03), 2 (20%) TGNB and 50 (20%) cis patients endorsed adult physical abuse (p\>0.9), and 6 (60%) TGNB and 96 (40%) cis patients reported adult sexual abuse (p¼0.3). TGNB patients had no statistically significant differences in measures of depression, anxiety, sleep disturbance, or fatigue compared to the cis cohort for. Although there was no difference in pain severity or pain interference with daily function, TGNB patients reported more frequent pelvic pain (24 versus 17 days per month of pain, p¼0.08) and spent more days in bed in due to pain (22 days versus 6 days in bed in past 3 months, p¼0.02).
+
+CONCLUSION: Similar to cis patients, pain in the TGNB population is life-impacting. While there were no differences in pain intensity, TGNB patients reported more disability and higher rates of childhood trauma, which has been previously implicated for its relation to chronic pain. Further research is needed to increase awareness and tailored treatment strategies for TGNB patients with chronic pelvic pain.
+
+01-29-25 questions
+
+if there was a way to compare for multiple comparisons or a reason why we didn't in the statistical analysis?
+
+answer:
+
+our study is mostly descriptive, we do not intend to investigate any high-impact risk factors or any novel therapeutics.
+
+02-04-25 question
+
+Do we have information for Childhood emotional abuse and Adult Sexual abuse between cohorts?
+
+```{r}
+pain2 <-pain2 |>
+  mutate(
+adult_sexualabuse1=case_when(um_amb_ob_gyn_endo_cpp_trauma_history_exposed_sex_organs_14_older=="Y"|um_amb_ob_gyn_endo_cpp_trauma_history_threatened_sex_14_older=="Y"|um_amb_ob_gyn_endo_cpp_trauma_history_touch_14_older=="Y"|um_amb_ob_gyn_endo_cpp_trauma_history_forced_sex_14_older=="Y"|um_amb_ob_gyn_endo_cpp_trauma_history_unwanted_sexual_experience_14_older=="Y" ~ "Yes",
+                                      um_amb_ob_gyn_endo_cpp_trauma_history_exposed_sex_organs_14_older=="N" &
+                                        um_amb_ob_gyn_endo_cpp_trauma_history_threatened_sex_14_older=="N" & 
+                                        um_amb_ob_gyn_endo_cpp_trauma_history_touch_14_older=="N" &
+                                        um_amb_ob_gyn_endo_cpp_trauma_history_forced_sex_14_older=="N" &
+                                        um_amb_ob_gyn_endo_cpp_trauma_history_unwanted_sexual_experience_14_older=="N" ~ "No",TRUE ~ NA))
+export(pain2, "pain2.rds")
+pain2 |>
+  select(gender1, starts_with("um_amb_ob_gyn_endo_cpp_trauma_history_"), 
+         child_physicalabuse1,
+         child_sexualabuse1, adult_physicalabuse1,adult_sexualabuse1)|>
+  drop_na(gender1)|>
+  tbl_summary(
+    by = gender1,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() 
+```
+
+## Manuscript (submitted to LGBT Health)
+
+### 12-11-2025 Editor's comments:
+
+1.  In the Methods section, include the name of the measure after the specific outcome(s) that it assessed. Explain what analyses were conducted with bivariate statistical tests. 
+
+response: In brief, each PROMIS questionnaire item asked patients to rate their experience over the past 7 days on a 1-5 scale (“Never” to “Always” or “Not at all” to “Very much”). Raw scores were calculated by summing responses for each PROMIS domain (Depression, Anxiety, Sleep Disturbance, Fatigue, Physical Function, Satisfaction with Social Roles, Emotional Support, and Meaning and Purpose). Summed raw scores were converted to T-scores according to the PROMIS scoring manual or conversion tables. Higher T-scores for depression, anxiety, sleep disturbance, and fatigue indicate greater emotional or physical distress, while higher T-scores for physical function, satisfaction with social roles, emotional support, and meaning and purpose indicate better physical, social, and emotional functioning. Median T-scores for each domain were calculated for group comparisons between TGNB and cisgender patients. The Wilcoxon rank sum test was used to compare all measures of PROMISE domain between TGNB and cisgender patients.
+
+[PROMIS](onenote:https://umhealth-my.sharepoint.com/personal/ylyl_med_umich_edu/Documents/Documents/OneNote%20Notebooks/Learning%20Modules/Stats.one#PROMIS&section-id={ED5668EF-46BD-41C5-8F19-CD4397CE67D0}&page-id={65A53C01-5E78-46DD-96C5-D68F6BD06A28}&end)  ([Web view](https://umhealth-my.sharepoint.com/personal/ylyl_med_umich_edu/_layouts/Doc.aspx?sourcedoc=%7bBF96F717-09F8-4396-B635-50AB47B9C9A9%7d&wd=target%28Stats.one%7CED5668EF-46BD-41C5-8F19-CD4397CE67D0%2FPROMIS%7C65A53C01-5E78-46DD-96C5-D68F6BD06A28%2F%29&wdpartid=%7b08F64952-D28F-016F-20D4-DC1FED8C518E%7d%7b1%7d&wdsectionfileid=%7b20A0D648-A9DE-4E90-BFFE-F6CFB5A332EF%7d))
+
+```{r}
+#promise and t-scores
+#variables:
+                             
+[189] "um_amb_ob_gyn_endo_cpp_sq9_promis_depression"                                     
+[190] "um_amb_ob_gyn_endo_cpp_sq10_promis_anxiety"                                       
+[191] "um_amb_ob_gyn_endo_cpp_sq11_promis_sleep_disturbance"                             
+[192] "um_amb_ob_gyn_endo_cpp_sq12_promis_fatigue"                                       
+[193] "um_amb_ob_gyn_endo_cpp_sq13_promis_physical_function"                             
+[194] "um_amb_ob_gyn_endo_cpp_sq14_promis_satisfaction_social_roles"                     
+[195] "um_amb_ob_gyn_endo_cpp_sq15_promis_emotional_support"                             
+[196] "um_amb_ob_gyn_endo_cpp_sq16_promis_meaning_purpose"  
+```
+
+2.  Please report the number of items assessed with the Brief Pain Inventory and how each item was scored. 
+
+    response:
+
+    ```{r}
+    #BPI variables:
+    [84] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q64_worst_last_week"                  
+     [85] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q65_least_last_week"                  
+     [86] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q66_average_pain"                     
+     [87] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q67_pain_right_now"                   
+     [88] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q68_general_activity"                 
+     [89] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q69_mood"                             
+     [90] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q70_walking_ability"                  
+     [91] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q71_normal_activitiy"                 
+     [92] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q72_relations"                        
+     [93] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q73_sleep"                            
+     [94] "um_amb_ob_gyn_endo_cpp_brief_pain_inventory_q74_enjoyment_of_life" 
+    [185] "um_amb_ob_gyn_endo_cpp_sq5_brief_pain_inventory_severity"                         
+    [186] "um_amb_ob_gyn_endo_cpp_sq6_brief_pain_inventory_interference"  
+
+    q64-q67: BPI severity
+    q68-q74: BPI interference
+    bpi <- pain2 |>
+      select(starts_with("um_amb_ob_gyn_endo_cpp_brief_pain_"),um_amb_ob_gyn_endo_cpp_sq5_brief_pain_inventory_severity, um_amb_ob_gyn_endo_cpp_sq6_brief_pain_inventory_interference)
+    shapiro.test(pain2$um_amb_ob_gyn_endo_cpp_sq5_brief_pain_inventory_severity)  
+    Response:
+    Pain severity was assessed using four items that ask patients to rate their worst pain in the past 24 hours, least pain in the past 24 hours, average pain, and pain at the time of assessment. Each item is rated on a scale from 0 (no pain) to 10 (severe pain). Scores for these four severity items were summed to create a composite pain severity score. Pain interference was assessed using seven items that ask patients to rate how much pain has interfered with their general activity, mood, walking ability, normal work, relationships with other people, sleep, and enjoyment of life, each rated on a scale from 0 (does not interfere) to 10 (completely interferes). The seven interference item scores were summed to create a composite pain interference score. Higher composite scores indicate greater pain severity or interference with daily life. Median composite scores were calculated for group comparisons between TGNB and cisgender patients.
+    As with the BPI scores, median pelvic pain severity scores were calculated for group comparisons between TGNB and cisgender patients. The Wilcoxon rank sum test was used to compare all measures of pain between TGNB and cisgender patients.
+    ```
+
+3.  In the Statistical analysis section, explain what analyses were conducted. There is no indication that you compared TGNB with cisgender individuals. 
+
+ response: add TGNB were compared with cisgender group
+
+4.  Include the measure of self-reported gender (and sex assigned at birth) so that it is clear how all patients self-identified. If questions and response options were provided, please include them in the article. 
+
+response:
+
+Patients were asked what their gender identity was, with options “Female”, “Genderqueer”,
+“Nonbinary”, “Transgender Male/ Female-to-Male”, “Other”, “Choose not to disclose”.
