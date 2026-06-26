@@ -1,7 +1,7 @@
 #  Analysis Project
 
 ## Overview
-This project analyzes perioerative outcomes and Epidural analgesia
+This project analyzes perioperative epidural use and postoperative outcomes
 
 ## Methods
 - Data cleaning in R
