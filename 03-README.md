@@ -5,7 +5,8 @@ This project analyzes Persistent opioid use among gynecologic oncology patients 
 ## Methods
 - Data cleaning in R
 - Descriptive statistics
-- Logistic regression model
+- Propensity score matching
+- Bivariate analysis
 
 ## Files
 03-report.qmd: clean, analysis and report
