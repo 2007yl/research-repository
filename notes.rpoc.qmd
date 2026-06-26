@@ -1,0 +1,606 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title
+
+Effects of OCP use after miscarriage treatment on rPOC
+
+## Team
+
+Leah Cooper, Radhika Sharma,Mindy B Frishman, Hanikka Muna, Danielle Jean,Yang Liu, Molly B Moravek, Samantha B Schon
+
+## Background
+
+Early pregnancy loss (EPL), commonly referred to as a miscarriage.
+
+## Study population
+
+Patients who experienced EPL following ET between 12/2013 and 12/2023 at UM REI clinic.
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'N='
+      [2]: 'N='
+      [3]: 'Exclude N='
+      [4]: 'Participants had complete data  N='
+      [5]: 'Study population N=188'
+      ")
+```
+
+## Objective
+
+Assess the prevalence of rPOC with initiation of OCPs after an EPL following embryo transfer.
+
+## Primary outcome
+
+Prevalence of retained products of conception (rPOC)
+
+## Secondary outcome
+
+Association between rPOC and patient characteristics, infertility diagnosis, and EPL treatment methods.
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age at transfer, race, ethnicity, BMI, parity, cause of infertility, GYN diagnosis, prior uterine surgery, history of placenta accreta, treatment of EPL, OCP use, rPOC
+
+## Data management (Import, Cleaning, Variable Creation)
+
+### Load Packages
+
+```{r}
+library(tidyverse) #for import, cleaning, wrangling
+library(gtsummary) #for summarizing
+library(labelled) #for variable labelling
+library(rio) #import/export 
+library(janitor) #for cleaning and tabulation helpers
+library(visdat) #data visualization for missingness
+```
+
+### Import data
+
+```{r}
+#import raw data from Redcap
+data=read.csv('rawdata/EffectOfOCPsOnRPOCAf_DATA_2025-10-07_0720.csv')
+```
+
+### Initial Data Check and Cleaning
+
+```{r}
+#check duplicates
+data |>
+  get_dupes(mrn) 
+
+# Find multiple mrn entries and subset the dataset
+dupdata <- data |>
+  get_dupes(mrn) |>
+  select(mrn, dupe_count, record_id, demographics_and_diagnosis_complete, etdate, started_ocps, ohs_date, rpoc, embryo_transfer_and_epl_data_complete)  # Select only the columns you are interested in
+
+# View the subsetted dataset
+print(dupdata)
+#export
+export(dupdata, "dupdata.csv")
+#remove duplicates
+data <- data |>
+  filter(!record_id %in% c(46, 49, 124, 211, 153, 168, 178, 180, 182, 197, 229))|>
+  filter(embryo_transfer_and_epl_data_complete==2)
+#remove according to Leah's notes: 171-remove given time between is 8 months;3-remove given time between is 14 months
+#data <- data |>
+#  filter(!record_id %in% c(3, 171))
+
+#--- Custom NA summary function ---
+check_na <- function(df) {
+  total_na <- sum(is.na(df))
+  na_per_column <- colSums(is.na(df))
+  list(total_na = total_na, na_per_column = na_per_column)
+}
+check_na(data)
+```
+
+### **Variable Transformation and Labeling**
+
+```{r}
+#apply factor labels to variables
+data <- data |>
+  mutate(ethnicity =
+           factor(
+             ethnicity,
+             levels = 1:2,
+             labels = c("Non-Hispanic", "Hispanic")),
+         race =case_when(race___1==1 ~ "Caucasian",
+                         race___2==1 ~ "Black or African-American",
+                         race___3==1 ~ "Asian",
+                         race___4==1 ~ "American Indian or Alaska Native",
+                         race___5==1 ~ "Native Hawaiian or Pacific Islander",
+                         race___6==1 ~ "Other",
+                         race___7==1 ~ "Biracial"),
+         infertility = case_when(causeinfertility___1==1 ~ "Male Factor",
+                                 causeinfertility___2==1 ~ "Endometriosis",
+                                 causeinfertility___3==1 ~ "Tubal factor",
+                                 causeinfertility___4==1 ~ "Uterine factor",
+                                 causeinfertility___5==1 ~ "PCOS",
+                                 causeinfertility___6==1 ~ "Hypothalamic Amenorrhea",
+                                 causeinfertility___7==1 ~ "Diminished Ovarian Reserve (DOR)",
+                                 causeinfertility___8==1 ~ "Recurrent pregnancy loss",
+                                 causeinfertility___9==1 ~ "Genetic Testing (ex: BRCA, SMA carrier)",
+                                 causeinfertility___10==1 ~ "Prior fertility preservation",
+                                 causeinfertility___11==1 ~ "Gestational Carrier",
+                                 causeinfertility___12==1 ~ "Unexplained",
+                                 causeinfertility___13==1 ~ "Other"),
+           gyn = case_when(gyndiagnoses___1==1 ~ "Endometriosis",
+                         gyndiagnoses___2==1 ~ "Adenomyosis",
+                         gyndiagnoses___3==1 ~ "Fibroid",
+                         gyndiagnoses___4==1 ~ "Endometrial Polyp",
+                        # gyndiagnoses___5==1 ~ "PCOS",
+                         gyndiagnoses___6==1 ~ "Other",
+                         gyndiagnoses___7==1 ~ "None"),
+       miscarriage_treatment =
+           factor(
+             miscarriage_treatment,
+             levels= 1:3,
+             labels =c("Expectant", "Medical", "Surgica")),
+       uterineanomaly =
+            factor(
+             uterineanomaly,
+             levels= 1:6,
+             labels =c("History of septum","Current septum","Unicornuate","Bicornuate","Didelphys","None")),
+       infert=case_when(causeinfertility___1==1 ~ "Male Factor",
+                          causeinfertility___4==1 ~ "Uterine factor",
+                          causeinfertility___12==1 ~ "Unexplained",
+                          causeinfertility___5==1 |causeinfertility___7==1 |causeinfertility___6==1 ~ "Ovulatory dysfunction",
+                          causeinfertility___2==1|causeinfertility___3==1|causeinfertility___8==1|causeinfertility___9==1|causeinfertility___10==1|causeinfertility___11==1|causeinfertility___13==1 ~"Other"))
+```
+
+### Drop levels with zero count
+
+```{r}
+# A function to drop levels with zero count in a factor variable
+drop_zero_categories <- function(x) {
+  # Convert to factor if not already
+  x <- as.factor(x)
+  # Keep only levels with non-zero count
+  factor(x, levels = levels(x)[tabulate(x) > 0])
+}
+# Apply this function to specified columns         
+    data <- data %>%
+  mutate(
+    uterineanomaly = drop_zero_categories(uterineanomaly))
+```
+
+### **Variables for age, time to OHS**
+
+```{r}
+#create new variable "age"
+data <- data |>
+  mutate(dob1 = lubridate::ymd(dob),
+       etdate1 = lubridate::ymd(etdate),
+        age = as.duration(dob1 %--% etdate1) / dyears(1),
+       )
+#create new variables for dates
+data$ohs_date1 <- data$ohs_date
+data$date_of_procedure1 <- data$date_of_procedure
+data$date_of_bleeding1 <- data$date_of_bleeding
+#replace empty string with NA
+data <- data |> mutate_at('ohs_date1', ~na_if(., '')) 
+data <- data |> mutate_at('date_of_procedure1', ~na_if(., '')) 
+data <- data |> mutate_at('date_of_bleeding1', ~na_if(., '')) 
+
+#--- Calculate time from EPL management to ohs ---
+data <- data |>
+  mutate(
+    ohs_date1 = ymd(ohs_date1),
+    date_of_procedure1 = ymd(date_of_procedure1),
+    time_procedure = as.numeric(ohs_date1 - date_of_procedure1, units = "days"),
+    date_of_bleeding1 = ymd(date_of_bleeding1),
+    time_bleeding = as.numeric(ohs_date1 - date_of_bleeding1, units = "days"))
+```
+
+### **Generate Cumulative Sums**
+
+```{r}
+#make new variable "uterine"
+data$uterine <- rowSums(data[, c("dandc", "uterinesurg")], na.rm = TRUE)
+```
+
+### **Additional Regrouping or Recoding for Statistical Analysis**
+
+```{r}
+#regroup uterine
+data<-data|>
+  mutate(uterine = as.character(uterine),
+         uterine_cat=case_when(uterine %in% c("3", "4", "5", "6", "7") ~ ">=3",
+                               TRUE ~ uterine))
+#recode rpoc
+data<- data |>
+  mutate(rpoc_cat = ifelse(rpoc == 0, "Non rPOC", "rPOC"))
+```
+
+### **Factor Level Orders**
+
+```{r}
+data$uterine_cat <- forcats::fct_relevel(data$uterine_cat, "0","1", "2", ">=3")  
+data$rpoc_cat <- forcats::fct_relevel(data$rpoc_cat, "rPOC","Non rPOC")
+data$race <- forcats::fct_infreq(data$race)
+data$infertility <- forcats::fct_infreq(data$infertility)
+data$infert <- forcats::fct_infreq(data$infert)
+data$infertility_new <- forcats::fct_infreq(data$infertility_new)
+data$gyn <- forcats::fct_infreq(data$gyn)
+data$miscarriage_treatment <- forcats::fct_infreq(data$miscarriage_treatment)
+data$uterineanomaly <- forcats::fct_infreq(data$uterineanomaly)
+```
+
+### **Variable Labelling**
+
+```{r}
+label(data$age)="Age at transfer"
+label(data$ethnicity)="Ethnicity"
+label(data$race)="Race"
+label(data$bmi)="BMI"
+label(data$gyn)="GYN diagnoses"
+label(data$started_ocps)="Started OCPs after resolution of pregnancy loss"
+label(data$miscarriage_treatment)="Miscarriage Treatment"
+label(data$infertility)="Cause of infertility"
+label(data$infert)="Cause of infertility"
+label(data$infertility_new)="Cause of infertility"
+label(data$ashermans)="History of Ashermans"
+label(data$pas)="History of placenta accreta spectrum"
+label(data$dandc)="Number of prior D&C and/or MVA"
+label(data$uterinesurg)="Number of other uterine surgeries (including C-section)"
+label(data$uterine)="Number of prior uterine surgeries (D&C, MVA, CS)"
+label(data$uterine_cat)="Number of prior uterine surgeries (D&C, MVA, CS)"
+label(data$uterineanomaly)="Uterine anomaly"
+label(data$rpoc)="Retained products of conception"
+label(data$rpoc_cat)="Retained products of conception"
+label(data$time_bleeding)="Time between bleeding and OHS (days)"
+label(data$time_procedure)="Time between procedure and OHS (days)"
+```
+
+### **Save Final Data**
+
+```{r}
+#save
+export(data, "data.rds")
+```
+
+### Create dataset by unique MRN for Demographic Table
+
+```{r}
+#sort by most recent visit
+data1 <- data |>
+  arrange(mrn, desc(`etdate`)) |>
+  distinct(mrn, .keep_all = TRUE)
+```
+
+## Descriptive summary
+
+```{r}
+# descriptive summary by unique mrn n=188
+data1 |>  
+  select(age, race, ethnicity, bmi, infert, gyn, ashermans, pas, uterine_cat, uterineanomaly,miscarriage_treatment, started_ocps, rpoc_cat) |>
+  tbl_summary(
+    by=rpoc_cat,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()|>
+  modify_spanning_header(all_stat_cols() ~ "**Patients**")|>
+  modify_caption("**Table 1. Demographic and Clinic Characteristics**")
+# calculate median(q1, q3)
+median(data$uterine_num, na.rm = TRUE)
+quantile(data$uterine_num, probs = c(0.25, 0.75), na.rm = TRUE)
+```
+
+```         
+```
+
+## Bivariate analysis
+
+```{r}
+# by EPL case n=196
+data |>
+  select(miscarriage_treatment, started_ocps, rpoc) |>
+  tbl_summary(
+    by=rpoc,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()|>
+  modify_spanning_header(all_stat_cols() ~ "**EPL after embryo transfer**")
+  
+```
+
+## Conclusion
+
+rPOC is not associated with OCP use following EPL.
+
+## References
+
+## Notes
+
+```{r}
+#MRNs with the unknowns for: GYN Dx, Anomalies, Accreta and Ashermans?ashermans, pas, uterineanomaly
+data|>
+  select(mrn, record_id, uterine)|>
+  filter(is.na(uterine))|>
+  print()
+
+#Also the list for Surgical management with rPOC. 
+list <- data |>
+  select(mrn, record_id, ohs_date, rpoc,miscarriage_treatment)|>
+  filter(rpoc==1)|>
+  filter(miscarriage_treatment=="Surgica")
+export(list, "list.csv")
+
+#list of pcos
+list <- data |>
+  select(mrn, record_id, gyn)|>
+  filter(gyn=="Other")|>
+  print()
+```
+
+## Abstract
+
+ASRM 2025 (
+
+**TITLE:** Immediate Initiation of Oral Contraceptive Pills After an Early Pregnancy Loss is Not Associated with Retained Products of Conception.
+
+**OBJECTIVE:** Previous studies have found retained products of conception (rPOC) after early pregnancy loss (EPL) are common, and impact subsequent treatments, timeline, and success rates of infertility care. After resolution of an EPL, infertility patients often begin oral contraceptive pills (OCPs) to synchronize their menstrual cycles with fertility treatments, such as subsequent embryo transfer cycles. The primary objective of this study was to evaluate whether the immediate initiation of OCPs after an EPL increased the risk of rPOC. Secondary objectives were to identify potential associations between rPOC and patient characteristics, infertility diagnosis, or EPL treatment method.
+
+**MATERIALS AND METHODS:** Retrospective cohort study at a tertiary care, university-based facility. CPT codes were used to identify all obstetric ultrasounds performed in patients who experienced EPL following embryo transfer between 12/2013 and 12/2023. Chart review was performed to identify findings from office hysteroscopy (OHS) following EPL, specifically, the presence or absence of rPOC. Additional data abstracted from the medical record included patient age, race, ethnicity, BMI, infertility diagnosis, gynecologic diagnosis, uterine surgery history, embryo transfer details, EPL management, and initiation of OCPs  Wilcoxon rank sum, Fisher’s exact test, and Chi-squared tests were utilized as appropriate to determine associations with OCP use, patient demographics, infertility diagnosis, and EPL treatment with rPOC.
+
+**RESULTS:** A total of 188 women met inclusion criteria and were included in the analysis. 42 women were found to have rPOC on OHS, while 146 had no evidence of rPOC.   The median age for both groups was 35 years, with the majority being Caucasian, Non-Hispanic, and having a normal BMI. There were no significant differences in patient demographics, infertility diagnosis, gynecology history between those individuals with or without rPOC. A higher percentage of women with rPOC had three or more prior uterine surgeries (35.7%) compared to women without rPOC (17.8%), although it is not statistically significant  (p=0.057). 55 women started OCP after EPL. There was no difference in OCP use among those with or without rPOC (31.0% vs 28.8%, p=0.8).96 (51.1%) women elected for surgical management of EPL, and 60 (31.9%) and 32 (17.0%) women elected for expectant and medical management, respectively. There is no difference between women with or without rPOC in terms of miscarriage management (p=0.2).
+
+**CONCLUSIONS:** Initiation of OCPs following EPL was not associated with an increased risk of rPOC. Among baseline factors, only increased number of prior uterine surgeries demonstrated a trend towards rPOC and this was not significant. This study is the first to our knowledge to assess the relationship of OCP initiation after EPL and rPOC in an infertility population. These findings indicate that common demographic and treatment factors, as well as initiation of OCPs after EPL following embryo transfer might not significantly contribute to the occurrence of rPOC.
+
+**IMPACT STATEMENT:** The immediate initiation of OCPs following early pregnancy loss does not increase the risk of retained products of conception and therefore can be used to expediate and coordinate fertility treatments.
+
+## Manuscript Discussions
+
+### 09-17-2025
+
+1.  Did we do a power calculation for the rPOC vs no rPOC in patients who did and did not take OCPs? Want to make sure we were powered to answer our primary outcome.
+
+    A: This is an exploratory study that is not intended to be powered to detect differences. (Long answer: to detect 10% difference with 80% power, we planned to recruit 282 patients (141 with rPOC, 141 with non-rPOC). We only had 42 patients in our rPOC cohort. )
+
+2.  Can we do another Chi-square comparison for the history of uterine sugery with the groups: 0 surgeries versus any surgery? And then also the two groups 1-2 surgeries versis 3+ surgeries?
+
+    ```{r}
+    data <- data |>
+      mutate(uterine_binary=case_when(uterine_cat=="0" ~ "No",
+                                      TRUE ~ "Yes"),
+             uterine_prior=case_when(uterine_cat=="1" ~ "1-2",
+                                     uterine_cat=="2" ~ "1-2",
+                                     uterine_cat==">=3" ~ ">=3",
+                                     TRUE ~ NA))
+
+    data1 <- data |>
+      arrange(mrn, desc(`etdate`)) |>
+      distinct(mrn, .keep_all = TRUE)
+    data1 |>  
+      select(uterine_cat, uterine_binary, uterine_prior, rpoc_cat) |>
+      tbl_summary(
+        by=rpoc_cat,
+        # missing = "no",
+        digits = list(all_categorical() ~ c(0, 1)))|>
+      add_p()|>
+      modify_spanning_header(all_stat_cols() ~ "**Patients**")|>
+      modify_caption("**Table 1. Demographic and Clinic Characteristics**")
+    ```
+
+3.  Of the 188 participants, how many have the date for OHS listed? Wondering if there is a lot of missing data for this variable. And do most patients have a date of management as well (ie date of medical/expectnat management OR date of surgical management)? If there is not a lot of data missing, could potentially look at the time between management and OHS between the two groups (rPOC and no rPOC)
+
+    A: All 188 participants have the dates for OHS.
+
+    For those 96 patients who had surgical management, 95 have the dates of procedure, but two dates look like a typo:
+
+    mrn 100502560  date: 2028-08-15
+
+    mrn 18815254 date: 0216-09-30
+
+    For those 92 patients who had medical or expectant management, I didn’t see variables for date of management, but there is a variable “date of bleeding”. Of those 92 patients, 13 patients don’t have the date of bleeding.
+
+    Few patients have both date of procedure and date of bleeding.
+
+    ```{r}
+    #create new variables for dates
+    data$ohs_date1 <- data$ohs_date
+    data$date_of_procedure1 <- data$date_of_procedure
+    data$date_of_bleeding1 <- data$date_of_bleeding
+    #replace empty string with NA
+    data <- data |> mutate_at('ohs_date1', ~na_if(., '')) 
+    data <- data |> mutate_at('date_of_procedure1', ~na_if(., '')) 
+    data <- data |> mutate_at('date_of_bleeding1', ~na_if(., '')) 
+    #--- Custom NA summary function ---
+    check_na <- function(df) {
+      total_na <- sum(is.na(df))
+      na_per_column <- colSums(is.na(df))
+      list(total_na = total_na, na_per_column = na_per_column)
+    }
+    check_na(data)
+    #--- List MRNs with missing info ---
+    data1 |>
+      filter(date_of_procedure1 =="0216-09-30")|>
+      select(mrn, date_of_procedure1) |>
+      print( )
+    #--- Calculate time from surgical management to ohs ---
+    data <- data |>
+      mutate(
+        ohs_date1 = ymd(ohs_date1),
+        date_of_procedure1 = ymd(date_of_procedure1),
+        time_procedure = as.numeric(ohs_date1 - date_of_procedure1, units = "days"),
+        date_of_bleeding1 = ymd(date_of_bleeding1),
+        time_bleeding = as.numeric(ohs_date1 - date_of_bleeding1, units = "days"))
+    data<- data |>
+      select(-time)
+    #save
+    export(data, "data.rds")
+    #data summary
+
+    ```
+
+    4.  Lastly, can you tell me how many people NOT on OCPs had rPOC and no rPOC?
+
+        29 and 104 respectively
+
+10/2/2025
+
+```{r}
+#--- List MRNs with missing info ---
+data1 |>
+  filter(miscarriage_treatment=="Surgica")|>
+  filter(is.na(date_of_procedure1))|>
+  select(mrn) |>
+  print( ) #n=1
+data1 |>
+  filter(miscarriage_treatment %in% c("Expectant", "Medical"))|>
+  filter(is.na(date_of_bleeding1))|>
+  select(mrn) |>
+  print( ) #n=13
+```
+
+10/03/2025 list of mrns
+
+```{r}
+#data by unique mrn
+data1 <- data |>
+  arrange(mrn, desc(`etdate`)) |>
+  distinct(mrn, .keep_all = TRUE)
+#--- List MRNs of patients had both date of bleeding and date of procedure ---
+data1 |>
+  filter(!is.na(date_of_bleeding1))|>
+  filter(!is.na(date_of_procedure1))|>
+  select(mrn) |>
+  print( ) 
+```
+
+### 10/7/2025 Redcap data updated
+
+time between bleeding and OHS, time between procedure and OHS
+
+```{r}
+data1 <- data |>
+  arrange(mrn, desc(`etdate`)) |>
+  distinct(mrn, .keep_all = TRUE)
+data1 |>  
+  select(miscarriage_treatment, rpoc_cat) |>
+  tbl_summary(
+    by=rpoc_cat,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p()
+data1 |>
+  filter(miscarriage_treatment=="Surgica")|>
+  select(time_procedure, rpoc_cat) |>
+  tbl_summary(
+    by=rpoc_cat) |>
+  add_overall()|>
+  add_p()
+data1 |>
+  filter(miscarriage_treatment %in% c("Expectant", "Medical"))|>
+  select(time_bleeding, rpoc_cat) |>
+  tbl_summary(
+    by=rpoc_cat) |>
+  add_overall()|>
+  add_p()
+```
+
+### 01-12-2026
+
+1.  **Time between OHS and Embryo Transfer – compared between rPOC and non rPOC groups.**
+
+2.  How many are missing data for number of embryos transferred? 0
+
+3.  How many are missing data for pregenetic screening? 0
+
+4.  How many are missing data for Multiples on initial OB US? 1
+
+    ```{r}
+    #create new variables for dates
+    data$etdate1 <- data$etdate
+    #--- Calculate time from embryo transfer to ohs ---
+    data <- data |>
+      mutate(
+        etdate1 = ymd(etdate1),
+        time_et = as.numeric(ohs_date1 - etdate1, units = "days"))
+        
+    #save
+    export(data, "data.rds")
+    #data by unique mrn
+    data1 <- data |>
+      arrange(mrn, desc(`etdate`)) |>
+      distinct(mrn, .keep_all = TRUE)
+
+    #--- Custom NA summary function ---
+    check_na <- function(df) {
+      total_na <- sum(is.na(df))
+      na_per_column <- colSums(is.na(df))
+      list(total_na = total_na, na_per_column = na_per_column)
+    }
+    check_na(data1)
+    #compare 
+    data1 |>  
+      select(time_et, rpoc_cat) |>
+      tbl_summary(
+        by=rpoc_cat,
+        # missing = "no",
+        digits = list(all_categorical() ~ c(0, 1)))|>
+      add_overall()|>
+      add_p()
+    ```
+
+### 01-28-2026
+
+manuscript edits:
+
+Redcap data was updated in October but table 2 was generated using older Redcap data. Fixed.
+
+```{r}
+#data by unique mrn
+data1 <- data |>
+  arrange(mrn, desc(`etdate`)) |>
+  distinct(mrn, .keep_all = TRUE)
+#Table 2
+data1 |>
+  select(miscarriage_treatment, started_ocps, rpoc_cat) |>
+  tbl_summary(
+    by=rpoc_cat,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p()|>
+  modify_spanning_header(all_stat_cols() ~ "**EPL after embryo transfer**")
+```
+
+**03-24-2026**
+
+1.  One question Sammy and I discussed exploring more was looking at whether OCP use was associated with a shorter time to OHS? Or to next treatment cycle/subsequent transfer? Was it shorter in our OCP population? I worry there are too many variables/confounders with time to subsequent transfer as some patients may have needed more IVF cycles, other pretesting, or just time to grieve a loss.
+
+Yang – what data is missing to answer those questions? Trying to see how much work it would be to do another chart review to pull it if we thought it would be meaningful to add to the paper.
+
+A: Just wanted to clarify “whether OCP use was associated with a shorter time to OHS?”: does “the shorter time to OHS” mean the time between embryo transfer and OHS?
+
+“whether OCP use was associated with a shorter time to next treatment cycle/subsequent transfer? ”: does this mean the time from OHS to next treatment or subsequent treatment?
+
+2.  I had also asked Yang to confirm what the study was powered to detect in % difference in rPOC with OCP use to add to the results.
+
+    A: This is an exploratory study that is not intended to be powered to detect differences. (Long answer: to detect 10% difference with 80% power, we planned to recruit 282 patients (141 with rPOC, 141 with non-rPOC). We only had 42 patients in our rPOC cohort. )
