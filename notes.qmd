@@ -1,0 +1,1016 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title
+
+Predictors of Immunotherapy-related Adverse Events in Patients with Gynecologic Malignancies
+
+## Background
+
+Immunotherapy
+
+use your body's immune system to destroy cancer cells
+
+compare to traditional chemotherapy (kill all cells) : more specific, less side effects
+
+Type:
+
+1.  checkpoint inhibitors: T cells turn on to kill cancerous cells; checkpoint proteins turn off T cells so they don't damage normal cells
+2.  
+
+## Study population
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'GYO patients receiving pembro Jan1 2022- Dec 31 2024 (N=)'
+      [2]: 'Exclude clinical trial'
+      [3]: 'Study population N=80'
+      [4]: 'Patients had IRAE n=68'
+      [5]: 'No IRAE n=12'
+      ")
+```
+
+## Objective
+
+Questions 1: What are the characteristics of Gynecologic Oncology patients receiving immunotherapy at Michigan Medicine? How do they vary by irAE outcome?
+
+Question 2: What are the type and severity of irAEs in our cohort?
+
+Question 3: To what extent are patient characteristics predictive of irAEs?
+
+## Methods
+
+**Design**: Retrospective cohort study of gynecologic oncology patients receiving pembrolizumab at Michigan Medicine between January 1, 2022 and July 31, 2024.  
+
+**Inclusion Criteria**: All patients with a histologically confirmed gynecologic malignancy who were managed at the University of Michigan and who received pembrolizumab January 1, 2022 and July 31, 2024.
+
+**Exclusion Criteria**: Patients were excluded if they were enrolled in a clinical trial.
+
+## Primary outcome
+
+IRAE rate
+
+Multiple IRAE rate
+
+CTCAE \>=3 rate
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, history of autoimmune disease, history of chronic infection (HIV, hepatitis, shingles), allergies, steroids (immunosuppressive), previous IRAE.  
+
+-IRAE characteristics:
+
+## Data Source
+
+Redcap
+
+## Data management
+
+```{r}
+#load libraries
+library(tidyverse)
+library(gtsummary)
+library(labelled)
+library(rio)
+library(readxl)
+library(janitor)
+library(Hmisc)
+```
+
+```{r}
+#import raw data
+# old
+data <- read_csv("rawdata/PredictorsOfImmunoth_DATA_2024-11-29_1350.csv")
+#basic cleaning
+data <- data|>
+  mutate(ethnicity =
+           factor(
+             ethnicity,
+             levels = 0:2,
+             labels = c("Hispanic or Latino", "NOT Hispanic or Latino", "Unknown / Not Reported")),
+         patient_race =
+           factor(
+             patient_race,
+             levels= 1:7,
+             labels =c("Asian", "Black", "Multiracial", "Native Indian", "Other", "Unknown", "White")),
+         absolute_eosinophil_count=as.numeric(absolute_eosinophil_count),
+         pre_egfr=as.numeric(gsub(">\\s*","", preimmunotherapy_egfr)), #convert ">90" to numeric
+         egfr=case_when(pre_egfr <=14 ~ "14 or less",
+                        pre_egfr <=29 ~ "15-29",
+                        pre_egfr <=44 ~ "30-44",
+                        pre_egfr <=59 ~ "45-59",
+                        pre_egfr <=89 ~ "60-89",
+                        pre_egfr <=200 ~ "90 or greater",
+                        TRUE ~ NA_character_),
+         treatment=case_when(overlap_of_chemotherapy_an___1 ==1 ~ "Platinums",
+                             overlap_of_chemotherapy_an___2 ==1 ~ "Taxanes",
+                             overlap_of_chemotherapy_an___3 ==1 ~ "cyclophosphamide",
+                             overlap_of_radiation_and_i ==1 ~ "Radiation",
+                             overlap_of_immunotherapy_a ==1 ~ "lenvatinib",
+                             immunotherapy_and_avastin ==1 ~ "Avastin",
+                             immunotherapy_letrozole ==1 ~ "Letrozole",
+                             maintenance_immunotherapy___1 ==1 ~ "Monotherapy q3wk",
+                             maintenance_immunotherapy___2 ==1 ~ "Monotherapy q4wk",
+                             maintenance_immunotherapy___3 ==1 ~ "Monotherapy q6wk"),
+         metastases=case_when(distant_metastases___1==1 ~ "Lung",
+                              distant_metastases___2==1 ~ "Liver",
+                              distant_metastases___3==1 ~ "Brain",
+                              distant_metastases___4==1 ~ "Other"),
+         hospital=case_when(if_any(starts_with("irae_hospitalization_"))==1 ~ 1,
+                            if_any(starts_with("irae_hospitalization_"))==0 ~ 0,
+                           TRUE ~ NA_real_ ),
+         type_of_cancer =
+           factor(
+             type_of_cancer,
+             levels= 1:5,
+             labels =c("Endometrial cancer", "Cervical cancer", "Ovarian Cancer", "Vulvar Cancer", "Vaginal Cancer")),
+         steroids=case_when(if_any(starts_with("steroids_for_irae_"))==1 ~ 1,
+                            if_any(starts_with("steroids_for_irae_"))==0 ~ 0,
+                           TRUE ~ NA_real_ ),)
+#create new variable "ctcae"
+data <- data |>
+  rowwise() |>
+  mutate(ctcae = case_when(
+    if_any(starts_with("ctcae_grade_"), ~ . == 3) | if_any(starts_with("ctcae_grade_"), ~ . == 4) ~ ">=3",
+    if_any(starts_with("ctcae_grade_"), ~ . == 1) | if_any(starts_with("ctcae_grade_"), ~ . == 2) ~ "<3",
+    TRUE ~ NA_character_
+  )) |>
+  ungroup()
+#create new variable "dose"
+data <- data |>
+  rowwise() |>
+  mutate(dose = case_when(
+    if_any(starts_with("pembro_dose_"), ~ . == 1) ~ "200mg",
+    if_any(starts_with("pembro_dose_"), ~ . == 2) ~ "400mg",
+    TRUE ~ NA_character_
+  )) |>
+  ungroup()
+#reset level
+data <- data |>
+  mutate(irae = ifelse(irae == 1, "Yes", "No"))
+data$irae <- forcats::fct_relevel(data$irae, "Yes","No")
+#create new variable "stop"
+data <- data |>
+  mutate(stop=case_when(if_any(starts_with("stopped_pembro_"))==1 ~ 1,
+                            if_any(starts_with("stopped_pembro_"))==0 ~ 0,
+                           TRUE ~ NA_real_ ))
+  
+data$irae_count <- rowSums(data[, c("type_of_irae___1", "type_of_irae___2", "type_of_irae___3", "type_of_irae___4","type_of_irae___5","type_of_irae___6","type_of_irae___7","type_of_irae___8","type_of_irae___9","type_of_irae___10","type_of_irae___11")], na.rm = TRUE)   
+#create new variable "irae_1", "irae_m"
+data<- data |>
+  mutate(irae_1=ifelse(irae_count == 1, "Yes", "No"),
+        irae_m= ifelse(irae_count > 1, "Yes", "No"))
+
+data<- data|>
+  mutate(irae_numeric=ifelse(irae=="Yes", 1,0))
+
+data<- data|>
+  mutate(vulvar=case_when(type_of_cancer=="Vulvar Cancer" ~ 1,
+         TRUE ~ 0))
+data<- data |>
+    mutate(egfr_group=case_when(egfr %in% c("90 or greater", "60-89") ~ "Grade 1-2",
+                                egfr %in% c("45-59", "30-44") ~ "Grade >=3",
+                                TRUE ~ NA_character_))
+
+data$egfr_group <- forcats::fct_relevel(data$egfr_group, "Grade 1-2","Grade >=3")
+data$metastases <- forcats::fct_relevel(data$metastases, "Lung", "Liver", "Other")
+```
+
+```{r}
+#label variables
+label(data$age)="Age (years)"
+label(data$ethnicity)="Ethnicity"
+label(data$patient_race)="Race"
+label(data$smoking_status)="Smoking Status - Prior to starting immunotherapy"
+label(data$vaping)="Vaping at time of immunotherapy initiation"
+label(data$history_of_tobacco_use)="History of tobacco use"
+label(data$history_of_autoimmune_dise)="History of autoimmune disease"
+label(data$preimmunotherapy_bmi)="BMI prior to initiation of immunotherapy"
+label(data$medication_allergies)="Medication allergies"
+label(data$seasonal_allergies)="Environmental allergies"
+label(data$preimmunotherapy_steroids)="Steroids prior to starting immunotherapy"
+label(data$pretherapy_immunosuppressant)="Immunosuppressants prior to starting immunotherapy"
+label(data$absolute_lymphocyte_count)="Absolute lymphocyte count prior to starting immunotherapy"
+label(data$absolute_eosinophil_count)="Absolute eosinophil count prior to starting immunotherapy"
+label(data$preimmunotherapy_egfr)="Baseline eGFR prior to initiation of immunotherapy"
+label(data$hiv)="HIV "
+label(data$hepatitis_c)="Hepatitis C"
+label(data$shingles)="Varicella infection"
+label(data$type_of_cancer)="Type of Cancer "
+label(data$hpv_associated_cancer)="HPV associated cancer"
+label(data$egfr) ="eGFR"
+label(data$treatment) = "Type of treatment"
+label(data$dose) = "Pembrolizumab Dose"
+label(data$metastases) = "Metastatic Disease"
+label(data$steroids) = "Steroids for IRAE"
+label(data$hospital) = "Hospitalization secondary to irAE"
+label(data$prior_exposure_to_immunoth)="Prior exposure to immunotherapy"
+label(data$previous_irae)="Previous irAE"
+label(data$ecog_score)="ECOG Score prior to initiation of immunotherapy"
+label(data$ctcae) = "CTCAE grade"
+label(data$type_of_irae___1)="Infusion related reaction"
+label(data$type_of_irae___2)="Cardiovascular"
+label(data$type_of_irae___3)="Dermatologic"
+label(data$type_of_irae___4)="Endocrinology"
+label(data$type_of_irae___5)="GI"
+label(data$type_of_irae___6)="MSK"
+label(data$type_of_irae___7)="Neuro"
+label(data$type_of_irae___8)="Ocular"
+label(data$type_of_irae___9)="Pulmonary"
+label(data$type_of_irae___10)="Renal"
+label(data$type_of_irae___11)="Hematologic"
+label(data$type_of_irr___1)="Fevers/chills/rigors"
+label(data$type_of_irr___2)="Back pain"
+label(data$type_of_irr___3)="Urticaria/pruritis"
+label(data$type_of_irr___4)="Angioedema"
+label(data$type_of_cv_irae___1)="Myocarditis"
+label(data$type_of_cv_irae___2)="Pericarditis"
+label(data$type_of_cv_irae___3)="Arrhythmia"
+label(data$type_of_cv_irae___4)="Heart failure"
+label(data$type_of_cv_irae___5)="Vasculitis"
+label(data$type_of_cv_irae___6)="VTE"
+label(data$type_of_dermatologic_irae___1)="Maculopapular rash"
+label(data$type_of_dermatologic_irae___2)="Bullous dermatitis"
+label(data$type_of_dermatologic_irae___3)="Pruritis"
+label(data$type_of_dermatologic_irae___4)="Severe cutaneous adverse reaction"
+label(data$type_of_dermatologic_irae___5)="Lichen planus"
+label(data$type_of_dermatologic_irae___6)="Psoriasis"
+label(data$type_of_dermatologic_irae___7)="Oral mucosa inflammation"
+label(data$type_of_dermatologic_irae___8)="Oral dysesthesia"
+label(data$type_of_endo_irae___1)="Diabetes"
+label(data$type_of_endo_irae___2)="Primary hypothyroidism"
+label(data$type_of_endo_irae___3)="Thyrotoxicosis"
+label(data$type_of_endo_irae___4)="Primary adrenal insufficiency"
+label(data$type_of_endo_irae___5)="Hypophysitis"
+label(data$type_of_endo_irae___6)="Fatigue"
+label(data$type_of_gi_irae___1)="Colitis"
+label(data$type_of_gi_irae___2)="Transaminitis"
+label(data$type_of_gi_irae___3)="Cholestasis"
+label(data$type_of_gi_irae___4)="Pancreatitis"
+label(data$type_of_msk_irae___1)="Myositis"
+label(data$type_of_msk_irae___2)="Inflammatory arthritis"
+label(data$type_of_msk_irae___3)="Polymyalgia-like syndrome"
+label(data$type_of_neuro_irae___1)="Aseptic meningitis"
+label(data$type_of_neuro_irae___2)="Encephalitis"
+label(data$type_of_neuro_irae___3)="Guillain-Barre Syndrome"
+label(data$type_of_neuro_irae___4)="Myasthenia gravis"
+label(data$type_of_neuro_irae___5)="Peripheral neuropathy"
+label(data$type_of_neuro_irae___6)="Autonomic neuropathy"
+label(data$type_of_neuro_irae___7)="Demyelinating disease"
+label(data$type_of_ocular_irae___1)="Uveitis or iritis"
+label(data$type_of_ocular_irae___2)="Episcleritis"
+label(data$type_of_pulmonary_irae___1)="Pneumonitis"
+label(data$type_of_renal_irae___1)="AKI"
+label(data$type_of_renal_irae___2)="Nephritis"
+label(data$type_of_hematologic_irae___1)="Hemolytic anemia"
+label(data$type_of_hematologic_irae___2)="Hemolytic uremic syndrome"
+label(data$type_of_hematologic_irae___3)="Aplastic anemia"
+label(data$type_of_hematologic_irae___4)="Lymphopenia"
+label(data$type_of_hematologic_irae___5)="Acquired hemophilia A"
+label(data$type_of_hematologic_irae___6)="Immune thrombocytopenia"
+label(data$type_of_hematologic_irae___7)="Acquired thrombotic thrombocytopenia purpura"
+label(data$stop) = "Requiring pause in therapy"
+label(data$restart_immunotherapy)="Restart immunotherapy"
+label(data$stopped_after_restart)="Stopped after restart"
+label(data$irae_1) = "One IRAE"
+label(data$irae_m) = "Multiple IRAEs"
+label(data$egfr_group) ="eGFR"
+#save
+export(data, "data.rds")
+
+```
+
+```{r}
+
+```
+
+## Descriptive summary
+
+### Table 1 Study cohort demographic and medical history
+
+```{r}
+#| echo: false
+# read rds
+data <- readRDS("data.rds")
+#
+summary_stats <- data |> 
+ # group_by(irae) %>%
+  summarise(
+    median_score = median(absolute_eosinophil_count, na.rm = TRUE),
+    Q1 = quantile(absolute_eosinophil_count, 0.25, na.rm = TRUE),
+    Q3 = quantile(absolute_eosinophil_count, 0.75, na.rm = TRUE)
+  )
+print(summary_stats)
+# descriptive summary
+data |>
+#  filter(steroids==1) |>
+#  filter(hospital==1) |>
+#  filter(ctcae==">=3") |>
+  select(age, ethnicity, patient_race, smoking_status, vaping, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, pretherapy_immunosuppressant, absolute_lymphocyte_count, absolute_eosinophil_count, egfr, hepatitis_c, shingles,hpv_associated_cancer, type_of_cancer,treatment,dose, metastases,prior_exposure_to_immunoth, previous_irae, ecog_score,steroids, hospital, ctcae, irae)|>
+  tbl_summary(
+    by=irae,
+    missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall() |>
+  modify_header(
+    stat_1 ~ "**Yes n=61**",
+    stat_2 ~ "**No n=11**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Immunotherapy-related Adverse Events**")|>
+  modify_caption("**Table 1. Demographic and medical history Characteristics**")
+
+```
+
+### Table 2 irAE patients characteristics
+
+```{r}
+data|>
+  filter(irae=="Yes")|>
+  select(irae_1, irae_m, ctcae, steroids, hospital, stop, restart_immunotherapy, stopped_after_restart, starts_with("type_of_"))|>
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 2.  IRAE Characteristics**")
+
+```
+
+```{}
+```
+
+### **Poisson regression analysis of risk factors**
+
+Table 3 in relation to irAEs
+
+```{r}
+# Ensure y is a numeric variable
+data |>
+  select(age, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, absolute_lymphocyte_count, egfr_group, shingles,hpv_associated_cancer, type_of_cancer,metastases,prior_exposure_to_immunoth, irae_numeric)|>
+              tbl_uvregression(method = glm,
+                               y = irae_numeric,
+                               method.args = list(family = poisson),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)|>
+ modify_caption("**Table 3.  Univariate Poisson regression analysis of risk factors in relation to IRAEs**") 
+
+```
+
+```{r}
+```
+
+```{r}
+#base R (codes work but p value make no sense)
+# Load necessary base R packages
+library(sandwich)
+library(lmtest)
+
+# Define a function for Poisson regression with robust SE
+poisson_robust <- function(var, data) {
+  model <- glm(reformulate(var, response = "irae_numeric"), data = data, family = poisson)
+  robust_se <- vcovHC(model, type = "HC0")
+  model_robust <- coeftest(model, vcov = robust_se)
+  
+  # Extracting exponentiated coefficients and confidence intervals
+  est <- exp(coef(model_robust))
+  ci <- exp(confint.default(model, vcov = robust_se))
+  p_values <- model_robust[, 4]
+  results <- data.frame(
+    Variable = var,
+    Term = names(est),
+    Estimate = est,
+    `Lower CI` = ci[, 1],
+    `Upper CI` = ci[, 2],
+    `p-value` = p_values
+  )
+  return(results)
+}
+
+# List of variables to analyze
+vars <- c("age", "history_of_tobacco_use", "history_of_autoimmune_dise", "preimmunotherapy_bmi",
+          "medication_allergies", "seasonal_allergies", "preimmunotherapy_steroids", 
+          "absolute_lymphocyte_count", "egfr", "shingles", "hpv_associated_cancer", 
+          "type_of_cancer", "metastases", "prior_exposure_to_immunoth")
+
+# Apply Poisson robust function to each variable and store results in a list
+results_list <- lapply(vars, poisson_robust, data = data)
+
+# Combine results into a single data frame
+results_df <- do.call(rbind, results_list)
+
+# Filter out only the relevant rows (i.e., excluding the intercept)
+results_df <- results_df[results_df$Term != "(Intercept)", ]
+
+# Print results
+print(results_df)
+
+```
+
+## Conclusion
+
+www.ncbi.nlm.nih.gov/pmc/articles/PMC6209550/
+
+Questions:
+
+1.  What irAE most commonly was rated at a CTCAE \>/= 3? 
+
+2.  What irAE most commonly led to pause in therapy?
+
+3.  What irAE most commonly led to starting steroids?
+
+4.  What irAE most commonly led to hospitalization?
+
+```{r}
+data|>
+  filter(irae=="Yes")|>
+  filter(ctcae==">=3")|>
+  # filter(stop==1)|>
+ # filter(steroids==1)|>
+ # filter(hospital==1)|>
+  select(irae_1, irae_m, ctcae, steroids, hospital, stop, restart_immunotherapy, stopped_after_restart, starts_with("type_of_"))|>
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+Is it possible to create tables like table 3 for our markers of irAE severity (CTCAE \>/=3, pause in therapy, steroids, hospitalization)? 
+
+## References
+
+### ref 1.
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6209550/
+
+**Abstract**
+
+**Purpose**
+
+We aimed to elucidate predictive factors for the development of immune-related adverse events (ir[ae]{.smallcaps}s) in patients receiving immunotherapies for the management of advanced solid cancers.
+
+**Methods**
+
+This retrospective study involved all patients with histologically confirmed metastatic or inoperable melanoma, non-small-cell lung cancer, or renal cell carcinoma receiving immunotherapy at the Cancer Centre of Southeastern Ontario. The type and severity of ir[ae]{.smallcaps}s, as well as potential protective and exacerbating factors, were collected from patient charts.
+
+**Results**
+
+The study included 78 patients receiving ipilimumab (32%), nivolumab (33%), or pembrolizumab (35%). Melanoma, non-small-cell lung cancer, and renal cell carcinoma accounted for 70%, 22%, and 8% of the cancers in the study population. In 41 patients (53%) ir[ae]{.smallcaps}s developed, with multiple ir[ae]{.smallcaps}s developing in 12 patients (15%). In most patients (70%), the ir[ae]{.smallcaps}s were of severity grade 1 or 2. Female sex \[adjusted odds ratio ([or]{.smallcaps}~adj~): 0.094; 95% confidence interval ([ci]{.smallcaps}): 0.021 to 0.415; *p* = 0.002\] and corticosteroid use before immunotherapy ([or]{.smallcaps}~adj~: 0.143; 95% [ci]{.smallcaps}: 0.036 to 0.562; *p* = 0.005) were found to be associated with a protective effect against ir[ae]{.smallcaps}s. In contrast, a history of autoimmune disease ([or]{.smallcaps}~adj~: 9.55; 95% [ci]{.smallcaps}: 1.34 to 68.22; *p* = 0.025), use of [ctla]{.smallcaps}-4 inhibitors ([or]{.smallcaps}~adj~: 6.25; 95% [ci]{.smallcaps}: 1.61 to 24.25; *p* = 0.008), and poor kidney function of grade 3 or greater ([or]{.smallcaps}~adj~: 10.66; 95% [ci]{.smallcaps}: 2.41 to 47.12; *p* = 0.025) were associated with a higher risk of developing ir[ae]{.smallcaps}s. A Hosmer--Lemeshow goodness-of-fit test demonstrated that the logistic regression model was effective at predicting the development of ir[ae]{.smallcaps}s (chi-square: 1.596; *df* = 7; *p* = 0.979).
+
+**Conclusions**
+
+Our study highlights several factors that affect the development of ir[ae]{.smallcaps}s in patients receiving immunotherapy. Although future studies are needed to validate the resulting model, findings from the study can help to guide risk stratification, monitoring, and management of ir[ae]{.smallcaps}s in patients given immunotherapy for advanced cancer.
+
+**Comments:** Odds ratio is used in rare events (\<10%), this paper should have used IRR (incidence rate ratio).
+
+ref 2.
+
+https://pubmed.ncbi.nlm.nih.gov/34562273/
+
+**Abstract**
+
+Immune-related adverse events (IrAEs) of immune checkpoint inhibitors (ICIs) can be serious and unpredictable. We examine the incidence rate and risk factors for IrAEs in an Asian cohort of nonsmall cell lung cancer (NSCLC) patients treated with immunotherapy. Between June 2014 and August 2020, we retrospectively analysed IrAEs in NSCLC patients treated with anti-PD-1 or anti-PD-L1 inhibitors at the National University Cancer Institute, Singapore. A Poisson regression model was used to estimate the effect of risk factors on incidence rate of any grade IrAEs. One hundred and forty-one patients were enrolled. Median age was 63. Majority were male (67%) with Eastern Cooperative Oncology Group (ECOG) PS 0-1 (77%). More than half (56%) received pembrolizumab. Eleven percent harboured epidermal growth factor receptor (EGFR) mutation. Eighteen percent received concomitant chemotherapy. Median number of cycles was 4, and median duration of treatment was 2.1 months. IrAEs were seen in 71 (50.4%) patients, with an incidence rate of 99 events per 1000 person-months. Fatigue (25%), rash (10.5%) and pneumonitis (7.9%) were the most common IrAEs. Twenty out of 152 IrAEs (13.2%) were Grade 3 or higher in severity: most common being pneumonitis (5.3%), fatigue (3.3%) and transaminitis (1.3%). Multivariable analysis demonstrated that concomitant chemotherapy use, higher BMI and presence of EGFR mutation are significant predictors for IrAEs (P \< .0001; P = .016; P = .007). Our findings can help guide risk stratification and monitoring of IrAEs among NSCLC patients on immunotherapy.
+
+Comments: data were summarized by events (more appropriate than by patients)
+
+### ref 3
+
+https://pubmed.ncbi.nlm.nih.gov/35843306/
+
+Review: **Immune-related adverse events of cancer immunotherapies targeting kinases**
+
+Notes: -some risk factors abstracted from references: smoking, older age, alcohol, diabetes, hypertension, male
+
+-fig.3 nice picture of organ specific irae
+
+### ref 4
+
+https://pubmed.ncbi.nlm.nih.gov/35210308/
+
+**Impact of immune-related adverse events on the therapeutic efficacy of pembrolizumab in urothelial carcinoma: a multicenter retrospective study using time-dependent analysis**
+
+**Abstract**
+
+**Background:** Several studies have reported the incidence of immune-related adverse events (irAEs) as a predictor of the efficacy of anti-programmed cell death protein 1 antibodies in patients with cancer. However, immortal time bias has not always been fully addressed in these studies. In this retrospective multicenter study, we assessed the association between the incidence of irAEs and the efficacy of pembrolizumab in urothelial carcinoma (UC) using time-dependent analysis, an established statistical method to minimize immortal time bias.
+
+**Methods:** The study included 176 patients with advanced UC who underwent pembrolizumab treatment at seven affiliated institutions between January 2018 and July 2020. Patients with irAEs were compared with those without irAEs in terms of overall survival (OS) and cancer-specific survival (CSS). Immortal time bias was eliminated by using time-dependent analysis.
+
+**Results:** Of the 176 patients, irAEs occurred in 77 patients (43.8%), with a median of 60 days. The irAEs (+) cohort showed significantly favorable OS and CSS compared with the irAEs (-) cohort (p=0.018 and p=0.005, respectively), especially in the cohort with grade 1-2 irAEs (OS and CSS; p=0.003 and p=0.002, respectively). Multivariate analyses identified any irAEs and grade 1-2 irAEs as independent favorable prognostic factors for OS and CSS.
+
+**Conclusion:** Even after minimizing immortal time bias by time-dependent analysis, the incidence of irAEs, especially grade 1-2 irAEs, could be a significant predictor of favorable prognoses in patients with UC who have undergone pembrolizumab treatment.
+
+Notes: -irae development at grade 1-2 coud be predictor for patients responding to immunotherapy
+
+### ref 5
+
+https://pubmed.ncbi.nlm.nih.gov/35348766/
+
+**Incidence, Clinical Characteristics, and Predictors of Cardiovascular Immune-Related Adverse Events Associated with Immune Checkpoint Inhibitors**
+
+notes: used hazard ratio, non-cardiovascular related death as competing event. Model: fine and gray regression
+
+### ref 6
+
+https://pubmed.ncbi.nlm.nih.gov/36480204/
+
+**Association of Immune-Related Adverse Events, Hospitalization, and Therapy Resumption With Survival Among Patients With Metastatic Melanoma Receiving Single-Agent or Combination Immunotherapy**
+
+Notes: -irae is positively associated with metastatic melanoma patients overall survival.
+
+-clinically significant irae event: ctcae \>=2, require steroid, require pause of immunotherapy.
+
+-irae data was summarized by patients. if a patient developed multiple irae events, the most clinically impactful event was used.
+
+## manuscript discussion:
+
+1.  data summarized by patients: patients who had multiple irae events: use the most clinically impactful event. note: for patients who had multiple events, their overall ctcae was determine by the most severe individual event.
+
+    or data summarized by events
+
+2.  patients who had no irae events: did they respond to immunotherapy? Most patients had iraes -indicating they responded to immunotherapy?
+
+3.  Continue the study: patients no irae vs ctcae \<3 vs ctcae \>=3: overall survival comparison
+
+4.  data: abstract not consistent with tables_101124:
+
+    The irAEs most commonly requiring pause in therapy were transaminitis (5/25, 20.0%), myositis (5/25, 20.0%), inflammatory arthritis (5/25, 20.0%), and immune thrombocytopenia (4/25, 16.0%). The irAEs most commonly requiring steroids were myositis (6/19, 31.6%), transaminitis (5/19, 26.3%), inflammatory arthritis (4/19, 21.1%), and maculopapular rash (3/19, 15.8%). The irAE that most led to hospitalization was colitis (2/9, 22.2%). Notably, pneumonitis occurred in 3 patients (4.9%).
+
+    raw data downloaded 10/07/24: type of dermatologic irae==1, study id=4, 6, 12, 13, 30, 44
+
+    raw data re-downloaded 11/25/24: same
+
+    ```{r}
+    #patients info
+    data1 <- data|>
+      filter(irae=="Yes")|>
+     # filter(ctcae==">=3")|>
+      filter(stop==1)|>
+     # filter(steroids==1)|>
+     # filter(hospital==1)|>
+      select(study_id, ctcae, steroids, hospital, stop, restart_immunotherapy, stopped_after_restart)
+    ```
+
+5.  Table 4: poisson regression (incidence rate ratio): we are interested in risk factors for serious adverse events, not any events. at some point, grade 1-2 could be predictors for immunotherapy responses. switch any irae to ctcae \>=3?
+
+    ```{r}
+    # Ensure y is a numeric variable
+    #recode ctcae, >=3==1, other including na==0
+    data<- data |>
+       mutate(ctcae_new = case_when(
+        ctcae == ">=3" ~ 1,
+        ctcae != ">=3" | is.na(ctcae) ~ 0
+      ))
+    #recode stop, 1==1, na==0
+    data<- data |>
+       mutate(stop_new = case_when(
+        stop == 1 ~ 1,
+        is.na(stop) ~ 0
+        ))
+    # regroup type of cancer and metastases
+    data<- data |>
+      mutate(cancer_new=case_when(type_of_cancer=="Endometrial cancer" ~ "Endometrial cancer",
+                                  TRUE ~ "Other"),
+             metastases_new=case_when(distant_metastases___5==1 ~ 0,
+                                      distant_metastases___1==1 |distant_metastases___2==1| distant_metastases___3==1 | distant_metastases___4 ==1 ~ 1))
+    data$cancer_new <- forcats::fct_relevel(data$cancer_new, "Other","Endometrial cancer")
+    label(data$cancer_new)="Type of Cancer "
+    label(data$metastases_new) = "Metastatic Disease"
+
+    export(data, "data.rds")
+    data |>
+      select(age, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, absolute_lymphocyte_count, egfr_group, shingles,hpv_associated_cancer, cancer_new,metastases_new,prior_exposure_to_immunoth, ctcae_new)|>
+                  tbl_uvregression(method = glm,
+                                   y = ctcae_new,
+                                   method.args = list(family = poisson),
+                                   exponentiate = TRUE,
+                                   hide_n = TRUE)|>
+     modify_caption("**Table .  Univariate Poisson regression analysis of risk factors in relation to severe IRAEs**") 
+
+    data |>
+      select(age, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, absolute_lymphocyte_count, egfr_group, shingles,hpv_associated_cancer, cancer_new,metastases_new,prior_exposure_to_immunoth, stop_new)|>
+                  tbl_uvregression(method = glm,
+                                   y = stop_new,
+                                   method.args = list(family = poisson),
+                                   exponentiate = TRUE
+                                   #hide_n = TRUE
+                                   )|>
+     modify_caption("**Table .  Univariate Poisson regression analysis of risk factors in relation to pausing immunotherapy**") 
+    ##tables_112924.xlsx 
+
+
+
+    data |>
+      select(age, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, absolute_lymphocyte_count, egfr_group, shingles,hpv_associated_cancer, cancer_new,metastases_new,prior_exposure_to_immunoth, stop_new)|>
+      tbl_summary(by=stop_new)|>
+      add_p()
+
+    ```
+
+6.  interesting data worthing investigating? 9 patients who had hospitalization secondary to irae, 7 ctcae \>=3, 2 \<3. why patients had mild adverse events were hospitalized?
+
+    17 patients who had ctcae\>=3, 12 paused immunotherapy, of those 12, 7 restarted immunotherapy, of those 7, 1 stopped after restart.
+
+    ```{r}
+    ctcae <- data |>
+      filter(ctcae==">=3")|>
+      select(ctcae, hospital, stop, restart_immunotherapy, stopped_after_restart, dose, irae_count)
+    ```
+
+7.  ideas for future projects: retrospective study 2018-2021 patients or prospective 2022-2024: is ctcae 1-2 positively associated with overall survival?
+
+## Abstract (SGO)
+
+submitted to SGO (not accepted)
+
+Assessment of Immunotherapy-related Adverse Events in Patients with Gynecologic Malignancies Receiving Pembrolizumab
+
+Objective: To describe the type, severity, and required management of immune-related adverse events (irAEs) in patients with gynecologic malignancies receiving pembrolizumab.
+
+Methods: Retrospective cohort study of patients with histologically confirmed gynecologic malignancies who received pembrolizumab through a gynecology oncology clinic between January 1, 2022 and July 31, 2024. Patients enrolled in a clinical trial were excluded. Patient demographics, pertinent medical history, cancer treatment information, and type, severity, and management of irAEs were collected from patient charts. Descriptive statistics were calculated. Study was reviewed and approved as exempt by the university institutional review board.
+
+Results: 72 patients were treated with pembrolizumab for a gynecologic malignancy. Patients were on average 62 years-old, non-Hispanic (98.6%), White (84.7%), non-smokers (95.8%), without autoimmune disease (76.1%), and with a mean body mass index of 31. The majority had endometrial cancer (51.4%) and were also receiving a platinum/taxane chemotherapy doublet (64.3%). Of the 72 subjects, 84.7% developed an irAE, out of which 68.9% had multiple irAEs, 28.3% were graded at a Common Terminology Criteria for Adverse Events (CTCAE) grade ≥ 3, 41.0% required a pause in pembrolizumab, 31.1% required treatment with steroids, and 14.8% required hospitalization. The irAEs most commonly graded at a CTCAE grade ≥ 3 were transaminitis, peripheral neuropathy, myositis, and inflammatory arthritis (all 3/17, 17.6%). The irAEs most commonly requiring pause in therapy were transaminitis (5/25, 20.0%), myositis (5/25, 20.0%), inflammatory arthritis (5/25, 20.0%), and immune thrombocytopenia (4/25, 16.0%). The irAEs most commonly requiring steroids were myositis (6/19, 31.6%), transaminitis (5/19, 26.3%), inflammatory arthritis (4/19, 21.1%), and maculopapular rash (3/19, 15.8%). The irAE that most led to hospitalization was colitis (2/9, 22.2%). Notably, pneumonitis occurred in 3 patients (4.9%).
+
+Conclusion: Transaminitis, inflammatory arthritis, and myositis were the irAEs most associated with markers of irAE severity in this single institution study. This is one of the first reports on the type, severity, and required management of irAEs in gynecologic malignancies and informs practice in this patient population. Future research should investigate factors that may be protective against or exacerbate irAEs.
+
+## Update 06-15-25
+
+This data analysis is similar to the recent project we did looking at rates and predictors of immune-related adverse effects (irAE) in patients with gynecologic malignancies receiving pembrolizumab. 
+
+We have since added additional patients to the cohort and are hoping to repeat the previously performed analysis for the new cohort. In addition, we would like to delineate rates of irAE for patients with endometrial cancer and for patients with cervical cancer. The intent behind breaking down rates of irAE by cancer subtype is to facilitate comparison of our institutional rates of irAE for these cancer subtypes to rates of irAE identified in the trials that support use of pembrolizumab in these cancers. 
+
+Would you be willing to help and be co-author on the future manuscript? I have cc'd Dr. Rolston as she will be the senior author. In terms of timeframe, I will be submitting the abstract to HAGO. The abstract deadline is 6/30/25. Dr. Rolston and I will be meeting Thursday, 6/19 in the evening to discuss the data. Would it be feasible to complete the data analysis before the evening of 6/19? I know that this is very last minute so completely understand if it is not feasible. 
+
+If you are willing to help, I have linked all of the relevant data and prepared tables:
+
+1\. [[Redcap data]{.underline}](https://nam02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2F033bvfwvxzvz3033xpob7%2FPembro-Data-6.15.25.xlsx%3Frlkey%3Dk7aoh6dgf7zfmewl0qo35eskf%26st%3D89ldxn08%26dl%3D0&data=05%7C02%7Cylyl%40med.umich.edu%7C062f36158c4b4673543808ddb2bfa4ae%7C1f41d613d3a14ead918d2a25b10de330%7C0%7C0%7C638863258348569217%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=Ub6WzAyGkGCrEjQ%2FWASDaQjokbM8lgls2p%2BSqjNoVYw%3D&reserved=0): The first sheet includes data for the entire cohort (n=80). The second sheet includes the data for all patients with endometrial cancer in the cohort (n=40). The third sheet includes data for patients with endometrial cancer receiving lenvatinib plus pembrolizumab per the Keynote 775 Trial (n=8). The fourth sheet includes data for patients with endometrial cancer receiving a platinum, taxane plus pembrolizumab per the GY018 Trial (n=35, there is some overlap between the third and fourth sheet). The fifth sheet includes data for all patients with cervical cancer in the cohort (n=22). The sixth sheet includes data for patients with cervical cancer receiving platinum, taxane plus pembrolizumab +/- avastin in the cohort (n=15). 
+
+2\. [[Templated tables]{.underline}](https://nam02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.dropbox.com%2Fscl%2Ffi%2Fhtltmr87ta8jqbk4ahywt%2FPembro-HAGO-Tables.xlsx%3Frlkey%3D3rlhn6tdng39j2m69l1rb25i7%26st%3Deoawp1e5%26dl%3D0&data=05%7C02%7Cylyl%40med.umich.edu%7C062f36158c4b4673543808ddb2bfa4ae%7C1f41d613d3a14ead918d2a25b10de330%7C0%7C0%7C638863258348582953%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=qPgSZRdqEo18BR3wEKumypPuemGqNrwu56%2BBP9h7NyE%3D&reserved=0): Table 1, 2 and 3 are similar to the data analysis that you performed on the prior cohort. We are hoping you could perform this analysis again for this new cohort (n=80). Table 4, 5, 6, 7 and 8 are templated to allow for input of the rates of irAE based on type of cancer and treatment regimen. For both endometrial (Table 4) and cervical cancer (Table 7), I would love to know overall rates of irAE broken down by markers of severity (any irAE, CTCAE \>/= 3, or irAE requiring pause in therapy, steroids or hospitalization). For endometrial, I would also like to  know rates of irAE based on treatment regimen, again broken down by markers of severity (Table 5 correlates to Keynote 775. Table 6 correlates to GY018). For cervical cancer, I would like to know rates of irAE for patients specifically receiving the Keynote 826 regimen (Table 8). 
+
+In case this is helpful, here is the breakdown in terms of which sheet from the RedCap data correlates to which of the templated tables:
+
+-   Sheet 1 - Tables 1, 2 and 3
+
+-   Sheet 2 - Table 4 n=40
+
+-   Sheet 3 - Table 5 n=8
+
+-   Sheet 4 - Table 6 n=35
+
+-   Sheet 5 - Table 7 n=22
+
+-   Sheet 6 - Table 8 n=15
+
+    ```{r}
+    #import raw data
+    # new 06242025
+    data <- read_excel("rawdata/Pembro Data - 6.15.25.xlsx", 
+        sheet = "All cancer types")
+    #basic cleaning
+    data <- data|>
+      mutate(ethnicity =
+               factor(
+                 ethnicity,
+                 levels = 0:2,
+                 labels = c("Hispanic or Latino", "NOT Hispanic or Latino", "Unknown / Not Reported")),
+             patient_race =
+               factor(
+                 patient_race,
+                 levels= 1:7,
+                 labels =c("Asian", "Black", "Multiracial", "Native Indian", "Other", "Unknown", "White")),
+             absolute_eosinophil_count=as.numeric(absolute_eosinophil_count),
+             pre_egfr=as.numeric(gsub(">\\s*","", preimmunotherapy_egfr)), #conver ">90" to numeric
+             egfr=case_when(pre_egfr <=14 ~ "14 or less",
+                            pre_egfr <=29 ~ "15-29",
+                            pre_egfr <=44 ~ "30-44",
+                            pre_egfr <=59 ~ "45-59",
+                            pre_egfr <=89 ~ "60-89",
+                            pre_egfr <=200 ~ "90 or greater",
+                            TRUE ~ NA_character_),
+             treatment=case_when(Platinum ==1 | Taxane ==1 ~ "Platinums + Taxanes ",
+                                 Cyclophosphamide ==1 ~ "Cyclophosphamide",
+                                 Lenvatinib ==1 ~ "Lenvatinib",
+                                 Avastin ==1 ~ "Avastin",
+                                 Letrozole ==1 ~ "Letrozole",
+                                 Maintenance_q3wk == 1 ~ "Monotherapy q3wk",
+                                 Maintenance_q6wk == 1 ~ "Monotherapy q6wk"),
+             metastases=case_when(distant_metastases___1==1 ~ "Lung",
+                                  distant_metastases___2==1 ~ "Liver",
+                                  distant_metastases___3==1 ~ "Brain",
+                                  distant_metastases___4==1 ~ "Other"),
+             hospital=case_when(if_any(starts_with("irae_hospitalization_"))==1 ~ 1,
+                                if_any(starts_with("irae_hospitalization_"))==0 ~ 0,
+                               TRUE ~ NA_real_ ),
+             type_of_cancer =
+               factor(
+                 type_of_cancer,
+                 levels= 1:5,
+                 labels =c("Endometrial cancer", "Cervical cancer", "Ovarian Cancer", "Vulvar Cancer", "Vaginal Cancer")),
+             steroids=case_when(if_any(starts_with("steroids_for_irae_"))==1 ~ 1,
+                                if_any(starts_with("steroids_for_irae_"))==0 ~ 0,
+                               TRUE ~ NA_real_ ),)
+    #create new variable "ctcae"
+    data <- data |>
+      rowwise() |>
+      mutate(ctcae = case_when(
+        if_any(starts_with("ctcae_grade_"), ~ . == 3) | if_any(starts_with("ctcae_grade_"), ~ . == 4) ~ ">=3",
+        if_any(starts_with("ctcae_grade_"), ~ . == 1) | if_any(starts_with("ctcae_grade_"), ~ . == 2) ~ "<3",
+        TRUE ~ NA_character_
+      )) |>
+      ungroup()
+    #create new variable "dose"
+    data <- data |>
+      rowwise() |>
+      mutate(dose = case_when(
+        if_any(starts_with("pembro_dose_"), ~ . == 1) ~ "200mg",
+        if_any(starts_with("pembro_dose_"), ~ . == 2) ~ "400mg",
+        TRUE ~ NA_character_
+      )) |>
+      ungroup()
+    #reset level
+    data <- data |>
+      mutate(irae = ifelse(irae == 1, "Yes", "No"))
+    data$irae <- forcats::fct_relevel(data$irae, "Yes","No")
+    #create new variable "stop"
+    data <- data |>
+      mutate(stop=case_when(if_any(starts_with("stopped_pembro_"))==1 ~ 1,
+                                if_any(starts_with("stopped_pembro_"))==0 ~ 0,
+                               TRUE ~ NA_real_ ))
+      
+    data$irae_count <- rowSums(data[, c("type_of_irae___1", "type_of_irae___2", "type_of_irae___3", "type_of_irae___4","type_of_irae___5","type_of_irae___6","type_of_irae___7","type_of_irae___8","type_of_irae___9","type_of_irae___10","type_of_irae___11")], na.rm = TRUE)   
+    #create new variable "irae_1", "irae_m"
+    data<- data |>
+      mutate(irae_1=ifelse(irae_count == 1, "Yes", "No"),
+            irae_m= ifelse(irae_count > 1, "Yes", "No"))
+
+    data<- data|>
+      mutate(irae_numeric=ifelse(irae=="Yes", 1,0))
+
+    data<- data|>
+      mutate(vulvar=case_when(type_of_cancer=="Vulvar Cancer" ~ 1,
+             TRUE ~ 0))
+    data<- data |>
+        mutate(egfr_group=case_when(egfr %in% c("90 or greater", "60-89") ~ "Grade 1-2",
+                                    egfr %in% c("45-59", "30-44") ~ "Grade >=3",
+                                    TRUE ~ NA_character_))
+
+    data$egfr_group <- forcats::fct_relevel(data$egfr_group, "Grade 1-2","Grade >=3")
+    data$metastases <- forcats::fct_relevel(data$metastases, "Lung", "Liver", "Other")
+    data$patient_race <- forcats::fct_infreq(data$patient_race)
+    data$treatment <- forcats::fct_infreq(data$treatment)
+
+    drop_zero_categories <- function(x) {
+      # Convert to factor if not already
+      x <- as.factor(x)
+      # Keep only levels with non-zero count
+      factor(x, levels = levels(x)[tabulate(x) > 0])
+    }
+
+    # Apply this function to specified columns
+    data <- data %>%
+      mutate(
+        patient_race = drop_zero_categories(patient_race),
+        ethnicity = drop_zero_categories(ethnicity)
+      )
+    # label variables, see previous codes
+    #save
+    export(data, "data.rds")
+    ```
+
+### Table 1
+
+```{r}
+# descriptive summary
+data |>
+#  filter(steroids==1) |>
+#  filter(hospital==1) |>
+#  filter(ctcae==">=3") |>
+  select(age, ethnicity, patient_race, smoking_status, vaping, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, pretherapy_immunosuppressant, absolute_lymphocyte_count, absolute_eosinophil_count, egfr, hepatitis_c, shingles,hpv_associated_cancer, type_of_cancer,treatment,dose, metastases,prior_exposure_to_immunoth, previous_irae, ecog_score,irae, distant_metastases___3,Letrozole )|>
+  tbl_summary(
+    by=irae,
+    missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall() |>
+  modify_header(
+    stat_1 ~ "**Yes n=68**",
+  stat_2 ~ "**No n=12**"
+ ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Immunotherapy-related Adverse Events**")|>
+  modify_caption("**Table 1. Demographic and medical history Characteristics**")
+```
+
+### Table 2
+
+```{r}
+data|>
+  filter(irae=="Yes")|>
+  select(irae_1, irae_m, ctcae, steroids, hospital, stop, dose)|>
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 2.  IRAE Characteristics**")
+```
+
+### Table 3
+
+```{r}
+data |>
+  select(age, history_of_tobacco_use, history_of_autoimmune_dise, preimmunotherapy_bmi, medication_allergies, seasonal_allergies, preimmunotherapy_steroids, absolute_lymphocyte_count, egfr_group, shingles,hpv_associated_cancer, type_of_cancer,metastases,prior_exposure_to_immunoth, irae_numeric)|>
+              tbl_uvregression(method = glm,
+                               y = irae_numeric,
+                               method.args = list(family = poisson),
+                               exponentiate = TRUE,
+                               hide_n = TRUE)|>
+ modify_caption("**Table 3.  Univariate Poisson regression analysis of risk factors in relation to IRAEs**") 
+
+```
+
+### Table 4
+
+```{r}
+# patients with endometrial cancer in the cohort (n=40)
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  #filter(irae=="Yes")|>
+ #filter(ctcae==">=3")|>
+ #  filter(stop==1)|>
+ # filter(steroids==1)|>
+  filter(hospital==1)|>
+  select(starts_with("type_of_"))|>
+  select(where(~ any(. != 0))) |> # Exclude all-zero columns
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+```{r}
+## number of restarted, number of stopped after restart
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  filter(stop==1)|>
+  filter (restart_immunotherapy==1)|>
+  filter(stopped_after_restart==1)|>
+  print()
+```
+
+### Table 5
+
+```{r}
+# patients with endometrial cancer receiving lenvatinib plus pembrolizumab (n=8)
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  filter(Lenvatinib==1)|>
+ # filter(irae=="Yes")|>
+ # filter(ctcae==">=3")|>
+ #  filter(stop==1)|>
+ # filter(steroids==1)|>
+  filter(hospital==1)|>
+  select(starts_with("type_of_"))|>
+  select(where(~ any(. != 0))) |> # Exclude all-zero columns
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+```{r}
+## number of restarted, number of stopped after restart
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  filter(Lenvatinib==1)|>
+  filter(stop==1)|>
+  filter (restart_immunotherapy==1)|>
+  filter(stopped_after_restart==1)|>
+  print()
+```
+
+### Table 6
+
+```{r}
+# patients with endometrial cancer receiving a platinum, taxane plus pembrolizumab n=32
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  filter(Platinum==1)|>
+ # filter(irae=="Yes")|>
+ # filter(ctcae==">=3")|>
+ #  filter(stop==1)|>
+ # filter(steroids==1)|>
+  filter(hospital==1)|>
+  select(starts_with("type_of_"))|>
+  select(where(~ any(. != 0))) |> # Exclude all-zero columns
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+```{r}
+## number of restarted, number of stopped after restart
+data |>
+  filter(type_of_cancer=="Endometrial cancer")|>
+  filter(Platinum==1)|>
+  filter(stop==1)|>
+  filter (restart_immunotherapy==1)|>
+  filter(stopped_after_restart==1)|>
+  print()
+```
+
+### Table 7
+
+```{r}
+# patients with cervical cancer in the cohort (n=22)
+data |>
+  filter(type_of_cancer=="Cervical cancer")|>
+ #  filter(irae=="Yes")|>
+ # filter(ctcae==">=3")|>
+ #  filter(stop==1)|>
+ # filter(steroids==1)|>
+  filter(hospital==1)|>
+  select(starts_with("type_of_"))|>
+  select(where(~ any(. != 0))) |> # Exclude all-zero columns
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+```{r}
+## number of restarted, number of stopped after restart
+data |>
+  filter(type_of_cancer=="Cervical cancer")|>
+  filter(stop==1)|>
+  filter (restart_immunotherapy==1)|>
+  filter(stopped_after_restart==1)|>
+  print()
+```
+
+### Table 8
+
+```{r}
+# patients with cervical cancer receiving platinum, taxane plus pembrolizumab +/- avastin in the cohort (n=15). 
+data |>
+  filter(type_of_cancer=="Cervical cancer")|>
+  filter(Platinum==1)|>
+#  filter(irae=="Yes")|>
+ # filter(ctcae==">=3")|>
+ #  filter(stop==1)|>
+ # filter(steroids==1)|>
+ filter(hospital==1)|>
+  select(starts_with("type_of_"))|>
+  select(where(~ any(. != 0))) |> # Exclude all-zero columns
+   tbl_summary(
+    #missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))
+```
+
+```{r}
+data |>
+  filter(type_of_cancer=="Cervical cancer")|>
+  filter(Platinum==1)|>
+  filter(stop==1)|>
+  filter (restart_immunotherapy==1)|>
+  filter(stopped_after_restart==1)|>
+  print()
+```
+
+## Abstract (HAGO 2025)
+
+**Rates of Immune-related Adverse Events in Patients with Gynecologic Malignancies**
+
+**Objective:** Compare immune-related adverse event (irAE) rates in gynecologic oncology patients on pembrolizumab to landmark trials.
+
+**Methods:** Retrospective study of patients with histologically-confirmed gynecologic malignancies receiving pembrolizumab through a gynecology oncology clinic between January 1, 2022 and December 31, 2024. Clinical trial participants were excluded. Descriptive statistics summarized rates of irAE by type and severity, with the analysis conducted for the entire cohort and for patients specifically receiving treatment per the GY018, KEYNOTE-775, or KEYNOTE-826 protocol.
+
+**Results**: Among 80 patients (median age 62), most were non-Hispanic (98.8%), White (86.3%), non-smokers (95.0%) and without autoimmune disease (76.9%). Endometrial cancer was the most common cancer-type (50%). 65.4% received a platinum-taxane doublet. 85.0% experienced an irAE; of these, 70.6% had multiple, 25.0% were Common Terminology Criteria for Adverse Events (CTCAE) grade ≥3, 38.2% required a pembrolizumab pause, 29.4% required steroids, and 16.2% required hospitalization.
+
+irAE rates in study patients on specific treatment protocols were compared to landmark trials:
+
+GY018 (n=35): 82.8% developed an irAE. Study patients had increased occurrences of dermatologic irAEs (13, 37.1% vs 64, 16.6%), hypothyroidism (7, 20.0% vs 51, 13.2%), colitis (9, 25.7% vs 11, 2.9%), transaminitis (4, 11.4% vs 1, 0.3%), pneumonitis (2, 5.7% vs 5, 1.3%), and immune thrombocytopenia (ITP; 3, 8.6% vs 0).
+
+KEYNOTE-775 (n=8): 100.0% developed an irAE. Study patients had higher rates of  infusion-related reactions (1, 12.5% vs 12, 3.0%), rashes (5, 62.5% vs 47, 11.6%), hypothyroidism (6, 75.0% vs 234, 57.6%), colitis (2, 25.0% vs 19, 4.7%), transaminitis (1, 12.5% vs 6, 1.5%), and aplastic anemia (1, 12.5% vs 0).
+
+KEYNOTE-826 (n=15): 93.3% developed an irAE. Study patients had higher rates of colitis (3, 20.0% vs 16, 5.2%), transaminitis (1, 6.7% vs 5, 1.6%), peripheral neuropathy (8, 53.3% vs 81, 26.4%), pneumonitis (1, 6.7% vs 6, 2.0%), and ITP (2, 13.3% vs 0).
+
+**Conclusions:** Real-world rates of several irAEs in this cohort exceeded those reported in trials, especially for dermatologic irAEs, hypothyroidism, colitis, transaminitis, and hematologic irAEs. Findings inform patient counseling and risk assessment. Further research is needed to better identify risk factors for and the impact of irAEs in gynecologic oncology patients. 
+
+**References:**
+
+1\. Eskander, Ramez N., et al. \"Pembrolizumab plus chemotherapy in advanced or recurrent endometrial cancer.\" New England Journal of Medicine, vol. 388, no. 23, 2023, pp. 2159--2170.
+
+2\. Makker, Vicky, et al. \"Lenvatinib plus Pembrolizumab for Advanced Endometrial Cancer.\" New England Journal of Medicine, vol. 386, no. 5, 2022, pp. 437--448.
+
+3\. Colombo Nicoletta, et al. "Pembrolizumab for Persistent, Recurrent, or Metastatic Cervical Cancer." New England Journal of Medicine, vol. 385, no. 20, 2021, pp. 1856-1867.
