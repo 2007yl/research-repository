@@ -1,0 +1,430 @@
+---
+title: "Persistent Opioid Use Among Gynecologic Oncology Patients After Surgery"
+author:
+date: 08-29-2023
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+Notes
+
+1.  **Opioid use within 30 days of surgery?**
+
+    0% -no prescription or no opioid use before and after surgery?
+
+    -persistent opioid use: start right before surgery or right after surgery and continue to use 90 days after surgery
+
+    -answer "No" to this question excluded some(or many?) new persistent opioid users, therefore underestimated incidence of new persistent opioid use; reference: In gynecologic surgery, the rate of persistent opioid use 3--6 months after surgery is 6--7 % ([Wright et al., 2019](https://www.sciencedirect.com/science/article/pii/S2352578923000413?via%3Dihub#b0200), [Chan et al., 2021](https://www.sciencedirect.com/science/article/pii/S2352578923000413?via%3Dihub#b0050)). -opioid-naive patients: no prior opioid use before admission
+
+    -consider including patients that had prescriptions/opioid use -15 days +30 days surgery
+
+    update: this question is asking any opioid use 30 days before surgery.
+
+2.  Dr. Peahl and Dr. Dalton's paper as a reference for defining persistent opioid use
+
+    Peahl, A. F., Dalton, V. K., Montgomery, J. R., Lai, Y. L., Hu, H. M., & Waljee, J. F. (2019). Rates of New Persistent Opioid Use After Vaginal or Cesarean Birth Among US Women. *JAMA Network Open*, *2*(7). https://doi.org/10.1001/JAMANETWORKOPEN.2019.7863
+
+    **Inclusion criteria:** Peripartum opioid prescription (1 week before delivery to 3 days after discharge)
+
+    Rates of new persistent opioid use, defined as pharmacy claims for 1 or more opioid prescription 4 to 90 days after discharge and 1 or more prescription 91 to 365 days after discharge among women who filled peripartum opioid prescriptions.
+
+3.  Swenson, C. W., Kamdar, N. S., Seiler, K., Morgan, D. M., Lin, P., & As-Sanie, S. (2018). Definition development and prevalence of new persistent opioid use following hysterectomy. *American Journal of Obstetrics and Gynecology*, *219*(5), 486.e1-486.e7. https://doi.org/10.1016/J.AJOG.2018.06.010
+
+    **Inclusion criteria** included the following: age ≤63 years at hysterectomy, no opioid fills for 8 months preceding (excluding the 30 days immediately prior), and no additional surgical procedures within 6 months after hysterectomy. The perioperative period was defined as 30 days prior to 14 days after hysterectomy.
+
+    New persistent opioid use was defined as follows: ≥2 opioid fills within 6 months of hysterectomy with ≥1 fill every 3 months and either total oral morphine equivalent ≥1150 or days supplied ≥39.
+
+4.  thoughts
+
+    -reset inclusion criteria
+
+    -reach out to Dr. Peahl, Dr. Dalton, Dr. As-Sanie for help with inclusion criteria and defining new persistent opioid use.
+
+5.  meeting notes 09-27-23:
+
+    Mode of surgery: regroup
+
+    -Open
+
+    -MIS including vaginal hysterectomy, LAVH
+
+    -Vulvar/vaginal surgery
+
+    variable pain_pill_refill: opioid refill at discharge,
+
+    cancer type: CAH could be grouped with uterine cancer
+
+    cancer stage: check missing values
+
+    any complication within 30 days: check missing values
+
+## Background
+
+Definition of persistent opioid use:
+
+Persistent opioid use refers to the long-term usage of opioid medications, even after a person has recovered from the condition for which the opioids were initially prescribed. This can be due to a multitude of factors such as individual's susceptibility, type of surgery, and the duration of initial prescription. Persistent opioid use is a major concern due to its correlation with opioid use disorder and the risk of overdose. some references:
+
+New persistent opioid use after surgery, most commonly defined as continued opioid prescription use between **90 and 180 days** after the surgical procedure in a previously opioid-naïve patient, has recently been identified as one of the most common postoperative complications \[3, 8\].Mar 24, 2021
+
+reference: pubmed [https://www.ncbi.nlm.nih.gov › articles › PMC7990836](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7990836/#:~:text=New%20persistent%20opioid%20use%20after%20surgery%2C%20most%20commonly%20defined%20as,complications%20%5B3%2C%208%5D.)
+
+What are the risk factors for persistent opioid use?
+
+The authors considered several putative risk factors for chronic opioid use: age (\>50years), male sex, preoperative medication use (benzodiazepines, antidepressants, or antipsychotics), and comorbidities (depression, psychosis, alcohol abuse, or drug abuse).
+
+[https://www.ncbi.nlm.nih.gov › articles › PMC6684468](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6684468/#:~:text=We%20considered%20several%20putative%20risk,abuse%2C%20or%20drug%20abuse).)
+
+In another paper younger age was one of risk factors.
+
+## Data source
+
+REDCap database with all of the information included. The data was collected via a combination of chart review and a postoperative patient survey. the REDCap is called Enhanced Recovery (ERAS ) v-3.0. The data we are looking at is the report called Persistent Opioid use 30d,90d.
+
+## Research questions
+
+### What is the rate of persistent opioid use (at 30 days and 90 days postop) in opioid-naive patients undergoing surgery for a gynecologic malignancy?
+
+A: Nine hundred and twenty-eight opioid-naïve patients were included in the analysis. Ongoing opioid use at 30 days post-operative period was identified in 16 (1.7%) of patients, and persistent opioid use at 90 days was identified in only **4 (0.32%)** of patients. At 30 days, the reasons for persistent opioid use were as follows: 4/16 were still using opioids for pain related to adjuvant treatment, 2/16 from wound complications, 1/6 from postoperative pain, 4/16 from conditions unrelated to surgery/cancer, and 5/16 were not clear from the chart.
+
+### What are the risk factors for persistent opioid use amongst this population?
+
+would like to determine whether any of the following factors makes it more likely that patients will have persistent opioid use: age, race, insurance type, BMI, preoperative diagnosis, mode of surgery, postoperative complications, contraindications to NSAIDs, and pre-existing conditions such as depression, anxiety, substance use, and chronic pain.
+
+A: not able to answer this question due to few outcomes.
+
+## Study design
+
+Retrospective study
+
+## Study population
+
+Define persistent opioid use:
+
+opioid use 30 days after surgery AND
+
+opioid use 90 days after surgery
+
+```         
+```
+
+```{r}
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      
+      # edge definitions with the node IDs
+       tab1 -> tab2 -> tab3 -> tab4;tab3-> tab5;tab5-> tab6;
+      }
+
+      [1]: 'Gynecology oncology malignant patients undergoing surgery 2019-2020 (N=444)'
+      [2]: 'Exclude missing opioid use and other data n=13'
+      [3]: 'Study population N=431'
+      [4]: 'opioid use 30 days after surgery cohort n=12'
+      [5]: 'No opioid use 30 days after surgery cohort n=419'
+      [6]: 'No opioid use cohort n=36 (propensity score matched)'
+      ")
+
+
+```
+
+## Objective
+
+to investigate the incidence of persistent opioid use in gynecology oncology patients.
+
+## Primary outcome
+
+incidence of persistent opioid use
+
+## Secondary outcome
+
+NA
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, insurance, preoperative diagnosis, mode of surgery, pre-existing conditions such as depression, anxiety, substance use, and chronic pain.
+
+-Postoperative characteristics: postoperative opioid use, postoperative complications
+
+## Methods
+
+Continuous variables were presented in median(IQR) and categorical variables were presented in numbers and percentages. (Pearson's Chi-squared test, Fisher's exact, and Wilcoxon rank sum tests were performed. Two-sided p\<0.05 was defined as significant.) All data management and analyses were performed using R (version 4.3.0).
+
+## Propensity score match
+
+We used propensity score matching to balance two cohorts' demographic and clinical characteristics and ensure outcomes are comparable. The propensity scores were estimated using a generalized linear model and these covariates: age, race, BMI, Insurance, Cancer diagnosis, Cancer Stage, mode of surgery, and Charlson comorbidity score. The matching method was nearest neighbor matching. Patients in no opioid use group were matched to the nearest patients in opioid group at a 3:1 ratio.
+
+**Matching variables:** Age, Race, BMI, Insurance, Cancer diagnosis, Cancer Stage, mode of surgery, Charlson comorbidity score
+
+**Risk factors for opioid use to analyze**: Anxiety, depression, chronic pain, hx of substance use (alcohol, tobacco, other)
+
+```{r}
+#| output: false
+#| #before match  
+# Missing and non-finite values are not allowed in the covariates. 
+data1 <- data1 |>
+  drop_na(c("age", "bmi", "race_clean", "insurance", "cancer_type", "charlson_score", "surgery_mode1")) #885 obs
+#check balance
+m.check <- matchit(opioid30d ~ age + bmi + race_clean + insurance + cancer_type + surgery_mode1 + charlson_score, data=data1, method = NULL, distance= "glm")
+summary(m.check)
+#nearest neighbor matching
+m <- matchit(opioid30d ~ age + bmi + race_clean + insurance + cancer_type + surgery_mode1 + charlson_score,
+             data=data1, method = "nearest", ratio = 3, distance= "glm")
+summary(m)
+#visualize the distribution of propensity score
+plot(m, type = "jitter", interactive = FALSE)
+#extract matched dataset
+m.data1 <- match.data(m) 
+```
+
+## Demographic and clinical characteristics
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+library(rio)
+# read rds
+data1 <- readRDS("data1.rds")
+# descriptive summary
+data1|>
+  tbl_summary(
+    by=opioid30d,
+    #  missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_caption("**Table. Demographic and Clinical Characteristics**")
+```
+
+Other notes:
+
+We would also like to determine whether any of the following factors makes it more likely that patients will have persistent opioid use: age, race, insurance type, BMI, preoperative diagnosis, mode of surgery, postoperative complications, contraindications to NSAIDs, and pre-existing conditions such as depression, anxiety, substance use, and chronic pain.
+
+```{r}
+data1 <- data1 |>
+  mutate(surgery=case_when(surgery_mode %in% c("Open", "Laparoscopic converted to open", "Robotic converted to open") ~ "Open",
+                           surgery_mode %in% c("Laparoscopic", "Robotic", "Vulvar/Vaginal Surgery", "Hand Assisted Laparoscopic", "Vaginal Hysterectomy", "LAVH") ~ "MIS"))
+data1$patient_depression_hx <- relevel(data1$patient_depression_hx, ref="No") 
+data1$patient_alc_hx <- relevel(data1$patient_alc_hx, ref="No") 
+
+data1 |>
+  select(age, race_clean, bmi, bmigroup, insurance, frailty_score, pain_pill_refill, patient_depression_hx, patient_alc_hx, cancer_type, surgery, complication,scheduled_toradol,scheduled_tylenol,scheduled_motrin,opioid30d) |>
+  tbl_uvregression(method = glm, 
+                   y= opioid30d,
+                   method.args = list(family = binomial),
+                   exponentiate = TRUE) |>
+  #  add_global_p()|>
+  modify_caption("**Univariate logistic regression**")
+```
+
+-   univariate logistic regression: didn't see anything interesting
+
+-   compare 12 30d users with 4 90d users: 4 90d users all had open surgery, all had no history of depression, all had ovarian cancer, 2 had cancer-related pain
+
+    ```{r}
+    data1 |>
+      filter(opioid30d==1)|>
+      tbl_summary(by=opioid90d,
+                   #  missing = "no",
+                   digits = list(all_categorical() ~ c(0, 1)))
+      
+    ```
+
+matching results:
+
+```{r}
+m.data1 |>
+  select(opioid30d, patient_alc_hx, patient_depression_hx, patient_pain_hx)|>
+  tbl_summary(by=opioid30d,
+              digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+Patients in no opioid use cohort were matched to the nearest patients in opioid cohort at a 3:1 ratio based on their propensity scores of age, race, BMI, insurance, cancer diagnosis, mode of surgery, and Charlson comorbidity score.
+
+After propensity score matching, the opioid use and no opioid use cohorts had no difference in history of anxiety, depression, chronic pain, and substance use.
+
+## References
+
+1.  AlAshqar, A., Ishiwata, R., Moss, C., Andersen, K. M., Yanek, L., Bicket, M. C., Alexander, G. C., & Borahay, M. A. (2022). Predictors of New Persistent Opioid Use After Benign Hysterectomy in the United States. *American Journal of Obstetrics and Gynecology*, *227*(1), 68.e1. https://doi.org/10.1016/J.AJOG.2022.02.030
+
+2.  Kay, A. H., Othieno, A., Boscardin, J., Chen, L. lynn, Alvarez, E. A., Swanson, M., Ueda, S., Chen, L. may, & Chapman, J. S. (2023). The past, present, and future of opioid prescribing: Perioperative opioid use in gynecologic oncology patients after laparotomy at a single institution from 2012 to 2021. *Gynecologic Oncology Reports*, *46*, 2352--5789. https://doi.org/10.1016/J.GORE.2023.101172
+
+## Abstract
+
+**Persistent Opioid Use Among Gynecologic Oncology Patients After Surgery**
+
+**Author**s: Michaela Pesce [MD]{.underline}, Cynthia Stroup [PA-C]{.underline}, Alli Straubhar [MD]{.underline}, Yang Liu [\*\*\*]{.underline}, Shitanshu Uppal [MBBS MBA]{.underline}, Aimee Rolston [MD MS]{.underline}, Katelyn Tondo-Steele [DO]{.underline} 
+
+**Objective:** To analyze the prevalence of and risk factors for persistent opioid use among patients undergoing surgery for a gynecologic malignancy[\[US1\]](#_msocom_1) .
+
+**Methods:** A retrospective analysis ~~of a prospective~~[\[US2\]](#_msocom_2)  ~~database~~ was performed for patients undergoing surgery for a suspected or known gynecologic malignancy between 4/2019-11/2021. Data regarding postoperative opioid use was collected using a 30-day post-operative patient questionnaire as well as chart review. Patients with a history of preoperative opioid use were excluded. Propensity score matching was used to compare patients with and without opioid use at 30 days based on age, race, BMI, insurance, cancer type, mode of surgery, or Charlson Comorbidity Index. Matching was performed in a 3:1 ratio to identify whether a history of anxiety, depression, chronic pain, or substance use conferred a higher risk of prolonged opioid use. This study was [deemed]{.underline} exempt by the Institutional Review Board.
+
+**Results:** Eight hundred and ninety-seven opioid-naïve patients were included in the analysis[\[US3\]](#_msocom_3) . ~~There were no significant differences in age, race, BMI, insurance, cancer type, mode of surgery, or Charlson Comorbidity Index between patients with and without opioid use at 30 days[\[MP4\]](#_msocom_4)~~ [\[TSK5\]](#_msocom_5) ~~.~~ Ongoing opioid use at 30 days after surgery was identified in 15 (1.7%) of patients, and persistent opioid use at 90 days was identified in 4 (0.45%) ~~of~~ patients. Of those ~~patients~~ with persistent use at 30 days, 27% (n=4) ~~of patients~~ had ongoing use due to adjuvant treatment-related pain, 13% (n=2) due to wound complications, 6.7% (n=1) due to post-operative pain, 20% (n=3) due to unrelated medical conditions, and 33% (n=5) for unidentified reasons. [In the 30 day postoperative period, 131 (15%) of patients placed one or more calls to the office due to pain-related concerns, and 43 (4.8%) of patients required an opioid prescription refill.]{.underline} After propensity score matching, patients with persistent opioid use at 30 days had no difference in history of anxiety, depression, chronic pain, or substance use than patients without persistent opioid use~~. In the 30 day postoperative period, 131 (15%) of patients placed one or more calls to the office due to pain-related concerns, and 43 (4.8%) of patients required an opioid prescription refill.~~
+
+**Conclusion:** ~~This is the first study to our knowledge providing data for persistent opioid use in the gynecologic oncology population. [The rate of persistent postoperative opioid use in this population is low compared to previously identified rates amongst patients undergoing surgery for benign gynecologic indications.]{.underline}~~ While previous studies have demonstrated that anxiety, depression, chronic pain, and a history of substance use are associated with increased opioid requirements in the postoperative period, this study did not find an association with those factors and persistent postoperative opioid use [The rate of persistent postoperative opioid use in this population is low compared to previously identified rates amongst patients undergoing surgery for benign gynecologic indications. Statewide and national efforts to educate patients about the addictive potential of opioids may be a contributory factor to the low persistent use of opioids in this population.]{.underline}
+
+ [\[US1\]](#_msoanchor_1)In methods it says known or suspected. If they include both, I recommend changing it to "known or suspected"
+
+ [\[US2\]](#_msoanchor_2)Save characters. Include in full manuscript
+
+ [\[US3\]](#_msoanchor_3)How many patients responded to the survey? 100% ? Or less? If less, do we know?
+
+ [\[MP4\]](#_msoanchor_4)Moving this to the methods section to shorten the word count
+
+ [\[TSK5\]](#_msoanchor_5)Is it a count per section? This should really be in the results!
+
+## Updates 03/04/2024
+
+I will attach my previously written abstract for this same project for your review -- the data needs to be re-analyzed given that 1. We realized we had included an extra year's worth of data in the initial analysis that cannot be included given that our opioid-prescribing algorithm changed in the interim, and 2. We had to include only the patients who had FULLY completed their postoperative surveys this time.
+
+I would like to analyze two date sets: they are very similar, but one of them includes patients with malignancies only, and one of them includes patients with both benign and malignant diagnoses. The data set on is Enhanced Recovery -- ERAS V 3.0. The data subsets are: "***persistent opioid use premaignant and malignant***", and the" ***persistent opioid use benign + malignant***" set. The reason I would like to analyze both is because we have been debating whether to include patients with benign disease in the data, and I would like to have both options ready to discuss at our next Gyn Onc research meeting so that I can roll with whichever option the team thinks is apppropriate.
+
+There are 490 patients to analyze in the malignancy dataset, and 596 in the benign/malignant data set.
+
+The primary goal will be to determine: whether there are any risk factors for opioid use at 30 days and 90 days postop. This will be difficult to analyze (just like it was the first time around when we looked at the data) given that the rate is so low and there are only 13 people that used opioids at 30 days in the first data set and 16 in the second data set. I would like to analyze whether the following have an impact on postoperative opioid use at 30 days (given that I think it would be impossible analyze the data at 90 days with only 3 people still reporting opioid use): history of anxiety, depression, previous sustance use, patient age, mode of surgery, cancer type, insurance type, whether the patient had any complications within 30 days, and whether the patient received scheduled tylenol and toradol.  In the group with both benign and malignant conditions, I would like to analyze whether there is a signficant difference between the % of patients using opioids at 30 days postoperatively.
+
+## Update 03/19/2024
+
+propensity score matching and bivariate analysis using new datasets
+
+This analysis is similar to the one we did before. Suppose the risk factors of interest are history of depression, alcohol, and substance use, covariates for propensity score matching include age, race, bmi, insurance, cancer type, stage, surgery mode and charlson score, here are the results after matching:
+
+**Dataset benign+malignant:**
+
+|     |                                       |     |                        |     |                    |     |                  |     |
+|--------|------------|--------|--------|--------|--------|--------|--------|--------|
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | **Characteristic**                    |     | Non-opioid N = 48^*1*^ |     | Opioid N = 16^*1*^ |     | **p-value**^*2*^ |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | History of alcohol or substance abuse |     |                        |     |                    |     | 0.4              |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Yes                               |     | 3 (6.3%)               |     | 0 (0.0%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     No                                |     | 45 (93.8%)             |     | 15 (93.8%)         |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Unknown                           |     | 0 (0.0%)               |     | 1 (6.3%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | History of depression                 |     |                        |     |                    |     | \>0.9            |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Yes                               |     | 15 (31.3%)             |     | 5 (31.3%)          |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     No                                |     | 33 (68.8%)             |     | 11 (68.8%)         |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Unknown                           |     | 0 (0.0%)               |     | 0 (0.0%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | ^*1*^ n (%)                           |     |                        |     |                    |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | ^*2*^ Fisher's exact test             |     |                        |     |                    |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+
+**Dataset malignant:**
+
+|     |                                       |     |                        |     |                    |     |                  |     |
+|--------|------------|--------|--------|--------|--------|--------|--------|--------|
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | **Characteristic**                    |     | Non-opioid N = 39^*1*^ |     | Opioid N = 13^*1*^ |     | **p-value**^*2*^ |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | History of alcohol or substance abuse |     |                        |     |                    |     | 0.6              |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Yes                               |     | 3 (7.7%)               |     | 0 (0.0%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     No                                |     | 36 (92.3%)             |     | 13 (100.0%)        |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Unknown                           |     | 0 (0.0%)               |     | 0 (0.0%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | History of depression                 |     |                        |     |                    |     | \>0.9            |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Yes                               |     | 13 (33.3%)             |     | 4 (30.8%)          |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     No                                |     | 26 (66.7%)             |     | 9 (69.2%)          |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     |     Unknown                           |     | 0 (0.0%)               |     | 0 (0.0%)           |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | ^*1*^ n (%)                           |     |                        |     |                    |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+|     | ^*2*^ Fisher's exact test             |     |                        |     |                    |     |                  |     |
+|     |                                       |     |                        |     |                    |     |                  |     |
+
+### Update 04/08/2024
+
+Redcap dataset has been updated, n=444
+
+[Persistent opioid use - premalignant /malignant](https://redcapproduction.umms.med.umich.edu/redcap_v14.0.15/DataExport/index.php?pid=3613&report_id=55274) (ERAS#77)
+
+PSM: covariate: age, race, bmi, insurance, cancer type, surgery mode, charlson score
+
+variables of interest to compare: 30d complications (any_complication), final diagnosis (malignant)
+
+```{r}
+m_0424 |>
+  select(opioid30d, any_complication, malignant)|>
+  tbl_summary(by=opioid30d,
+              digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_header(
+    stat_1 ~ "**No n = 36**",
+    stat_2 ~ "**Yes n = 12**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Opioid use 30 days postop**")
+```
+
+### Update 04/25/24
+
+```{r}
+
+data1 <- maligant_0424 |>
+  drop_na(c("age", "bmi", "race_clean", "insurance", "cancer_type", "charlson_score", "surgery_mode1", "opioid30d")) #431 obs
+data1 |>
+  select(opioid30d, age, race_clean, bmi, insurance, cancer_type, surgery_mode1,
+         charlson_score) |>
+  tbl_summary(by=opioid30d,
+              #  missing = "no",
+              digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall() |>
+  modify_header(
+    stat_1 ~ "**No n = 419**",
+    stat_2 ~ "**Yes n = 12**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Opioid use 30 days postop**")
+  modify_caption("**Table. Demographic and Clinical Characteristics**")
+```
+
+```{r}
+m_0424 |>
+  select(opioid30d, patient_depression_hx, patient_alc_hx, any_complication, malignant)|>
+  tbl_summary(by=opioid30d,
+              digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_header(
+    stat_1 ~ "**No n = 36**",
+    stat_2 ~ "**Yes n = 12**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**Opioid use 30 days postop**")
+
+```
+
+### Update 4/26/24 missing data
+
+```{r}
+#missing data
+maligant_0424$opioid30d |> is.na() |>which()
+
+maligant_0424$charlson_score |> is.na() |>which()
+```
+
+13 patients were excluded:
+
+-8 opioid use data missing: 34990335, 18777034, 101183121, 101172314, 101265181, 20435872, 29765467, 100715058
+
+-5 covariates data for propensity score matching missing: 101293542 (age), 101080483 (bmi), 101124411, 36977498 (insurance), 16206593 (surgery mode)
+
+## 06/18/25
