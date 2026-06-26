@@ -7,9 +7,8 @@ This project analyzes patient perspective on virtual care
 - Descriptive statistics
   
 ## Files
-- 04-clean.R: clean
-- 04-analysis.R: analysis
-- 04-report.qmd: report
+- 05-analysis.r: clean and analysis
+
 ## Notes
 Original data are not included due to privacy/research restrictions.
 
