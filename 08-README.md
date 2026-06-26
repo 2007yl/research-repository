@@ -15,5 +15,5 @@ This project analyzes midwifery students education for difficult conversations
 ## Notes
 Original data are not included due to privacy/research restrictions.
 
-## Publication
+## Manuscript
 Sarosi, E., Taylor, L., Mason, H., Zielinski, R., Liu, Y., Brackmann, M., Low, L. K., & Janke, M. J. (2026). Beyond the birth plan: Preparing midwifery students for difficult conversations. Journal of Midwifery & Women’s Health. In revision.
