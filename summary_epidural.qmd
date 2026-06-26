@@ -1,0 +1,315 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 01-04-2024
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Background
+
+Recent publications claimed perioperative epidural use would reduce postoperative pain, opioid use and complications.
+
+## Hypothesis
+
+No difference in pain scores and postop outcomes between perioperative epidural use group and no-epidural use group
+
+## Study design
+
+Retrospective cohort study
+
+## Study population
+
+```{r}
+library(tidyverse)
+library(labelled)
+library(lubridate)
+library(rio)
+# read rds
+data <- readRDS("data.rds") # 647 obs from Redcap 07-20_0957.csv
+data1<- data |>
+  filter(eras_identifier <=1878) #626 obs
+data1 <- data |>
+  mutate(regional_anes_type = as.numeric(regional_anes_type)) |>
+  mutate(anes_type=case_when(is.na(regional_anes_type) ~ 0,
+                             TRUE ~ regional_anes_type))|>
+  filter(anes_type <=1)|>
+  mutate(anes_type =factor(anes_type,
+                           levels = 0:1,
+                           labels = c("No Epidural", "Epidural"))) #608 obs coding 1 and 0 in propensity score matching "treated" and "control" respectively.
+data1 <- data |>
+  drop_na(pain_score_pod_1) #545 obs 
+data1 <- data1 |>
+  select(-redcap_repeat_instance, -redcap_repeat_instance, -redcap_repeat_instrument.factor,
+         -name_last, -name_first, -mrn) |>
+  mutate( dob1 = lubridate::ymd(dob),
+            date_sur = lubridate::ymd(date_surgery),
+                 age = as.duration(dob1 %--% date_sur) / dyears(1))|>
+  labelled::set_variable_labels(
+    race_clean ="Race",
+    age="Age")
+data1 <- data1 |>
+  mutate(toradol=case_when(scheduled_toradol.factor=="Contraindicated" ~ 1,
+                           TRUE ~ 0))|>
+  mutate(motrin=case_when(scheduled_motrin.factor=="Contraindicated" ~ 1,
+                          TRUE ~ 0))
+data1 <- data1 |>
+  drop_na(c("age", "hyst.factor", "other_sx_procedure")) # 530 obs 
+```
+
+```{r}
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      tab7 [label = '@@7']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;tab4-> tab6;tab6-> tab7;
+      }
+
+      [1]: 'Gynecology oncology patients undergoing laparotomy 2019-2023 (N=626)'
+      [2]: 'Exclude regional analgesia  n=19'
+      [3]: 'Exclude missing POD-1 score and other data  n=78'
+      [4]: 'Study population N=530'
+      [5]: 'Epidural cohort n=20'
+      [6]: 'No Epidural cohort n=510'
+      [5]: 'No Epidural cohort n=60 (propensity score matched)'
+      ")
+```
+
+## Objective
+
+to evaluate whether perioperative epidural use helps postoperative pain control and reduces postoperative opioid use and complications.
+
+## Primary outcome
+
+postoperative pain scores
+
+## Secondary outcome
+
+length of hospital stay, postoperative opioid use, complications
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, insurance, hospital teaching status, hospital size, ASA class, comorbidities.  
+
+-Postoperative characteristics: length of hospital stay, postoperative opioid use, complications
+
+## Methods
+
+Continuous variables were presented in median(IQR) and categorical variables were presented in numbers and percentages. Pearson's Chi-squared test, Fisher's exact, and Wilcoxon rank sum tests were performed. Two-sided p\<0.05 was defined as significant. All data management and analyses were performed using R (version 4.3.0).
+
+## Demographic and clinical characteristics
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+library(labelled)
+library(lubridate)
+library(rio)
+library(MatchIt)
+# read rds
+data1 <- readRDS("data1.rds")
+# descriptive summary
+data1|>
+  select(race_clean, ethnicity.factor,	bmi,	insurance, anes_type, comorbidities___1,	comorbidities___2,	comorbidities___3,	comorbidities___4,	
+         comorbidities___5,	comorbidities___6,	comorbidities___7,	comorbidities___8,	comorbidities___9,	comorbidities___10,	comorbidities___11,	comorbidities___12,	comorbidities___13,	comorbidities___14,	comorbidities___15, asa_cat, cancer_type.factor, debulking_type.factor, hyst.factor,	oophorectomy.factor,	salpingectomy.factor,ureterolysis.factor,	plnd.factor,	palnd.factor	,
+         splenectomy,	liver_resection,	diaphragm_strip,	diaphragm_argon,	sb_resection,	lb_resection,	peritoneum_pelvic,	peritoneum_abd,	recto_sig,	ileostomy,	colostomy,	omentectomy.factor, history, patient_pain_hx.factor,	patient_preop_opioid.factor,	patient_depression_hx.factor,	patient_anxiety_hx.factor,	patient_alc_hx.factor)|>
+  tbl_summary(
+    by=anes_type,
+    #  missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_caption("**Table. Demographic and Clinical Characteristics Before Matching**")
+```
+
+## Propensity score matching
+
+To balance two cohorts' demographic and clinical characteristics and to ensure outcomes are comparable, we used propensity score matching. The propensity scores were estimated using a generalized linear model. This model included age, race, BMI, other surgical procedures, comorbidities such as diabetes with end organ damage, moderate or severe liver or renal disease, and history of chronic pain, pre-op opioid intake, depression, anxiety, alcohol or substance abuse. Patients in no epidural cohort were matched to the nearest patients in epidural cohort at a 3:1 ratio.
+
+```{r}
+#| output: false
+#check balance
+m.check <- matchit(anes_type ~ age + bmi + race_clean + history ++ comorbidities___6 + comorbidities___13 + toradol + motrin + hyst.factor + other_sx_procedure, data=data1, method = NULL, distance= "glm")
+summary(m.check)
+#nearest neighbor matching
+m <- matchit(anes_type ~ age + bmi + race_clean + history + comorbidities___6 + comorbidities___13 + toradol + motrin + hyst.factor + other_sx_procedure,
+             data=data1, method = "nearest", ratio = 3, distance= "glm")
+summary(m)
+#visualize the distribution of propensity score
+plot(m, type = "jitter", interactive = FALSE)
+#extract matched dataset
+m.data1 <- match.data(m) 
+```
+
+## Bivariate analysis
+
+Demographic and clinical characteristics (after matching)
+
+```{r}
+m.data1<- m.data1 |>
+  mutate(length_of_stay=factor(length_of_stay,
+                               levels=c(1:6),
+                               labels =c("1 day","2 days","3 days","4-6 days","7-13 days","14 or more days")))|>
+  mutate(anycmp = case_when(urinary_ti==1 |	urinary_arf==1|	
+         urinary_retention2==1|	urinary_ureter_injury==1|	neuro_perip_nerve==1|
+         card_arrhythmia==1|card_chf==1|gi_bowel_obstn==1|	
+         gi_anastomotic_leak==1|vasc_dvt==1|vasc_other==1|id_sepsis==1|	
+         id_port_line_infxn==1|	id_abscess==1|id_ssi_cellulitis==1|	
+           id_ssi_abscess==1|id_ssi_dehiscence==1|resp_pna==1 ~ 1,
+         is.na(any_complication) & is.na(urinary_ti) ~ NA,
+         TRUE ~ 0))|>
+  mutate(stay=case_when(length_of_stay %in% c("1 day","2 days","3 days") ~ "<=3 days",
+                        length_of_stay %in% c("4-6 days","7-13 days","14 or more days") ~ ">3 days"))|>
+      labelled::set_variable_labels(
+  pain_score_pod_1="Pain score POD 1",
+  pain_score_pod_2="Pain score POD 2",
+  pain_score_pod_3="Pain score POD 3",
+  opioid_use_within_30_days="Opioid use within 30 days of surgery",
+  unplanned_readmission="Any unplanned readmission within 30 days",
+  opioid_use_within_30_days="Opioid use within 30 days of surgery",
+  any_complication="ANY complications in 30-days",
+  length_of_stay="Length of stay",
+  anycmp="Any complications in 30-days",
+  stay="Length of stay",
+  age="Age",
+  bmi="BMI",
+  race_clean="Race",
+  history= "Any history",
+  comorbidities___6="Diabetes with end organ damage",
+  comorbidities___13="moderate or severe liver or renal disease",
+  hyst.factor="Hysterectomy",
+  other_sx_procedure="Other surgical procedure")|>
+  mutate(foley_removal_time = as.numeric(foley_removal_time))|>
+  mutate(iv_bolus_floor_volume = as.numeric(iv_bolus_floor_volume))|>
+  labelled::set_variable_labels(
+    urinary_retention.factor="Postoperative urinary retention",
+    foley_removal_time="Duration foley remained in the bladder (min)",
+    iv_fluid_volume="IV fluid volume (ml)",
+    iv_bolus_floor_volume="Floor IV bolus total volume (ml)",
+    total_fluid="Total amount of IV fluids (ml)")
+m.data1 |>
+  select(age, bmi, race_clean, history, comorbidities___6, 
+           comorbidities___13, toradol, motrin, hyst.factor, other_sx_procedure, anes_type)|>
+  tbl_summary(
+    by=anes_type
+  )|>
+  add_p()
+```
+
+## Bivariate analysis: Primary outcome
+
+```{r}
+m.data1 |>
+  select(anes_type, pain_score_pod_1,	pain_score_pod_2,	pain_score_pod_3
+  )|>
+  tbl_summary(by=anes_type)|>
+  add_p()|>
+  modify_caption("**Table. Patients' pain scores on post-operative day 1-3**")
+```
+
+This figure included all patients in two cohorts with some missing pain score data (early discharge?):
+
+![](pain%20score.png){width="601"}
+
+This figure included patients in two cohorts with complete pain score data:
+
+![](pain%20score%20(complete%20data).png)
+
+box-plot:
+
+```{r}
+m.data1 |>
+  ggplot(aes(x = anes_type, y = pain_score_pod_1)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2)
+```
+
+## Bivariate analysis: Secondary outcome
+
+```{r}
+m.data1 <- m.data1 |>
+  mutate(postop_cmp=case_when(post_op_complications___20==1 ~ 0,
+                              post_op_complications___20==0 ~ 1))
+m.data1 |>
+  select(anes_type, stay, opioid_use_within_30_days, postop_cmp, unplanned_readmission, anycmp, morphine_eqs, urinary_retention.factor, foley_removal_time, iv_fluid_volume, total_fluid)|>
+  tbl_summary(
+    by=anes_type,
+    label= c(postop_cmp ~ "Immediate complications"))|>
+  add_p() |>
+  modify_caption("**Table. Post-operative Characteristics**")
+```
+
+## Abstract
+
+https://docs.google.com/document/d/15cyLrdZOzXhEULCzjys2p--3cv2IU6fAJaZ6KVj3xoc/edit
+
+**Title:** Epidural analgesia for gynecology oncology patients undergoing laparotomy: A retrospective analysis and systematic review of perioperative outcomes. 
+
+**Authors:** Annie Minns, Alli Straubhar, Cindy Stroup, LaTeesa James, Yang Liu, Shitanshu Uppal, Zhen Ni Zhou
+
+**Background**: Enhanced recovery after surgery (ERAS) has become the standard of perioperative care in gynecologic oncology. Epidural analgesia has become an important facet of ERAS as some studies have shown that its use is associated with decreased postoperative opioid use. However, the side effects of epidural analgesia are not inconsequential. Given the conflicting data on perioperative epidural use and postoperative pain control in the gynecologic oncology population as well as the risk of side effects associated with perioperative epidurals, there is currently no formal recommendation for its use and lacks consensus regarding the benefits of epidural analgesia on perioperative outcomes in gynecologic oncology.
+
+**Objective**: To compare perioperative outcomes in gynecologic oncology patients who did not receive an epidural prior to undergoing laparotomy to patients who received epidurals at our institution and to those previously described in the literature. 
+
+**Methods:** A retrospective analysis of patients who underwent a laparotomy procedure for a suspected or known gynecologic malignancy between April 2019 and February 2023 at a single tertiary cancer center was performed. Patients were identified as having received no regional analgesia or epidural analgesia. Patients receiving other types of regional analgesia (e.g., regional and spinal blocks) were excluded. The primary outcome was postoperative pain. Secondary outcomes included length of hospital stay, opioid use, and postoperative complications. To adjust for confounding factors, propensity score matching 1:3 (epidural: no epidural) was performed. A systematic review was performed by an electronic search of PubMed, Medline, EMBASE, and CINAHL databases, which identified studies assessing epidural use in our population of interest. A narrative analysis of the data was performed. 
+
+**Results:** Five hundred and thirty patients who underwent laparotomy at our institution were included; 20 (3.7%) received epidurals and 510 (96.2%) did not. After propensity score matching, the epidural and non-epidural groups had no difference in pain scores on postoperative days 1, 2, or 3. Length of hospital stay was similar between the two groups (p=0.10); however, the epidural cohort trended towards longer length of stay with 50% of patients staying \>3 days vs 30% in the non-epidural cohort. There was no significant difference in total opioid use during admission (p=0.6) or any complications within 30 days (p=0.7). Nine studies (3,737 patients) were included in the systematic review. Post-operative pain scores varied widely between studies. Several studies noted an association between their epidural cohorts and greater length of stay.
+
+**Conclusions:** Epidural analgesia may not change perioperative outcomes for patients undergoing laparotomy for known or suspected gynecologic malignancy. Furthermore, some studies, including data from our own institution, suggest that perioperative epidurals are associated with an increased length of hospital stay. Therefore, additional studies assessing the use of epidurals in conjunction with ERAS standard of care in gynecologic oncology are warranted given the potential risks associated with epidural placement. 
+
+## Conference
+
+HAGO
+
+## Updates
+
+meeting 1-3-2024: post-operative any complications: list individual complication
+
+```{r}
+m.data1 |>
+  select(anes_type,urinary_ti, urinary_arf,gi_bowel_obstn, id_sepsis,                       id_port_line_infxn,id_abscess,id_ssi_cellulitis, 
+id_ssi_abscess, id_ssi_dehiscence, resp_pna)|>
+  tbl_summary(
+    by=anes_type)|>
+  add_p() |>
+  modify_caption("**Table. Post-operative Complications**")
+```
+
+2-7-2024 change "Length of Stay" to continuous
+
+date of discharge-date of surgery
+
+2-15-2024
+
+explain nearest neighbor matching:
+
+-   Nearest neighbor matching is when we match each treated individual with a control individual who has the most similar characteristics.
+
+-   We typically use a distance metric (like propensity scores) to quantify how similar individuals are. Propensity scores estimate the probability of receiving the treatment based on observed characteristics.
+
+-   Each treated patient is then matched with the closest (i.e., the most similar) control patient who has the smallest distance in terms of this metric.
+
+````         
+PCA
+
+```{r}
+  data1 |>
+  select(anes_type,pca_used, time_pca_discontinued)|>
+  tbl_summary(
+    by=anes_type)|>
+  add_p() 
+```
+````
+
+18 patients in non-epidural cohort (n=510) and 5 patients in epidural cohort (n=20) used PCA. After matching, 3 patients in non-epidural cohort (n=60) used PCA.
