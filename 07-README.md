@@ -15,5 +15,5 @@ This project analyzes perioperative epidural use and postoperative outcomes
 ## Notes
 Original data are not included due to privacy/research restrictions.
 
-## Publication
-Epidural analgesia for gynecologic oncology patients undergoing laparotomy: A retrospective analysis and review of perioperative outcomes
+## Manuscript
+Minns, A., Straubhar, A. M., Janke, M. J., Liu, Y., James, L., Stroup, C., Uppal, S., & Zhou, Z. N. (2026). Epidural analgesia for gynecologic oncology patients undergoing laparotomy: A retrospective analysis and review of perioperative outcomes. Gynecologic Oncology Reports. Accepted.
