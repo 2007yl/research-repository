@@ -1,0 +1,255 @@
+---
+title: "Educational Intervention to Improve Resident Serious Illness Communication Skills"
+author: "Yang Liu"
+date: May 29, 2024
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Background
+
+Vital talk
+
+educational workshop to improve serious illness communication skills
+
+## Study population
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+     
+      # edge definitions with the node IDs
+      tab1 -> tab4; tab2 -> tab4;tab3 -> tab4;
+      }
+
+      [1]: 'Residents Workshop #1 (N=11)'
+      [2]: 'Residents Workshop #2 (N=8)'
+      [3]: 'Residents Workshop #3 (N=6)'
+      [4]: 'Study participants N=25'
+      ")
+```
+
+## Methods
+
+pre-survey, educational intervention (halfday workshop of 1 hour lecture & 2 hour simulation), immediate post-survey, 30-day post-survey. Participants rate their self-preparedness on a 5-point Likert scale. Everything collected in Qualtrics.
+
+## Primary outcome
+
+preparedness to deliver serious news to patients
+
+## Variables of interest
+
+-Demographic characteristics: age, gender, pgy level.  
+
+## Data management
+
+```{r}
+#see script "clean.R"
+```
+
+## Descriptive summary
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(gtsummary)
+library(rio)
+# read rds
+complete_data <- readRDS("cleandata/complete_data.rds")
+# descriptive summary
+complete_data |>  
+  select('What is your age?_post', 'Gender: how do you identify? - Selected Choice_post', 'What is your PGY level?_post') |>
+  tbl_summary(
+    #by=var,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  #modify_spanning_header(all_stat_cols() ~ "**whatever**")|>
+  modify_caption("**Table 1. Demographic Characteristics**")
+```
+
+## Statistical analysis
+
+### paired test- before and after workshop
+
+```{r}
+#| echo: false
+# McNemar test or Wilcoxon Signed rank test
+#see script analysis_0701.R
+```
+
+### by pgy level
+
+```{r}
+complete_data1 |>  
+  tbl_summary(
+    by='What is your PGY level?_post',
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_spanning_header(all_stat_cols() ~ "**PGY level**")|>
+  modify_caption("**Table 1. Demographic Characteristics**")
+```
+
+```{r}
+complete_data1 <- complete_data1 |>
+  mutate(pgylevel=case_when('What is your PGY level?_post' %in% 0:2 ~ "Junior",
+                            'What is your PGY level?_post' %in% 3:4 ~ "Senior",
+                            TRUE ~ as.character(NA)))
+export(complete_data1, "cleandata/complete_data1.csv")
+complete_data1 |>
+  select(pgylevel, 'AFTER this training, how comfortable are you delivering serious news to a patient?')|>
+  tbl_summary(
+    by=pgylevel,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p( )|>
+  modify_spanning_header(all_stat_cols() ~ "**PGY level**")
+```
+
+## Abstract (APGO 2024)
+
+**Title**
+
+Educational Intervention to Improve Resident Serious Illness Communication Skills
+
+**Category**
+
+Self-Care, Compassion, and Connection: Well-being and professional growth
+
+**Authors**
+
+Monica J. Janke, Laura Taylor, Michael P. Mendez, Anita M. Malone, Yang Liu, Melissa W. Brackmann
+
+**Introduction**
+
+Obstetrician gynecologists often need to deliver serious news to patients, but effective communication practices are rarely taught in residency. We aimed to implement a serious illness communication curriculum and assess residents' self-perceived preparedness in key skills before and after the course.
+
+**Methods**
+
+We created an OBGYN-specific serious illness communication course based on the nationally recognized VitalTalk framework. The course included a 1-hour didactic and a 2-hour small group role-playing session with actors as simulated patients. Participants were surveyed before and after the course to assess their comfort with delivering serious news and their preparedness in seven key communication skills, using a 5-point Likert scale. Pre- and post-course responses were analyzed using the Wilcoxon signed-rank test.
+
+**Results**
+
+Twenty five residents completed the course and pre- and post-course surveys. After course completion, residents felt significantly more comfortable with delivering serious news, with median ratings increasing from 4.0 (IQR 2.0-4.0) to 5.0 (IQR 4.0-5.0, P=0.001). Residents' median rating of how prepared they feel to perform key communication skills significantly improved in all domains, including: conveying serious news and prognosis, recognizing emotion and responding with empathy, leading a family meeting, managing conflict, and responding to patients who deny the seriousness of their illness or who want treatments that are not indicated (P \<0.01 for all domains).
+
+**Conclusion**
+
+Implementing an OBGYN-focused course that improves resident comfort and preparedness for delivering serious news is achievable. Equipping residents with compassionate and effective communication skills should be integral to residency training.
+
+## Notes
+
+### 6/3/2024
+
+1.  combination of age, gender, pgy level created 7 unique id. pre and post survey data could be matched. N=7
+
+2.  post survey data in Excel, first observation age and gender missing, manually added to Excel sheet: age=28, gender=2
+
+3.  30 d post: 1 obs missing age, gender, pgy level, total matched obs n=4
+
+4.  McNemar's test Error in mcnemar.test(contingency_table) : 'x' must be square with at least two rows and columns
+
+    Explanation:
+
+    There are a couple of potential issues that could cause this:
+
+    1.  All responses are the same before and after training, leading to a contingency table without the necessary dimensions.
+
+    2.  There are no instances of one of the four possible combinations (e.g., no instances where the answer went from 0 before training to 1 after training).
+
+    | Before | After |     |
+    |--------|-------|-----|
+    |        | 0     | 1   |
+    | 0      | 0     | 4   |
+    | 1      | 0     | 7   |
+    | Total  | 0     | 11  |
+
+    In this contingency table, two of the four possible combinations are empty, so this table is not suitable for McNemar's test.
+
+    Other considerations:
+
+    1.  There may not be any change between the before and after responses (or changes only in one direction), which would render McNemar's test inapplicable.
+    2.  The sample size might be too small to observe enough variation in the responses.
+
+    Options:
+
+    1.  **Descriptive Statistics**: If participants overwhelmingly rated themselves higher after the training, simply summarizing the proportion of individuals in each category might provide valuable information.
+
+    2.  **Wilcoxon Signed-Rank Test**: For paired ordinal data that is not binary or dichotomous, you can use the non-parametric Wilcoxon Signed-Rank Test. Unlike McNemar's test, it doesn't rely on a contingency table format but instead looks at differences between pairs.
+
+        solution: keep likert scale 1-5, use wilcoxon signed-rank test.
+
+        ### 6/4/2024
+
+        Wilcoxon Signed-Rank test parameters:
+
+        paired = TRUE,
+
+        exact = TRUE, \# Use for small sample sizes
+
+        correct = TRUE \# Apply continuity correction for discrete data like Likert scales, can adjust p value calculation Question: exact = TRUE or FALSE? trade-off between small sample size and data structure (ties or zero differences)
+
+        Answer (UMGPT): The `exact` parameter in the `wilcox.test` function in R specifies whether to calculate the exact p-value for the Wilcoxon Signed-Rank Test. When dealing with small sample sizes (typically n \< 20 or so), it is generally recommended to calculate exact p-values because the normal approximation (which is used when `exact = FALSE`) may not be accurate enough.
+
+        However, as I mentioned previously, the exact calculation may not work well when there are ties or zero differences in the data, which is often the case with Likert scale data. With ties, the ranking process required by the Wilcoxon test is complicated, and with zero differences, the test doesn't include those pairs in the ranking, potentially leading to inaccuracies in the exact p-value calculation.
+
+        Given that your sample size is quite small (n=11), here are the considerations:
+
+        -   If you use `exact = TRUE`, R will attempt to calculate the exact p-value, which is generally more appropriate for small samples. However, if you have ties or zero differences in your data, R will issue warnings, and the exact p-value will not be calculated correctly.
+
+        -   If you use `exact = FALSE`, R will use the normal approximation to estimate the p-value. This method is less precise with small sample sizes, but it's not affected by ties or zero differences in the same way that the exact method is.
+
+        For very small samples with Likert scale data that include many ties and zero differences, there's a trade-off between the theoretical appeal of the exact p-value and the practical issues associated with calculating it.
+
+        Given your situation, with a small sample size and data that includes ties and zeroes, it may be reasonable to proceed with `exact = FALSE` to avoid the calculation issues. However, it is essential to acknowledge this limitation when reporting your results. It would help if you also considered complementing your statistical test results with descriptive statistics and visualizations to provide a more comprehensive view of your data.
+
+### 10/21/2024 Questions
+
+Q1: Is there anyway to run the two comparisons with the 7 skills: pre-course and 30 days post, immediate post-course and 30 days post? Only 10 people completed the 30-day post survey, and it didn't have our identifier on it. So I think its probably not possible to compare the medians? but I'm curious as this may be helpful to report if so (please see attached excel sheets for 30-day post survey results, and the table this would fill in is in the abstract paired data sheet 2)
+
+-   Answer: you can report the median of 30 days post, but can't run tests
+
+    ```{r}
+    library(readxl)
+    library(gtsummary)
+    post30day_data <- read_excel("rawdata/GYN - DSN 30-day post survey_October 10, 2024_17.31.xlsx", sheet="Sheet1")
+    median(post30day_data$Q7, na.rm = TRUE)
+    quantile(post30day_data$Q7, probs = c(0.25, 0.75), na.rm = TRUE)
+    ```
+
+-   Q2: Is there anyway you can help me fill in the area re: comfortability in the abstract paired data sheet attached? I have everyone's raw data for the 7 skills, but am unable to identify those participants who you were able to link together who did not provide the last 4 digits of their phone number. Would appreciate if you could help with this!
+
+-   Answer:
+
+    ```{r}
+    comfort_data <- complete_data |>
+      filter(id %in% 1:9)|>
+      select(id, `How comfortable are you delivering serious news to a patient?`, `AFTER this training, how comfortable are you delivering serious news to a patient?`, `What is your PGY level?_post`)
+    export(comfort_data, "cleandata/comfort_data.csv")
+    ```
+
+-   
+
+-   Q3: Could we compare the comfortability/skills of PGY levels? Are senior residents more comfortable or are junior residents? etc. Can we look at this pre vs. post or who has the most significant changes? It would be helpful to identify which level of residents find the most benefit from the course
+
+-   Answer: excel file "by pgylevel_071224"
+
+April 2025
+
+Reviewer: **Why did you choose to report median scores rather than mean scores?  It would be helpful to include this rationale in the methods section. I found myself wondering whether you results would have been statistically significant if you had reported a change in mean scores.**
+
+```{r}
+shapiro.test(complete_data$'Lead a family meeting')
+```
+
+Response:
+
+Thank you very much for your insightful question. We reported median scores because our data did not follow a normal distribution. In response to your suggestion, we have updated the methods section to include the following explanation: "We analyzed survey responses using mean or median scores, depending on the normality of the data distribution."
