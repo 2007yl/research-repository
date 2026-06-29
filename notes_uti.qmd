@@ -1,0 +1,1104 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 1-17-2024
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Background
+
+**Urinary tract infections (UTIs) are most often caused by bacteria (germs) that get into the bladder, which is part of the urinary tract.** UTIs are also called bladder infections. UTIs are common, especially in women. More than half of women will have at least one UTI at some point in life. UTIs are serious and often painful. But most UTIs are easy to treat with antibiotics. **Risk factors:**
+
+-   **Are sexually active.** Sexual activity can move germs that cause UTIs from other areas, such as the vagina, to the urethra.
+
+-   **Use a [diaphragm](https://www.womenshealth.gov/a-z-topics/urinary-tract-infections# "DEYE-uh-fram") for [birth control](https://www.womenshealth.gov/a-z-topics/birth-control-methods) or use spermicides** (creams that kill sperm) with a diaphragm or with condoms. Spermicides can kill good bacteria that protect you from UTIs.
+
+-   **Are pregnant.** Pregnancy hormones can change the bacteria in the urinary tract, making UTIs more likely. Also, many pregnant women have trouble completely emptying the bladder, because the uterus (womb) with the developing baby sits on top of the bladder during pregnancy. Leftover urine with bacteria in it can cause a UTI.
+
+-   **Have gone through [menopause](https://www.womenshealth.gov/menopause).** After menopause, loss of the hormone [estrogen](https://www.womenshealth.gov/a-z-topics/urinary-tract-infections# "ESS-truh-juhn") causes vaginal tissue to become thin and dry. This can make it easier for harmful bacteria to grow and cause a UTI.
+
+-   **Have diabetes,** which can lower your immune (defense) system and cause nerve damage that makes it hard to completely empty your bladder
+
+-   **Have any condition, like a kidney stone,** that may block the flow of urine between your kidneys and bladder
+
+-   **Have or recently had a [catheter](https://www.womenshealth.gov/a-z-topics/urinary-tract-infections# "KATH-uh-tur") in place.** A catheter is a thin tube put through the urethra into the bladder. Catheters drain urine when you cannot pass urine on your own, such as during surgery.
+
+Other Risk factors:
+
+-   A previous UTI.
+
+-   Poor hygiene, for example, in children who are potty-training.
+
+Risk factors for women: urinary incontinence, vaginal infection, diabetes, health conditions, prior UTI, anal-urethral distance, pregnancy coitus, antimicrobials, menopause, short urethral length, contraception, personal hygiene
+
+Risk factors for recurrent UTI in postmenopausal women: lack of estrogen, urogenital surgery, incontinence, cystocele, postvoid residual urine, prior UTI, and nonsecretor status
+
+Estrogen stimulates the proliferation of lactobacillus in the vaginal epithelium, reduces pH, and avoids vaginal colonization of Enterobacteriaceae, which are the main pathogens of the urinary tract. Can cranberry juice help prevent UTIs?
+
+Maybe. Studies on whether cranberry juice or products prevent or treat UTIs show mixed results.
+
+Cranberries may help prevent bacteria from attaching to cells in the wall of the urinary tract and causing infection. If you get recurrent UTIs, talk to your doctor or nurse about taking cranberry products to prevent UTIs.
+
+Recurrent UTI:
+
+two UTIs in six months or three in a year
+
+Sources:
+
+https://www.womenshealth.gov/a-z-topics/urinary-tract-infections
+
+## Data source
+
+Foresight 50+ October 2023
+
+The Foresight 50+ Consumer Omnibus survey is conducted monthly among a nationally representative sample of 1000 adults aged 50 or older.
+
+Data are weighted to the latest Current Population Survey (CPS) benchmarks developed by the U.S. Census Bureau and are balanced by gender, age, education, race/ethnicity, and region.
+
+Funded and operated by NORC at the University of Chicago, Foresight 50+is a probability-based panel designed to be representative of the US household population age 50 or older. During the initial recruitment phase of the panel, randomly selected U.S. households were sampled with a known, non-zero probability of selection from the NORC National Sample Frame or a secondary national address frame, both with over 97% coverage of all U.S. addresses, and then contacted by U.S. mail, email, telephone, or field interviewers (face to face). Households were screened for having at least one adult age 50 and older. The panel provides sample coverage of approximately 97% of the U.S. household population. Those excluded from the sample include people with P.O. Box only addresses, some addresses not listed in the USPS Delivery Sequence File, and some newly constructed dwellings population. The panel also excludes people who live in some institutional types of settings, such as nursing facilities or nursing homes, depending on how addresses are listed for the facility.
+
+Field Dates: 10/12-10/16
+
+Total Sample size: 1,038
+
+Design Effect: 1.92
+
+Margin of Error: 4.23%
+
+## Survey
+
+## **Research Questions**
+
+1.  What interventions are 50+ women using to promote urogenital health?
+
+2\. What factors are associated with the use of these interventions to prevent UTI?
+
+## **Hypothesis**
+
+Women with a history of a UTI are using more of these interventions than women who have not had a UTI
+
+Why does this matter: UTI is expensive and common. Understanding usage patterns can help us identify opportunities to increase use of preventative measures and hopefully decrease the incidence of UTI
+
+## Study population
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'Foresight 50+ Panel (N=1034)'
+      [2]: 'Intervention n=292'
+      [3]: 'No intervention n=742'
+      [4]: 'Excluded n=1'
+      [5]: 'Intervention n=189'
+      ")
+```
+
+## Objective
+
+## Exposure
+
+prior UTI
+
+## Primary outcome
+
+use of interventions to promote urogenital health
+
+## Variables of interest
+
+-Demographic and clinical characteristics:  age, race, BMI, insurance, income, education,  
+
+sociodemographics characteristics, history UTI, sexual behavior, urinary behaviors
+
+## Data management
+
+### Clean up
+
+```{r}
+#load packages
+library(haven)
+library(tidyverse)
+library(janitor)
+library(gtsummary)
+library(labelled)
+library(Hmisc)
+library(rio)
+library(forcats)
+library(skimr)
+```
+
+```{r}
+#load data
+uti <- read_sav("C:/Users/ylyl/OneDrive - Michigan Medicine/ResidentsResearch/Residents/2024/White/rawdata/Foresight 50+ Omnibus_1023_Data_UTI.SAV")
+uti<- uti |>
+  clean_names()
+#new variable for any interventions
+uti<- uti |>
+  mutate(umich4_any=case_when(umich4_1==1 | umich4_2==1 |umich4_3==1| umich4_4==1 | umich4_5==1 | umich4_6==1 | umich4_7==1 ~ "Yes",
+                              TRUE ~ "No"))
+#new variables for grouping interventions
+uti<- uti |>
+  mutate(umich4_cran=case_when(umich4_1==1| umich4_2==1 ~ 1,
+                               TRUE ~ 0),
+         umich4_estro1=case_when(umich4_3==1| umich4_4==1 | umich4_5==1 ~ 1,
+            TRUE ~ 0))                      
+#new vaviable for more than one intervention
+uti<- uti |>
+  rowwise() |>
+  mutate(umich4_number=sum (c_across(c(umich4_1:umich4_7))))|>
+  mutate(umich4_number1=sum (c_across(c(umich4_cran, umich4_estro1, umich4_6,umich4_7))))
+#check missing
+uti$umich18 |> is.na() |>sum()
+visdat::vis_miss(uti)
+#clean up  
+uti <- uti |>
+  mutate(umich1=factor(umich1,
+         levels=c(1,2),
+         labels=c("Yes", "No")),
+         umich2_4group=case_when(umich2==0 ~ "Had prior UTI but not last year",
+                                 umich2==1 ~ "Had one UTI last year",
+                                 umich2 %in% c(2,3,4,6,12) ~ "Had more than one UTI last year",
+                                 umich2==98 ~ "had prior UTI but last year UTI unknown",
+                                 umich1=="No" ~ "Never had UTI",
+                                 is.na(umich1) ~ NA),
+#         labels=c("Had Prior UTI but not last year", "Had one UTI last year", "Had  more than one UTI last year", "Had more than one UTI last year","Had more than  one UTI last year","Had more than one UTI last year","Had more than one UTI last year", NA)),
+         umich2_3group=case_when(umich2_4group %in% c("Had one UTI last year","Had more than one UTI last year") ~ "Had UTI last year",
+                                 TRUE ~ umich2_4group),
+         umich5=factor(umich5,
+         levels=c(1:5),
+         labels=c("Never", "Rarely", "Sometimes", "Often", "Almost always")),
+         umich6=factor(umich6,
+         levels=c(1:5,98),
+         labels=c("Never", "Rarely", "Sometimes", "Often", "Almost always", NA)),
+         umich7=factor(umich7,
+         levels=c(1:5,98),
+         labels=c("Never", "Rarely", "Sometimes", "Often", "Almost always", NA)), 
+         umich11=factor(umich11,
+                        levels=c(1:7),
+                        labels=c("Not at all", "A few times in the past year", "Once a month", "A few times per month", "Once a week", "2-3 times per week", "Almost every day")),
+         umich12=factor(umich12,
+                        levels=c(1:5, 98, 99),
+                        labels=c("Never", "Rarely", "Sometimes", "Often", "Almost always", NA, NA)),
+         umich15_feet=replace(umich15_feet, umich15_feet==98, NA), #recode 98 "missing"
+         umich15_feet=as.numeric(umich15_feet),
+         umich15_m=(umich15_feet*12 + umich15_inches)*2.54/100,
+         umich13_kg=umich13/2.205,
+         bmi=umich13_kg/umich15_m ^ 2,
+         bmigroup = case_when(bmi < 18.5 ~ "Under weight",
+                              bmi < 25 ~ "Normal weight",
+                              bmi < 30 ~ "Overweight",
+                              bmi >= 30 ~ "Obese"),
+         umich16=factor(umich16,
+         levels=c(1:3,98),
+         labels=c("Every day", "Some days", "Not at all", NA)),
+         umich17=factor(umich17,
+         levels=c(1:3,98),
+         labels=c("Every day", "Some days", "Not at all", NA)),
+         umich18=factor(umich18,
+         levels=c(1,2, 98),
+         labels=c("Yes", "No", NA)),
+         umich19=factor(umich19,
+         levels=c(1:4,77, 98),
+         labels=c("Never", "Sometimes", "Usually", "Always", "Don't know",NA)), 
+         umich20=factor(umich20,
+         levels=c(1:5, 98),
+         labels=c("Excellent", "Very good", "Good", "Fair", "Poor",NA)), 
+         gender=factor(gender,
+                       levels=c(1:2),
+                       labels=c("Male", "Female")),
+         age2=factor(age2,
+                     levels=c(1:2),
+                     labels =c("50-64", "65+")),
+         age4=factor(age4,
+                     levels=c(1:4),
+                     labels =c("50-59", "60-69", "70-79", "80+")),
+         racethnicity=factor(racethnicity,
+                             levels=c(1:6),
+                             labels=c("White, non-Hispanic", "Black, non-Hispanic", "Other, non-Hispanic", "Hispanic", "2+, non-Hispanic", "Asian-Pacific Islander, non-Hispanic")),
+         educ5=factor(educ5,
+                      levels=c(1:5),
+                      labels=c("Less than HS","HS graduate or equivalent", "Some college/ associates degree", "Bachelor's degree", "Post grad study/professional degree")),
+         marital=factor(marital,
+                        levels=c(1:5),
+                        labels=c("Married", "Widowed", "Divorced", "Separated", "Never married")),
+         employ=factor(employ,
+                       levels=c(1:7),
+                       labels=c("Working - as a paid employee", "Working - self-employed", "Not working - on temporary layoff from a job", "Not working - looking for work", "Not working - retired", "Not working - disabled", "Not working - other")),
+         employ1=case_when(employ %in% c("Working - as a paid employee", "Working - self-employed") ~ "Working",
+                           employ %in% c("Not working - on temporary layoff from a job", "Not working - looking for work", "Not working - retired", "Not working - disabled", "Not working - other") ~ "Not working"),
+         income4=factor(income4,
+                        levels=c(1:4),
+                        labels=c("Less than $30,000", "$30,000 to under $60,000", "$60,000 to under $100,000", "$100,000 or more")),
+         region4=factor(region4,
+                        levels=c(1:4),
+                        labels=c("Northeast", "Midwest", "South", "West")),
+         metro=factor(metro,
+                      levels=c(0:1),
+                      labels=c("Non-Metro Area", "Metro Area")))|>
+  labelled::set_variable_labels(
+    umich1="Prior urinary tract infection, cystitis or pyelonephritis",
+    umich2="The number of times having UTI during past 12 months",
+    umich2_4group="UTI history -4 groups",
+    umich2_3group="UTI history -3 groups",
+    umich4_any="Use interventions to prevent UTI",
+    umich5="How often do you leak urine?",
+    umich6="How often do you delay urinating when busy?",
+    umich7="How often do you urinate before leaving home?",
+    bmi="BMI",
+    bmigroup="BMI -4 categories",
+    umich11="Sexual activity",
+    umich12="How often are you constipated?",
+    umich16="Tobacco use",
+    umich17="Alcohol use",
+    umich18="Physical activities or excercises",
+    umich19="Have access to care, tests or treatments in the last 6 months",
+    umich20="Overall health",
+    gender="Gender",
+    age="Age",
+    age2="Age",
+    age4="Age",
+    racethnicity="Race/Ethnicity",
+    educ5="Education",
+    marital="Marital status",
+    employ="Current Employment Status",
+    employ1="Current Employment Status",
+    income4="Household income",
+    region4="Region",
+    metro="Metropolitan area")
+uti$bmigroup <- forcats::fct_relevel(uti$bmigroup, "Under weight", "Normal weight", "Overweight", "Obese")
+
+```
+
+### Raw data overview (unweighted)
+
+```{r}
+#read rds
+uti <- readRDS("uti.rds") 
+# quick view of the data summary
+uti |>
+  select(umich1, umich2, umich2_4group, umich2_3group, umich4_any, umich5, umich6, umich7, bmi, bmigroup, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+   tbl_summary(by=umich4_any)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")
+#notes:significant factors associated with using intervention: prior uti, more uti during past 12 months, frequent urine leakage, less easier access to care, female, unmarried, lower income. 
+```
+
+### clean up 1-31-202
+
+```{r}
+uti <- uti |>
+  mutate(umich2_new=case_when(   umich2==1 ~ "1",
+                                  umich2==2 ~ "2",
+                                 umich2 %in% c(3,4,6,12) ~ "3 or more"),
+         umich3_new=case_when(   umich3==0 ~ "0",
+                                umich3==1 ~ "1",
+                                  umich3==2 ~ "2",
+                                 umich3 %in% c(3,4,5,6,7,8,9,10,11,12,21,28,32) ~ "3 or more",
+                                 umich3 %in% c(77,98,99) ~ NA),
+         umich3_2=case_when(umich3_new %in% c("2", "3 or more") ~ "2 or more",
+                             TRUE ~ umich3_new),
+         umich3_1=if_else(umich3_2 %in% c("1", "2 or more"), 1,0),
+         umich4_estro=case_when(umich4_4 ==1 ~ "Oral",
+                                umich4_5 ==1 ~ "Transdermal",
+                                umich4_3 ==1 ~ "Vaginal"),
+         umich8_group=case_when(umich8 < 11 ~ "0-10",
+                                umich8 < 21 ~ "11-20",
+                                umich8 < 31 ~ "21-30",
+                                umich8 < 41 ~ "31-40",
+                                umich8 < 51 ~ "41-50",
+                                umich8 %in% c(77,98,99) ~ NA),
+         umich9_group=case_when(umich9 < 11 ~ "0-10",
+                                umich9 < 21 ~ "11-20",
+                                umich9 < 31 ~ "21-30",
+                                umich9 < 41 ~ "31-40",
+                                umich9 %in% c(77,98,99) ~ NA),
+         umich10_group=case_when(umich10 < 11 ~ "0-10",
+                                umich10 < 21 ~ "11-20",
+                                umich10 < 31 ~ "21-30",
+                                umich10 < 41 ~ "31-40",
+                                umich10 < 51 ~ "41-50",
+                                umich10 %in% c(77,98,99) ~ NA),
+         umich14=factor(umich14,
+                        levels=c(1,2,98),
+                        labels=c("English", "Other", NA)))
+uti<- uti|>        labelled::set_variable_labels(
+          umich1="Ever Diagnosed with UTI",
+          umich2_new="UTI diagnosed in last year",
+          umich3_new="Hospitalization in last year",
+          umich3_2="Hospitalization in last year",
+          umich3_1="Hospitalization in last year",
+          umich4_estro="If you utilize estrogen",
+          umich5="Urine leakage",
+          umich6="Delay urinating when busy",
+          umich7="Urinate before leaving home",
+          umich8_group="How many times do you go to restroom to empty bladder in 24 hours?",
+          umich9_group="In last 7 days how many times do you go to restroom to empty bladder after falling asleep?",
+          umich10_group="During last week,how many 8 oz servings of beverages did you consume each day?",
+          umich11="In last 12 months, how often did you engage in vaginal,oral, anal sex?",
+          umich14="What language do you use most?")
+uti$umich4_any <- forcats::fct_relevel(uti$umich4_any, "Yes", "No")
+uti$bmigroup <- forcats::fct_relevel(uti$bmigroup, "Under weight", "Normal weight", "Overweight", "Obese")
+
+uti<- uti |>
+  mutate(party_id5=factor(party_id5,
+                          levels=c(-1, 1:5),
+                          labels=c(NA, "Democrat", "Lean Democrat", "Don't Lean/Independent/None", "Lean Republican", "Republican")),
+        ideo=factor(ideo,
+                    levels=c(-1, 1:5),
+                    labels=c(NA, "Very liberal", "Somewhat liberal", "Moderate","Somewhat conservative", "Very conservative")),
+        surv_mode=factor(surv_mode,
+                         levels=c(1:2),
+                         labels=c("Phone interview", "Web Interview")),
+        internet=factor(internet,
+                        levels=c(0:1),
+                        labels=c("Non-internet household", "Internet Household")),
+        housing=factor(housing, 
+                       levels=c(1:3),
+                       labels=c("Owned or being bought by you or someone in your household", "Rented for cash", "Occupied without payment of cash rent")),
+        home_type=factor(home_type,
+                         levels=c(1:5),
+                         labels=c("A one-family house detached from any other house", "A one-family house attached to one or more houses", "A building with 2 or more apartments", "A mobile home or trailer", "Boat, RV, van, etc")),
+        phoneservice=factor(phoneservice,
+                            levels=c(1:5),
+                            labels=c("Landline telephone only", "Have a landline, but mostly use cellphone", "Have cellphone, but mostly use landline", "Cellphone only", "No telephone service")),
+        hhsize=factor(hhsize, 
+                      levels=c(1:6),
+                      labels=c("One person, I live by myself", "Two persons", "Three persons", "Four persons", "Five persons", "Six or more persons")))
+
+#export clean subset
+export(uti, "uti.rds")                                
+```
+
+### regrouping 3-20-2024
+
+```{r}
+uti<- uti |>
+  mutate(income2=case_when(income4 %in% c("Less than $30,000", "$30,000 to under $60,000")  ~ "Less than $60,000",
+                           income4 %in% c("$60,000 to under $100,000", "$100,000 or more") ~ "$60,000 or more"),
+         device3=case_when(device %in% c("Smartphone", "Tablet") ~ "Smartphone/tablet",
+                           TRUE ~ device),
+         hhsize1=case_when(hhsize=="One person, I live by myself" ~ "Live alone",
+                           hhsize %in% c( "Two persons", "Three persons", "Four persons", "Five persons", "Six or more persons") ~ "Two or more persons"))
+                            
+uti <- uti |>
+  mutate(race_new=case_when(racethnicity =="2+, non-Hispanic" ~ "Other, non-Hispanic",
+                            TRUE ~ racethnicity),
+         marital_new=case_when(marital %in% c("Widowed", "Divorced", "Separated") ~ "Widowed/divorced/separated",
+                               TRUE ~ marital),
+         employ_new=case_when(employ %in% c("Not working - on temporary layoff from a job", "Not working - looking for work", "Not working - disabled", "Not working - other" ) ~ "Not working", 
+                              employ == "Not working - retired" ~ "Retired",
+                              TRUE ~ employ))
+uti<- uti |>
+  mutate(access=case_when(is.na(umich19) ~ NA_real_, 
+    umich19=="Never" ~ 1,
+                          TRUE ~ 0))
+uti<-uti|>mutate(health=case_when(umich20 %in% c("Very good", "Good", "Excellent") ~ "Good/excellent",
+                          umich20 %in% c("Fair", "Poor") ~ "Poor/fair"))
+         
+uti$race_new <- forcats::fct_relevel(uti$race_new, "White, non-Hispanic", "Black, non-Hispanic", "Asian-Pacific Islander, non-Hispanic", "Other, non-Hispanic", "Hispanic")
+#export clean subset
+export(uti, "uti.rds") 
+export(uti, "uti.csv") 
+```
+
+### clean up 3/28/24
+
+```{r}
+uti<- uti |>
+  mutate(lastyearuti=case_when(umich2 %in% c(1,2,3,4,6,12) ~ 1,
+                               umich2==98 ~ NA,
+                               TRUE ~ 0),
+         urine_24h=case_when(umich8 < 5 ~ "0-4",
+                                umich8 < 9 ~ "5-8",
+                                umich8 < 13 ~ "9-12",
+                                umich8 < 51 ~ ">12",
+                                umich8 %in% c(77,98,99) ~ NA),
+         urinenight_7day=case_when(umich9 < 5 ~ "0-4",
+                                umich9 < 9 ~ "5-8",
+                                umich9 < 13 ~ "9-12",
+                                umich9 < 41 ~ ">12",
+                                umich9 %in% c(77,98,99) ~ NA))|>
+   labelled::set_variable_labels(
+          lastyearuti="Having UTI during past 12 months",
+          urine_24h="Urination in 24 hours",
+          urinenight_7day="Urination during night in last 7 days")
+ uti|>
+  select(umich2, umich2_3group, umich2_4group, lastyearuti)|>
+  tbl_summary() #use umich2_3group
+uti$urine_24h <- forcats::fct_relevel(uti$urine_24h, "0-4","5-8", "9-12", ">12" ) 
+uti$urinenight_7day <- forcats::fct_relevel(uti$urinenight_7day, "0-4","5-8", "9-12", ">12" ) 
+uti$umich2_3group <-forcats::fct_relevel(uti$umich2_3group, "Never had UTI", "had prior UTI but last year UTI unknown", "Had prior UTI but not last year",  "Had UTI last year")
+uti<- uti|> mutate(umich5_new=case_when(umich5 %in% c("Often", "Almost always") ~ "Often/always",
+                      TRUE ~ umich5))
+uti<- uti|> 
+  mutate(intervention = if_else(umich4_any == "No", 0, 1))
+         
+export(uti, "uti.rds")   
+```
+
+### Clean up 04/05/2024
+
+```{r}
+uti<- uti |>
+  mutate(urine_24h_new=case_when(umich8 < 9 ~ "0-8",
+                                umich8 < 51 ~ ">8",
+                                umich8 %in% c(77,98,99) ~ NA),
+         bmi_new=case_when(bmigroup %in% c("Under weight", "Normal weight") ~ "Normal weight",
+                           TRUE ~ bmigroup),
+         housing_new=case_when(housing %in% c("Rented for cash", "Occupied without payment of cash rent") ~ "Rented or occupied",
+                               TRUE ~ housing),
+         ui=case_when(umich5 %in% c("Never", "Rarely") ~ "Never or rarely",
+                      umich5 %in% c("Often", "Almost always") ~ "Often or almost always",
+                      TRUE ~ umich5))
+uti<- uti |> mutate(uti_history=case_when(umich2_3group %in% c("Had prior UTI but not last year", "had prior UTI but last year UTI unknown") ~ "Had prior UTI but not last year",
+                    TRUE ~ umich2_3group))
+uti$urine_24h_new <- forcats::fct_relevel(uti$urine_24h_new, "0-8",">8") 
+uti$ui <- forcats::fct_relevel(uti$ui, "Never or rarely","Sometimes", "Often or almost always") 
+uti$uti_history <-forcats::fct_relevel(uti$uti_history, "Never had UTI", "Had prior UTI but not last year",  "Had UTI last year")  
+uti$bmi_new <- forcats::fct_relevel(uti$bmi_new, "Normal weight", "Overweight", "Obese") 
+uti<- uti |> mutate(umich4_nojuice=case_when(umich4_2==1 |umich4_3==1| umich4_4==1 | umich4_5==1 | umich4_6==1 | umich4_7==1 ~ "Yes",
+                              TRUE ~ "No"),
+          intervention_nojuice = if_else(umich4_nojuice == "No", 0, 1))
+# Remove NA levels from factor columns
+uti <- uti %>%
+  mutate(
+    across(
+      where(is.factor), 
+      ~ ifelse(is.na(.), NA, as.character(.)) %>% factor()
+    )
+  )
+export(uti, "uti.rds")          
+export(uti, "uti.csv")         
+```
+
+### Additional data #1 (unweighted)
+
+Research question
+
+Are interventions associated with urogenital health?
+
+Rational:
+
+We hypothesize that for people having prior UTI but no UTI in the past year, the intervention cohort might have better urogenital health compared to the no-intervention cohort.
+
+```{r}
+uti |>
+  filter(umich2==0)|>
+  select(umich4_any, umich5, umich6, umich7, bmi, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+  tbl_summary(by=umich4_any)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")
+#note: didn't see difference 
+```
+
+### Additional data #2 (unweighted)
+
+Research question
+
+Are interventions associated with urogenital health?
+
+Rational:
+
+We hypothesize that for people not having prior UTI, the intervention cohort might have better urogenital health compared to the no-intervention cohort.
+
+```{r}
+uti |>
+  filter (umich1=="No")|>
+  select(umich4_any, umich5, umich6, umich7, bmi, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+  tbl_summary(by=umich4_any)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")
+#note: intervention cohort leak urine more often, more females, lower income
+```
+
+### Additional data #3 (unweighted)
+
+Research question
+
+For people having prior UTI but no UTI in the past year VS having UTI past year VS no prior UTI, are there any differences in urogenital health?
+
+Rational:
+
+We don't have a hypothesis, we wanted to describe the urogenital health of people who use interventions and have various UTI conditions.
+
+```{r}
+uti |>
+  filter(umich4_any=="Yes")|>
+  filter(umich2_3group!="had prior UTI but last year UTI unknown")|>
+  select(umich1, umich2_3group, umich5, umich6, umich7, bmi, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+  tbl_summary(by=umich2_3group)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2", "stat_3") ~ "**UTI History**")
+#note: people use interventions that had uti last year:83% female, 17% male 
+# people use interventions that had uti but not last year: 89% female, 11% male,
+# people use interventions that never had uti: 51% female, 49% male
+
+```
+
+### additional data #4
+
+compare "Had prior UTI but not last year" and "Had UTI last year"
+
+```{r}
+uti |>
+  filter(umich2_3group=="Had prior UTI but not last year" | umich2_3group=="Had UTI last year")|>
+  select(umich2_3group, umich4_any, umich5, umich6, umich7, bmi, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+  tbl_summary(by=umich2_3group)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2") ~ "**UTI History**")
+#note: significant: had uti last year more likely to use interventions, leak urine more frequently, higher bmi, more likely to constipate, poorer overall health, race, education, unmarried, lower income
+```
+
+### Additional data #5
+
+last year had one uti vs more than one uti
+
+```{r}
+uti |>
+  filter(umich2_4group=="Had one UTI last year" | umich2_4group=="Had more than one UTI last year")|>
+  select(umich2_4group, umich4_any, umich5, umich6, umich7, bmi, umich11, umich12, umich16, umich17, umich18, umich19, umich20, gender, age2, racethnicity, educ5, marital, employ1, income4, region4, metro)|>
+  tbl_summary(by=umich2_4group)|>
+  add_p()|>
+   modify_spanning_header(c("stat_1", "stat_2") ~ "**UTI History**")
+# Note: those had more than one uti last year are more likely to use interventions  (p=0.053).
+```
+
+### Data Discrepancy
+
+```{r}
+# interventions variables
+uti |>
+  select(umich4_1, umich4_2, umich4_3, umich4_4, umich4_5, umich4_6,umich4_7,umich4_8, umich4_any)|>
+  tbl_summary()
+# Notes: discprepancy? 292 respondents used interventions (umich4_any) vs 297(umich4_8)
+```
+
+## Sample weights
+
+```{r}
+# Complete case         
+# Create a missing case indicator variable (we will call it nomiss) which will facilitate ensuring that our descriptive statistics are based on the same cases as the regression.
+#model 1 and 2 
+uti <- uti |>
+  mutate(nomiss = !is.na(race_new) & !is.na(bmi_new) & !is.na(uti_history) & !is.na(income4) & !is.na(urine_24h_new) & !is.na( surv_mode)  &!is.na(ui) & !is.na(umich18) & !is.na(access))
+
+library(survey)
+# sample design parameters
+utidesign<-svydesign(id=~1, weights=~weight, data=uti)
+#use the subset() function to create design objects that will produce analyses just for the cases with complete data. These design objects are not actually necessary for regression analyses, but will ensure that descriptive statistics are based on the same cases as regression analyses. 
+utidesign.nomiss <- subset(utidesign, nomiss)
+#survey subpopulation
+uti_female <- subset(utidesign, gender=="Female" & nomiss)
+uti_female_cran <- subset(utidesign, gender=="Female" & umich4_1==1)
+#check unweighted sample size
+nrow(subset(uti, gender == "Female" & nomiss))   #n=537
+#check weighted population size
+sum(weights(uti_female))   #n=509.7023
+```
+
+## Overview of interventions
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    include = c(umich4_1, umich4_2, umich4_3, umich4_4, umich4_5, umich4_6, umich4_7, umich4_number, umich4_number1, umich4_cran, umich4_estro1, umich4_any, umich4_estro),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      umich4_cran ~ "Cranberry juice/pill",
+      umich4_estro1 ~ "Estrogen cream/pill/skin patch"))
+#umich4_number: 7 types of intervention; umich4_number1: 4 types of intervention
+```
+
+Question: : to what extent is use of cranberry juice is the intervention that we are studying in this model?
+
+```{r}
+uti_female_cran |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    include = c(umich4_1, umich4_2, umich4_3, umich4_4, umich4_5, umich4_6, umich4_7, umich4_number, umich4_number1, umich4_cran, umich4_estro1, umich4_any, umich4_estro),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      umich4_cran ~ "Cranberry juice/pill",
+      umich4_estro1 ~ "Estrogen cream/pill/skin patch"))
+
+uti_female |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    by=umich4_1,
+    include = c(umich4_2, umich4_3, umich4_4, umich4_5, umich4_6, umich4_7, umich4_number, umich4_number1, umich4_cran, umich4_estro1, umich4_any, umich4_estro),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      umich4_cran ~ "Cranberry juice/pill",
+      umich4_estro1 ~ "Estrogen cream/pill/skin patch"))
+```
+
+## Bivariate Analysis
+
+### Table 1 Demographic
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+   # missing = "no",
+    # summarize a subset of the columns
+    include = c(age4, race_new, bmi_new,educ5, income2, income4, marital_new, umich14, employ_new, region4, metro, party_id5, ideo, surv_mode, internet, housing_new, home_type, phoneservice, hhsize, hhsize1),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      age4 ~ "Age",
+      race_new ~ "Race/Ethnicity",
+      bmi_new ~ "BMI",
+      region4 ~ "Region",
+      educ5 ~ "Education",
+      party_id5 ~ "Party",
+      income2 ~ "Household income",
+      marital_new ~ "Marital status",
+      employ_new ~ "Current Employment Status",
+   #   umich14 ~ "What language do you use most?",
+      ideo ~ "Political ideology",
+      surv_mode ~ "Survey interview mode",
+      internet ~ "HH internet access via dial-up, DSL, or cable broadband at home",
+      housing_new ~ "Home Ownership",
+      home_type ~ "Type of building of panelists' residence",
+      phoneservice ~ "Telephone service for the household",
+      hhsize1 ~ "Household size (including children)"))|>
+ # add_p() |> 
+  add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 1. Weighted descriptive statistics of demographic characteristics")
+```
+
+### Table 2 Health characteristics
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+  #  missing = "no",
+    # summarize a subset of the columns
+    include = c(access, health, umich10_group, umich11, umich12,umich16, umich17, umich18),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      access ~ "No access to care, tests or treatments in the last 6 months",
+      health ~ "Overall health",
+      umich10_group~"During last week,how many 8 oz servings of beverages did you consume each day?",
+          umich11~"In last 12 months, how often did you engage in vaginal,oral, anal sex?",
+      umich12 ~ "How often are you constipated?",
+      umich16 ~ "Tobacco use",
+      umich17 ~ "Alcohol use",
+      umich18 ~ "Physical activities"
+    ))|>
+  add_p() |> 
+ # add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 2. Weighted descriptive statistics of health characteristics")
+```
+
+### Table 3 Urinary characteristics
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+   # missing = "no",
+    # summarize a subset of the columns
+    include = c(uti_history, umich3_2, ui, umich6, umich7, urine_24h_new, urinenight_7day),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+          uti_history ~ "UTI history",
+          umich3_2~"Hospitalization in last year",
+          ui~"Urinary incontinence",
+          umich6~"Delay urinating when busy",
+          umich7~"Urinate before leaving home",
+          urine_24h_new ~ "Urinary frequency in 24 hours",
+          urinenight_7day ~ "Urination during night in last 7 days"))|>
+  add_p() |> 
+#  add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 3. Weighted descriptive statistics of urinary characteristics")
+#notes: Unweighted proportions reflect the composition of the sample, whereas weighted proportions estimate the population distribution.For categorical variables,  N and  n values in the table are estimated population totals – when we did unweighted analyses, these were sample sizes. ref: https://www.bookdown.org/rwnahhas/RMPH/survey-desc.html
+```
+
+## Multivariable logistic regression
+
+```{r}
+#set reference level
+logit1 <- (svyglm(intervention~ factor(access) + factor(umich2_3group) + factor(umich5)+ factor(urine_24h) + factor(urinenight_7day) +  factor(umich18), family=binomial, design=uti_female))
+summary(logit1)
+exp(coef(logit1))
+exp(cbind(OR = coef(logit1), confint(logit1)))
+
+#summary table2
+#model 1-any interventions
+svyglm(intervention~  factor(race_new) + factor(bmi_new) + factor(income4) + factor(surv_mode) +  factor(access) + factor(uti_history) + factor(ui), family=binomial, design=uti_female)|>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+
+#model2-no cranberry juice
+svyglm(intervention_nojuice~  factor(race_new) + factor(bmi_new) + factor(income4) + factor(surv_mode) +  factor(access) + factor(uti_history) + factor(ui), family=binomial, design=uti_female)|>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+```
+
+```{r}
+#chech if consistent with forsight table
+utidesign |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = internet,
+ #   missing = "no",
+    # summarize a subset of the columns
+    include = c(age2,racethnicity,income4))
+#output: no difference
+```
+
+## Error check: categorical variables
+
+error message:
+
+```         
+Sample size greater than population size: are weights correctly scaled?
+```
+
+```{r}
+#check missing
+uti |>
+  filter(gender=="Female", nomiss)|>
+  select(umich18, health, access)|>
+  visdat::vis_miss()
+#check frequency
+svytable(~umich4_any+umich18, utidesign)
+#chi square test
+svychisq(~umich4_any+umich18, utidesign)
+
+
+```
+
+```         
+                       umich18
+umich4_any         Yes          No        <NA>
+       Yes  97.2503694  70.9391256   3.8434491
+       No  239.3282381 101.9465382   0.2040978
+```
+
+```         
+Error in t(Cmat) %*% (iDmat/N) : non-conformable arguments
+```
+
+## References:
+
+\# https://www.displayr.com/the-correct-treatment-of-sampling-weights-in-statistical-tests/
+
+\# https://stats.oarc.ucla.edu/r/seminars/survey-data-analysis-with-r/
+
+### Subpopulation Analysis
+
+Before we continue with our descriptive statistics, we should pause to discuss the analysis of subpopulations. The analysis of subpopulations is one place where survey data and experimental data are quite different. If you have data from an experiment (or quasi-experiment), and you want to analyze the responses from, say, just the women, or just people over age 50, you can just delete the unwanted cases from the data set or use the by: prefix. Complex survey data are different. **With survey data, you (almost) never get to delete any cases from the data set, even if you will never use them in any of your analyses.** Instead, the survey package has two options that allow you to correctly analyze subpopulations of your survey data. These options are svyby and subset.survey.design. The subset.survey.design option is sort of like deleting unwanted cases (without really deleting them, of course), and the svyby option is very similar to by-group processing in that the results are shown for each group of the by-variable.
+
+**Why not just remove rows?**
+
+Removing rows from the dataset before analysis can lead to incorrect standard errors and confidence intervals. This is because the remaining sample may no longer be representative of the original population, and the survey design is not properly accounted for in the calculations. 
+
+\# https://epirhandbook.com/en/survey-analysis.html
+
+**How to fix:**
+
+https://www.stata.com/manuals/svysvytabulatetwoway.pdf
+
+\*subpopulation
+
+svy: tab umich4_any umich18 if gender=="Female" & nomiss=="TRUE"
+
+\* Unweighted numbers of observations and weighted counts
+
+svy: tab umich18 umich4_any if gender=="Female" & nomiss=="TRUE", obs count
+
+\*Within-row and within-column proportions
+
+svy: tab umich18 umich4_any if gender=="Female" & nomiss=="TRUE", row column
+
+output:
+
+Pearson:
+
+Uncorrected chi2(3) = 3.9187
+
+Design-based F(2.41, 1297.95)= 0.7939 **P = 0.4730 (with correction)**
+
+## Conclusion
+
+female, prior UTI, recurrent UTI in the past year, urine leakage, lower income, unavailable internet are associated with utilizing interventions.
+
+MISC
+
+notes: table_0320: n=1034, with missing data
+
+table_0328: n=548 (female), with missing data
+
+table_0329: n=513 (female), no missing: regression model: uti history, access, urine leakage, urine 24h, urinenight 7days.
+
+## Updates
+
+### Weighted vs unweighted
+
+weighted analyses: notes_uti.qmd
+
+unweighted analyses: notes_uti_unweighted.qmd
+
+Table 1
+
+```         
+```
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+   # missing = "no",
+    # summarize a subset of the columns
+    include = c(age4, race_new, bmi_new,educ5, income2, income4, marital_new, umich14, employ_new, region4, metro, party_id5, ideo, surv_mode, internet, housing_new, home_type, phoneservice, hhsize, hhsize1),
+    statistic = all_categorical() ~ "{p}%",
+    label = list(
+      age4 ~ "Age",
+      race_new ~ "Race/Ethnicity",
+      bmi_new ~ "BMI",
+      region4 ~ "Region",
+      educ5 ~ "Education",
+      party_id5 ~ "Party",
+      income2 ~ "Household income",
+      marital_new ~ "Marital status",
+      employ_new ~ "Current Employment Status",
+   #   umich14 ~ "What language do you use most?",
+      ideo ~ "Political ideology",
+      surv_mode ~ "Survey interview mode",
+      internet ~ "HH internet access via dial-up, DSL, or cable broadband at home",
+      housing_new ~ "Home Ownership",
+      home_type ~ "Type of building of panelists' residence",
+      phoneservice ~ "Telephone service for the household",
+      hhsize1 ~ "Household size (including children)"))|>
+  add_overall()|>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 1. Weighted descriptive statistics of demographic characteristics")
+
+
+
+
+
+
+
+
+```
+
+### New research question:
+
+Women that had UTI in last year are more likely to use estrogen.
+
+Outcome: use of estrogen, variable "umich4_estro"
+
+Exposure: access to care
+
+Had UTI last year yes or no: binary variable "lastyearuti"
+
+```{r}
+uti <- uti |>
+  mutate(estro=case_when(umich4_4 ==1 | umich4_5 ==1 | umich4_3 ==1 ~ 1,
+                         TRUE ~0))
+
+uti |>
+  filter(gender=="Female")|>
+#  filter(lastyearuti==1)|>
+  select(umich1, lastyearuti,estro, access)|>
+  tbl_summary(by=estro)|>
+  add_overall()
+
+uti |>
+  filter(gender=="Female")|>
+  filter(umich1=="Yes")|>
+  select(estro, umich19,umich4_3, umich4_4, umich4_5)|>
+  tbl_summary(by=estro)|>
+  add_overall()|>
+  add_p()
+
+
+```
+
+###  Recode access
+
+```{r}
+#fix issues: some "Don't know" were coded 0, should be NA
+uti<- uti |>
+  mutate(umich19=replace(umich19, umich19=="Don't know", NA),
+         access=case_when(is.na(umich19) ~ NA_real_, 
+                          umich19=="Never" ~ 1,
+                          TRUE ~ 0))
+# A function to drop levels with zero count in a factor variable
+drop_zero_categories <- function(x) {
+  # Convert to factor if not already
+  x <- as.factor(x)
+  # Keep only levels with non-zero count
+  factor(x, levels = levels(x)[tabulate(x) > 0])
+}
+
+# Apply this function to specified columns
+uti <- uti %>%
+  mutate(
+    umich19 = drop_zero_categories(umich19))
+export(uti, "uti.rds")          
+export(uti, "uti.csv") 
+uti <- uti |>
+  mutate(nomiss = !is.na(race_new) & !is.na(bmi_new) & !is.na(uti_history) & !is.na(income4) & !is.na(urine_24h_new) & !is.na( surv_mode)  &!is.na(ui) & !is.na(umich18) & !is.na(access))
+
+library(survey)
+# sample design parameters
+utidesign<-svydesign(id=~1, weights=~weight, data=uti)
+#survey subpopulation
+uti_female <- subset(utidesign, gender=="Female" & nomiss)
+#check unweighted sample size
+nrow(subset(uti, gender == "Female" & nomiss))   #n=532
+#check weighted population size
+sum(weights(uti_female))   #n=507.7745
+#overview of interventions
+uti_female |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    include = c(umich4_1, umich4_2, umich4_3, umich4_4, umich4_5, umich4_6, umich4_7, umich4_number, umich4_number1, umich4_cran, umich4_estro1, umich4_any, umich4_estro),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      umich4_cran ~ "Cranberry juice/pill",
+      umich4_estro1 ~ "Estrogen cream/pill/skin patch"))
+```
+
+```{r}
+uti$umich4_any <- relevel(uti$umich4_any, ref= "Yes")
+#Table 1
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+   # missing = "no",
+    # summarize a subset of the columns
+    include = c(age4, race_new, bmi_new,educ5, income2, income4, marital_new, umich14, employ_new, region4, metro, party_id5, ideo, surv_mode, internet, housing_new, home_type, phoneservice, hhsize, hhsize1),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      age4 ~ "Age",
+      race_new ~ "Race/Ethnicity",
+      bmi_new ~ "BMI",
+      region4 ~ "Region",
+      educ5 ~ "Education",
+      party_id5 ~ "Party",
+      income2 ~ "Household income",
+      marital_new ~ "Marital status",
+      employ_new ~ "Current Employment Status",
+      umich14 ~ "What language do you use most?",
+      ideo ~ "Political ideology",
+      surv_mode ~ "Survey interview mode",
+      internet ~ "HH internet access via dial-up, DSL, or cable broadband at home",
+      housing_new ~ "Home Ownership",
+      home_type ~ "Type of building of panelists' residence",
+      phoneservice ~ "Telephone service for the household",
+      hhsize1 ~ "Household size (including children)"))|>
+  add_overall()|>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 1. Weighted descriptive statistics of demographic characteristics")
+```
+
+Table 2
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+  #  missing = "no",
+    # summarize a subset of the columns
+    include = c(access, health, umich10_group, umich11, umich12,umich16, umich17, umich18),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+      access ~ "No access to care, tests or treatments in the last 6 months",
+      health ~ "Overall health",
+      umich10_group~"During last week,how many 8 oz servings of beverages did you consume each day?",
+          umich11~"In last 12 months, how often did you engage in vaginal,oral, anal sex?",
+      umich12 ~ "How often are you constipated?",
+      umich16 ~ "Tobacco use",
+      umich17 ~ "Alcohol use",
+      umich18 ~ "Physical activities"
+    ))|>
+  add_p() |> 
+ # add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 2. Weighted descriptive statistics of health characteristics")
+```
+
+Table 3
+
+```{r}
+uti_female |>
+  tbl_svysummary(
+    # stratify summary statistics by "Use any interventions to prevent UTI"
+    by = umich4_any,
+   # missing = "no",
+    # summarize a subset of the columns
+    include = c(uti_history, umich3_2, ui, umich6, umich7, urine_24h_new, urinenight_7day),
+    digits = list(all_categorical() ~ c(0, 1)),
+    label = list(
+          uti_history ~ "UTI history",
+          umich3_2~"Hospitalization in last year",
+          ui~"Urinary incontinence",
+          umich6~"Delay urinating when busy",
+          umich7~"Urinate before leaving home",
+          urine_24h_new ~ "Urinary frequency in 24 hours",
+          urinenight_7day ~ "Urination during night in last 7 days"))|>
+  add_p() |> 
+#  add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Interventions**")|>
+  modify_caption("Table 3. Weighted descriptive statistics of urinary characteristics")
+```
+
+Table 4
+
+```{r}
+#set reference level
+uti$race_new <- relevel(uti$race_new, ref="White, non-Hispanic")
+uti$bmi_new <- relevel(uti$bmi_new, ref="Normal weight")
+uti$income4 <- relevel(uti$income4, ref="Less than $30,000")
+uti$surv_mode <- relevel(uti$surv_mode, ref="Phone interview")                    
+uti$uti_history <- relevel(uti$uti_history, ref="Never had UTI")  
+uti$ui <- relevel(uti$ui, ref="Never or rarely")  
+
+#summary table2
+#model 1-any interventions
+svyglm(intervention~  factor(race_new) + factor(bmi_new) + factor(income4) + factor(surv_mode) +  factor(access) + factor(uti_history) + factor(ui), family=binomial, design=uti_female)|>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+```
