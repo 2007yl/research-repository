@@ -1,0 +1,418 @@
+---
+title: "notes"
+author: "Yang Liu"
+date: 07-14-2023
+format: 
+   revealjs:
+    slide-number: c/t
+    width: 1600
+    height: 900
+    theme: simple
+    incremental: true
+    scrollable: true
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Background
+
+Edward et al. Do educated women in Sierra Leone supportdiscontinuation of female genital mutilation/cutting? Evidence from the 2013 Demographic and Health Survey. Reprod Health (2020) 17:174. https://doi.org/10.1186/s12978-020-01027-1
+
+Abstract:
+
+Introduction: Female genital mutilation/cutting (FGM/C) comprises all procedures that involve the total or partial elimination of the external genitalia or any injury to the female genital organ for non-medical purposes. More than 200 million females have undergone the procedure globally, with a prevalence of 89.6% in Sierra Leone. Education is acknowledged as a fundamental strategy to end FGM/C. This study aims to assess women's educational attainmentand how this impacts their views on whether FGM/C should be discontinued in Sierra Leone.
+
+Methods: We used data from the 2013 Sierra Leone Demographic and Health Survey. A total of 15,228 women were included in the study. We carried out a descriptive analysis, followed by Binary Logistic Regression analyses. We presented the results of the Binary Logistic Regression as Crude Odds Ratios (COR) and Adjusted Odds Ratios (AOR) with 95% confidence intervals (CIs).
+
+Results: Most of the women with formal education (65.5%) and 15.6% of those without formal education indicated that FGM/C should be discontinued. Similarly, 35% of those aged 15--19 indicated that FGM/C should be discontinued. Women with a higher education level had a higher likelihood of reporting that FGM/C should be discontinued \[AOR 4.02; CI 3.00--5.41\]. Christian women \[AOR 1.72; CI 1.44--2.04\], those who reported that FGM/C is not required by religion \[AOR 8.68; CI 7.29--10.34\], wealthier women \[AOR 1.37; CI 1.03--1.83\] and those residing in the western part of Sierra Leone \[AOR 1.61; CI 1.16--2.23\] were more likely to state that FGM/C should be discontinued. In contrast, women in union \[AOR 0.75; CI 0.62--0.91\], circumcised women \[AOR 0.41; CI 0.33--0.52\], residents of the northern region \[AOR 0.63; CI 0.46--0.85\] and women aged 45--49 \[AOR 0.66; CI 0.48--0.89\] were less likely to report that FGM/C should be discontinued in Sierra Leone.
+
+Conclusion: This study supports the argument that education is crucial to end FGM/C. Age, religion and religious support for FGM/C, marital status, wealth status, region, place of residence, mothers' experience of FGM/C and having a daughter at home are key influences on the discontinuation of FGM/C in Sierra Leone. The study demonstrates the need to pay critical attention to uneducated women, older women and women who have been circumcised to help Sierra Leone end FGM/C and increase its prospects of achieving Sustainable Development Goals (SDG) three and five.
+
+Keywords: Discontinue, Female genital mutilation/cutting, Reproductive health, Sierra Leone, Women
+
+## Data source
+
+DHS Demographic and Health survey data in Sierra Leone since 2019
+
+codebook: https://www.dhsprogram.com/publications/publication-dhsg4-dhs-questionnaires-and-manuals.cfm
+
+DHS has publicly assessable, deidentified data of over 400 surveys in more than 90 countries. \[https://dhsprogram.com/data/dataset_admin/index.cfm?CFID=128425097&CFTOKEN=50ffe6b7de9bebad-53EF3AA3-DA30-33FA-9A92F5605E5050DC\]
+
+**IR: Individual (Women's) Recode** Unit of analysis: De facto woman interviewed Contains all the data collected in the Woman's Questionnaire for de facto women plus some variables from the Household Questionnaire. Up to 20 births in the birth history (see also BR file), and up to 6 children under age 5 (see also KR file), for whom pregnancy and postnatal care as well as immunization, health and nutrition data were collected, can be found as repeated variables in this file. This dataset is used for most woman-level analysis including marriage and sexual activity (Chapter 4), fertility and fertility preferences (Chapters 5 and 6), family planning (Chapter 7), anthropometry and anemia in women (Chapter 11), malaria prevention for women (Chapter 12), HIV/AIDS (Chapters 13 and 14), women's empowerment (Chapter 15), adult and maternal mortality (Chapter 16), and domestic violence (Chapter 17).
+
+https://www.dhsprogram.com/pubs/pdf/DHSG1/Guide_to_DHS_Statistics_DHS-7_v2.pdf page 36
+
+## Objective
+
+Use Demographic and Health Surveys (DHS) 2019 data to perform a descriptive study or studies that explores the relationship between education, women empowerment and discontinuation of FGC.
+
+## Study design
+
+Survey, retrospective, cross-sectional, descriptive
+
+## Study population
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4; tab3 -> tab5;
+      }
+
+      [1]: 'Women in 2019 SL DHS N=15574'
+      [2]: 'Missing fgc data n=930'
+      [3]: 'Study population N=14,692'
+      [4]: 'Continued women n=9,025'
+      [5]: 'Discontinued women n=4,733'
+      ")
+```
+
+## FGC Survey Questionnaire
+
+/G100 "Ever heard of female circumcision"
+
+/G101 "Ever heard of genital cutting (probed)"
+
+/G102 "Respondent circumcised"
+
+/G103 "Flesh removed from genital area"
+
+/G104 "Genital area just nicked without removing any flesh"
+
+/G105 "Genital area sewn closed"
+
+/G106 "Age at circumcision (in years)"
+
+/G107 "Person who performed circumcision"
+
+/G108 "Number of daughters circumcised"
+
+/G109 "NA - Line number of daughter most recently circumcised (from Birth History)"
+
+/G110 "NA - Flesh removed from genital area of daughter"
+
+/G111 "NA - Genital area of daughter just nicked without removing flesh"
+
+/G112 "NA - Genital area of daughter sewn closed"
+
+/G113 "NA - Age of daughter at circumcision (in years)"
+
+/G114 "NA - Person who performed circumcision of daughter"
+
+/G115 "NA - Any daughter not circumcised"
+
+/G116 "NA - Intends to have daughter(s) circumcised in future"
+
+/G117A "NA - Cleanliness/hygiene: Female circumcision benefit"
+
+/G117B "NA - Social acceptance: Female circumcision benefit"
+
+/G117C "NA - Better marriage prospects: Female circumcision benefit"
+
+/G117D "NA - Virginity/prevent premarital sex: Female circumcision benefit"
+
+/G117E "NA - Greater sexual pleasure for men: Female circumcision benefit"
+
+/G117F "NA - Religious approval: Female circumcision benefit"
+
+/G117G "NA - CS: Female circumcision benefit"
+
+/G117H "NA - CS: Female circumcision benefit"
+
+/G117I "NA - CS: Female circumcision benefit"
+
+/G117J "NA - CS: Female circumcision benefit"
+
+/G117X "NA - Other: Female circumcision benefit"
+
+/G117Y "NA - No benefit from female circumcision"
+
+/G118 "Female circumcision required by religion"
+
+**/G119 "Female circumcision: continue or be stopped"**
+
+/GIDX\$01-20 "Daughter's index to birth history"
+
+/G121\$01-20 "Is daughter circumcised"
+
+/G122\$01-20 "Daughter's age at circumcision"
+
+/G123\$01-20 "Was daughter genital area sewn closed"
+
+/G124\$01-20 "Who performed daughter's circumcision"
+
+## Exposure
+
+female genital cutting (FGC)
+
+## Dependent variable
+
+g119 (do you think that this practice should be continued, or stopped?)
+
+1==continued
+
+2==discontinued
+
+## Independent variables
+
+### Demographic:
+
+age, religion, whether fgc is required by religion, education, wealth, marital status, has daughter at home, residential status, social acceptance of fgc circumcision status and region. 
+
+v012 \~ "Age",
+
+v101 \~ "Region",
+
+v106 \~ "Highest education level",
+
+v130 \~ "Religion",
+
+v131 \~ "Ethnicity",
+
+v025 \~ "Type of place of residence",
+
+v119 \~ "Household has: electricity",
+
+v121 \~ "Household has: television",
+
+v125 \~ "Household has: car/truck",
+
+v136 \~ "Number of household members (listed)",
+
+v151 \~ "Sex of household head",
+
+v190 \~ "Wealth index combined",
+
+v190a \~ "Wealth index for urban/rural"
+
+### Women empowerment
+
+higher scores being indicative of high disagreement to wife beating, high knowledge, and high decision-making power. labor force participation:
+
+V731 Worked in last 12 months
+
+V719 Work for a family member
+
+V716, V717 Respondent's occupation
+
+V732  Work through year/seasonally
+
+V741 Paid in cash or kind
+
+V746 Earns more than partner
+
+Acceptance of wife beating
+
+Q832B = V744B  Wife neglects children
+
+-   Q832A = V744A Wife goes out
+
+-   Q832C = V744C Wife argues
+
+-   Q832D = V744D Wife refuses sex
+
+-   Q832E = V744E Wife burns food
+
+    Knowledge level
+
+-   Q107 = in V106 : Ever attended school
+
+    -   Q108 = in V106 : Highest educational level 
+
+    -   Q109 = V107 : Highest grade at that level
+
+        Decision-making power
+
+        Q922 = V743A Own health care
+
+        -   Q923 = V743B Making large household purchases
+
+        -   Q919 = V739 Who usually decides how earnings spent
+
+        -   Q924 = V743D Visits to family
+
+        -   Q921 = V743F  Who usually decides on spending husband's/partner's earnings 
+
+### Mass media exposure
+
+V157 : Reads newspaper or magazine
+
+V158 : Listens to radio 
+
+V159 : Watches television 
+
+V169A : Own a mobile telephone 
+
+V171A : Have ever used the internet
+
+V171B : How often used internet the last month
+
+\
+
+v171a \~ "Use of internet",
+
+## Weighting variables
+
+individual sample weight (v005)
+
+cluster number (v001) strata (v022 or v023) primary sampling unit (v021)
+
+notes:
+
+DHS data structure:
+
+![](dhs_data_structure.png)
+
+**Sample design:**
+
+DHS sample designs are usually two-stage probability samples drawn from an existing sample frame, generally the most recent census frame. A probability sample is defined as one in which the units are selected randomly with known and nonzero probabilities. A sampling frame is a complete list of all sampling units that entirely covers the target population.
+
+Stratification is the process by which the sampling frame is divided into subgroups or strata that are as homogeneous as possible using certain criteria.
+
+Within each stratum, the sample design specifies an allocation of households to be selected. Most DHS surveys use a fixed take of households per cluster of about 25-30 households, determining the number of clusters to be selected. In the first stage of selection, the primary sampling units (PSUs) are selected with probability proportional to size (PPS) within each stratum. The PSUs are typically census enumeration areas (EAS). The PSU forms the survey cluster. In the second stage, a complete household listing is conducted in each of the selected clusters. Following the listing of the households a fixed number of households is selected by equal probability systematic sampling in the selected cluster.
+
+**Application of Sampling Weights:**
+
+Sample weights are calculated to six decimals but are presented in the standard recode files without the decimal point. They need to be divided by 1,000,000 before use to approximate the number of cases.
+
+sample design video: https://www.youtube.com/watch?v=DD5npelwh80
+
+sampling weights video: https://www.youtube.com/watch?v=SJRVxvdIc8s
+
+Stata codes video: https://www.youtube.com/watch?v=YpXPWMUsb94&t=776s
+
+## Data management
+
+Always use the FULL survey dataset. Do NOT exclude any observations, even those with missing data.The survey procedures need to have access to all survey design variable information for all observations in order to obtain valid estimates, even estimates in subgroups. ref: https://www.studocu.com/en-gb/document/university-of-essex/applying-regression/analyzing-complex-survey-data/23100776 Create a missing case indicator variable (we will call it nomiss) which will facilitate ensuring that our descriptive statistics are based on the same cases as the regression.
+
+```{r}
+library(haven)
+library(tidyverse)
+library(janitor)
+library(gtsummary)
+library(survey)
+ir <- read_sav("C:/Users/ylyl/OneDrive - Michigan Medicine/ResidentsResearch/Fellows/Marie Bangura/FGC/SL_2019_DHS/SLIR7ASV/SLIR7AFL.SAV")
+ir<- ir |>
+  clean_names()
+ir<-ir|>
+  mutate(wt=v005/1000000,
+# Complete case         
+# NOTE: This creates a logical vector, taking on values TRUE and FALSE         
+  nomiss = !is.na(v012) & !is.na(v101) & !is.na(v106) & !is.na(v130) & !is.na(v131) & !is.na(v025) & !is.na(v119) & !is.na(v121) & !is.na(v125) & !is.na(v136) & !is.na(v151) & !is.na(v171a) & !is.na(v190) & !is.na(v190a) & !is.na(g102)& !is.na(g119))
+ir<- ir |>
+  filter(g119==1 | g119==2)  #should use survey package subset function
+
+```
+
+## Tables
+
+Table 1 Demographic
+
+The analysis incorporated the following variables: individual sample weight (wt=v005/1000000), sample strata for sampling errors (v023) and cluster number (v021).
+
+```{r}
+# Complex sample design parameters
+DHSdesign<-svydesign(id=~v021, strata=~v023, weights=~wt, data=ir)
+#use the subset() function to create design objects that will produce analyses just for the cases with complete data. These design objects are not actually necessary for regression analyses, but will ensure that descriptive statistics are based on the same cases as regression analyses. 
+DHSdesign.nomiss <- subset(DHSdesign, nomiss)
+#demographic summary table
+DHSdesign.nomiss |>
+  tbl_svysummary(
+    # stratify summary statistics by the "continuation" column
+    by = g119,
+    # summarize a subset of the columns
+    include = c(v012, v101, v106,v130, v131,v025, v119, v121, v125, v136, v151, 
+                v171a, v190, v190a, g102, g119),
+    # adding labels to table
+    label = list(
+      v012 ~ "Age",
+      v106 ~ "Highest education level",
+      v101 ~ "Region",
+      v130 ~ "Religion",
+      v131 ~ "Ethnicity",
+      v025  ~   "Type of place of residence",
+      v119  ~   "Household has: electricity",
+      v121  ~   "Household has: television",
+      v125  ~   "Household has: car/truck",
+      v136  ~   "Number of household members (listed)",
+      v151 ~    "Sex of household head",
+      v171a ~   "Use of internet",
+      v190  ~   "Wealth index combined",
+      v190a  ~  "Wealth index for urban/rural"
+    )
+  ) |>
+  add_p() |> 
+  add_overall() |>
+  # adding spanning header
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**FGC**")|>
+  modify_caption("Table 1. Weighted descriptive statistics")
+#notes: Unweighted proportions reflect the composition of the sample, whereas weighted proportions estimate the population distribution.For categorical variables,  N and  n values in the table are estimated population totals – when we did unweighted analyses, these were sample sizes. ref: https://www.bookdown.org/rwnahhas/RMPH/survey-desc.html
+```
+
+Table 2 Women empowerment and FGC discontinuation
+
+Table 3 Logistic regression
+
+## References
+
+1.  Women's empowerment and female genital mutilation intention for daughters in Sierra Leone- a multilevel analysis
+
+outcome variable: intention for cutting daughters
+
+individual-level factors: women's empowerment, including (a) labour force participation (measured by current employment status); (b) acceptance of wife beating under some circumstances (e.g. neglects children, burns food, refuses to have sex with husband, argues with husband and visitations without permission from husband); (c) knowledge level (e.g. education level, listens, to the radio, reads newspaper and watches television); and (d) decision-making power (decision on respondent's healthcare, house earning, household purchases and visiting family members).other factors: age, household wealth index (poorest, poorer, middle, richer, richest), partner's education (no education, primary and secondary or higher), and fgc status.
+
+Contextual factors:whether FGM/C is required by religion (yes or no), if it is socially accepted (yes or no), family headship (male or female) and place of residence (urban or rural).
+
+model1: empty, no explanatory variables model2: individual-level factors only model3: contextual factors only model4: full tables: proportions, crude OR, adjusted OR
+
+2.  Dalal K, Kalmatayeva Z, Mandal S et al. Adolescent girls' attitudes toward female genital mutilation: a study in seven African countries \[version 1; referees: 2 approved, 1 not approved\] F1000Research 2018, 7:343 (doi:10.12688/f1000research.14142.1)
+
+didn't use sample weight- regional population size within a nation has no influence on this study (weight is normalized at national level?).
+
+3.  Anemia and Associated Factors Among Lactating Women in Sierra Leone: An Analysis of the Sierra LeoneDemographic and Health Survey 2019
+
+DOI: 10.1177/11786388221105732
+
+Methods: The analysis incorporated the following variables: individual sample weight, sample strata for sampling errors and cluster number. Analysis was carried out based on the weighted count to account for the unequal probability sampling in different strata and to ensure representativeness of the survey results at the national and regional level.
+
+```         
+```
+
+4.  DHS program
+
+    The DHS Program recode files are exported into several dataset types. Below is a description of the dataset types referred to in the Guide to DHS Statistics, together with the unit of analysis (or case) for each dataset: **HR: Household Recode** Unit of analysis: Households Includes household characteristics, the household roster, and biomarkers rosters as repeating sets of variables. This dataset is used for calculation of household level indicators such as water and sanitation (see Chapter2). **PR: Household members (or Persons) Recode** Unit of analysis: Household member Includes characteristics of household members including age, sex, marital status, education, as well as biomarker measurement information. The dataset includes both de facto and de jure household members. It also includes the characteristics of the households where the individual lives or was visiting. This dataset is used for analysis of education of household members (Chapter 2) and of anthropometry and anemia in children under age 5 (Chapter 11). **IR: Individual (Women's) Recode** Unit of analysis: De facto woman interviewed Contains all the data collected in the Woman's Questionnaire for de facto women plus some variables from the Household Questionnaire. Up to 20 births in the birth history (see also BR file), and up to 6 children under age 5 (see also KR file), for whom pregnancy and postnatal care as well as immunization, health and nutrition data were collected, can be found as repeated variables in this file. This dataset is used for most woman-level analysis including marriage and sexual activity (Chapter 4), fertility and fertility preferences (Chapters 5 and 6), family planning (Chapter 7), anthropometry and anemia in women (Chapter 11), malaria prevention for women (Chapter 12), HIV/AIDS (Chapters 13 and 14), women's empowerment (Chapter 15), adult and maternal mortality (Chapter 16), and domestic violence (Chapter 17). **BR: Births Recode** Unit of analysis: Birth Contains the full birth history of all women interviewed, including information on pregnancy and postnatal care as well as immunization, health and nutrition data for children born in the last 5 years. Data for the mother of each of these children are also included. This dataset is used for fertility (Chapter 5) and mortality (Chapter 8) analysis. **KR: Kids Recode** Unit of analysis: Child under age 5 born to a woman interviewed Contains the information related to the child's pregnancy and postnatal care and immunization, health and nutrition data. The data for the mother of each of these children is also included. This dataset is used to look at child health indicators such as immunization coverage, vitamin A supplementation, recent occurrences of diarrhea, fever, and cough for young children and treatment of childhood diseases (Chapter 10), nutrition of young children (Chapter 11), and malaria prevention and treatment (Chapter 12). **MR: Men's Recode** Unit of analysis: De facto man interviewed Contains all data collected in the Man's Questionnaire de facto men plus some variables from the Household Questionnaire. This dataset is used for most man-level analysis including marriage and sexual activity (Chapter 4), fertility preferences (Chapters 6), and HIV/AIDS (Chapters 13 and 14). **CR: Couples Recode** Unit of analysis: Married woman and man Contains data for married or living together women and men who both declared that they are married (living together) to each other and with completed individual interviews. This dataset is the result of linking the IR and MR files, based on whom they both declared as partners. In polygynous societies a man's data may be linked to more than one woman's data. This dataset is used for analysis of couples, principally related to HIV (Chapters 13 and 14). **FW: Fieldworker's Dataset** Unit of analysis: Fieldworker Contains the basic characteristics of each fieldworker who participated in the survey, including their age, sex, marital status, level of education, region of residence, languages, and prior experience with DHS or other surveys. Data from the fieldworker's dataset may be linked to the survey responses using the interviewer, supervisor, field editor, or biomarker specialists IDs.
+
+    sampling and weighting: https://www.youtube.com/watch?v=YpXPWMUsb94
+
+5.  Association between exposure to family planning messages on different mass media channels and the utilization of modern contraceptives among young women in Sierra Leone: insights from the 2019 Sierra Leone Demographic Health Survey
+
+    https://doi.org/10.1186/s12905-022-01974-w
+
+6.  Prevalence and factors associated with underweight among 15--49-year-old women in Sierra Leone: a secondary data analysis of Sierra Leone demographic health survey of 2019 https://doi.org/10.1186/s12905-023-02358-4
+
+7.  Prevalence of risk factors for human immunodeficiency virus among women of reproductive age in Sierra Leone: a 2019 nationwide survey
+
+    https://doi.org/10.1186/s12879-022-07037-7
+
+8.  Do educated women in Sierra Leone support discontinuation of female genital mutilation cutting? Evidence from the 2013 Demographic and Health Survey
+
+    Ameyaw et al. Reprod Health (2020) 17:174
+
+    https://doi.org/10.1186/s12978-020-01027-1
+
+note: render Quarto documents into self contained HTML format: html: embed-resources: true
+
+## Why do we need survey data analysis software?
+
+Regular procedures in statistical software (that is not designed for survey data) analyzes data as if the data were collected using simple random sampling. For experimental and quasi-experimental designs, this is exactly what we want. However, very few surveys use a simple random sample to collect data. Not only is it nearly impossible to do so, but it is not as efficient (either financially and statistically) as other sampling methods. When any sampling method other than simple random sampling is used, we usually need to use survey data analysis software to take into account the differences between the design that was used to collect the data and simple random sampling. This is because the sampling design affects both the calculation of the point estimates and the standard errors of those estimates. If you ignore the sampling design, e.g., if you assume simple random sampling when another type of sampling design was used, both the point estimates and their standard errors will likely be calculated incorrectly. The sampling weight will affect the calculation of the point estimate, and the stratification and/or clustering will affect the calculation of the standard errors. Ignoring the clustering will likely lead to standard errors that are underestimated, possibly leading to results that seem to be statistically significant, when in fact, they are not. https://stats.oarc.ucla.edu/r/seminars/survey-data-analysis-with-r/
