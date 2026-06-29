@@ -1,0 +1,763 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 8/29/2025
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title
+
+Clinical Utility and Cost-effectiveness of the Pre-operative Type and Screen in Gynecologic Oncology
+
+## Team
+
+Sarosi, Janke, Brackmann, Morgan
+
+## Background
+
+A **preoperative type and screen** is a common laboratory test ordered before many surgeries to prepare for the possibility that a patient might need a blood transfusion during or after their procedure.
+
+-   **Type**: This refers to determining your blood type (ABO group and Rh factor, e.g., A+, O-, etc.).
+
+-   **Screen**: This checks your blood for unexpected antibodies that could react with donor blood.
+
+Given the risk of intraoperative blood loss during surgery, preoperative type and screen is routinely ordered in GYO patients.
+
+Only a small portion of GYP patients require transfusion of blood products.
+
+Studies have demonstrated that a well-planned use of the pre-operative type and screen in benign gynecologic laparoscopic surgery is both safe and cost-effective. (less type and screen)
+
+**Difference from “Type and Crossmatch”**
+
+-   **Type and Screen:** Blood is *not* specifically reserved for you, just tested in advance. Used when transfusion is possible but not certain.
+
+-   **Type and Crossmatch:** Blood is actually set aside and matched in detail. Used when transfusion is almost certain or urgent.
+
+## Study population
+
+Patients aged \>/= 18 undergoing vulvar, vaginal or laparoscopic Gynecologic Oncology surgery at the University of Michigan. The pre-intervention cohort will range from 1/1/2021 to 12/31/2022. The post-intervention cohort will range from 1/1/2023 to 12/31/2024
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'GYO patients 1/1/2021-12/31/2024 (N=2367)'
+      [2]: 'Intervention December 2022'
+      [3]: 'Exclusion.....'
+      [4]: 'Pre-intervention cohort 1/1/2021-12/31/2022 N='
+      [5]: 'Post-intervention cohort 1/1/2023-12/31/2024 N='
+      ")
+```
+
+## Objective
+
+Through a pre-post study design, we aim to characterize the utility of the preoperative type and screen (T&S) in patients undergoing Gynecologic Oncology surgery.
+
+## Prediction
+
+1.  Intervention lowers the rate of T&S
+2.  Patients who had open surgery are more likely to have pre-operative T&S.
+
+## Primary outcome
+
+Pre-post changes in T&S ordering practices for vulvar, vaginal and laparoscopic Gynecologic Oncology surgeries
+
+## Secondary outcome
+
+Pre-post changes in morbidity, including rates of conversion from laparoscopic to laparotomy, estimated blood loss, rates of conversion from T&S to type and cross (T&C) without a transfusion, rates of perioperative (intra-operatively or post-operatively during the same hospitalization) transfusions, rates of urgent transfusions of un-crossmatched blood, and mortality rates.
+
+Cost savings associated with this intervention.
+
+## Variables of interest
+
+-Demographic characteristics: age, race, BMI, insurance
+
+-Clinical characteristics (comorbidity): anemia, hypertension, hyperlipidemia, diabetes, hyperthyroidism, hypothyroidism, COPD, asthma, OSA, GERD, diverticulosis, alcohol use, tobacco use, prior exposure to chemotherapy
+
+-Surgical characteristics: surgical type, surgical indication, length of stay after surgery (days), laparoscopy to laparotomy conversion, EBL, conversion to T&C without transfusion, perioperative transfusion, un-crossmatched transfusion, mortality
+
+-T&S characteristics: pre-operative T&S without transfusion, intra-operative T&S without transfusion, post-operative T&S without transfusion, T&C without transfusion
+
+## Raw Data Description
+
+Data source: Michart
+
+Data collection: by Ken
+
+1.  Available: sheet "QI", variable "indicatorWlist": ICU admission, transfusion perioperative, transfusion not perioperative. all listed Michart_Log_Id had transfusion if the values are "transfusion perioperative" or "transfusion not perioperative". not listed had no transfusion. ICU admission had no transfusion? "transfusion not periopetative" means UNKNOWN pre-operative transfusion or post-operative? casedate is admission date, not helpful in defining type of transfusion.
+
+    sheet "Orders", all listed Michart_Log_Id had T&S orders. what is "NO TS REQUIRED FOR OR" (patients don't need T&S-intervention?), variable "T&S_On_Surgery_Date" is intra-operative T&S, variable "30days_Prior" is pre-operative T&S, variable "30days_Post" is post-operative T&S.
+
+## Data management(Import, Cleaning, Variable Creation)
+
+### Load Packages
+
+```{r}
+library(readxl)
+library(tidyverse) #for import, cleaning, wrangling
+library(gtsummary) #for summarizing
+library(labelled) #for variable labelling
+library(rio) #import/export 
+library(janitor) #for cleaning and tabulation helpers
+library(visdat) #data visualization for missingness
+library(hmisc) #for variable labelling
+```
+
+### Import data
+
+```{r}
+#--- Import raw datasets from Excel ---
+#raw data structure: 
+#sheet "Cohort" demographics
+#sheet "Categories" surgical type
+#sheet "Dx" surgical indication, comorbidities
+#sheet "Orders" Type and screen orders
+#sheet "T&S Done" Type and screen done
+#sheet "QI" QI indicators (death, surgery conversion, transfusion, blood loss, etc)
+
+cohort <- read_excel("rawdata/Type & Screen Data 022626.xlsx", 
+    sheet = "Cohort") #n=2328
+category <- read_excel("rawdata/Type & Screen Data 022626.xlsx", 
+    sheet = "T&S + Comorbidities") #n=877
+dx <- read_excel("rawdata/Type & Screen Data 022626.xlsx", 
+    sheet = "Dx") #n=10134
+qi <- read_excel("rawdata/Type & Screen Data 022626.xlsx", 
+    sheet = "QI") #n=1155
+```
+
+### Initial Data Check and Cleaning
+
+```{r}
+#--- Basic structure and missingness checks ---
+str(data)          # Data structure
+head(data)         # First 6 rows
+dim(data)          # Number of rows & columns
+names(data)        # Variable names
+visdat::vis_miss(data) # Visualize missing data
+
+#replace empty string with NA, whole dataset, all columns
+data[data == ''] <- NA 
+#replace only on selected columns
+data <- data |> mutate_at('selected var', ~na_if(., '')) 
+
+#--- basic cleaning ---
+cohort <- cohort|> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+category <- category|> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+dx <- dx |> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+qi <- qi |> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+
+#--- Custom NA summary function ---
+check_na <- function(df) {
+  total_na <- sum(is.na(df))
+  na_per_column <- colSums(is.na(df))
+  list(total_na = total_na, na_per_column = na_per_column)
+}
+check_na(case_complete)
+
+#--- check MRN multiple entries ---
+cohort |>
+  get_dupes(mrn)    #mrn multiple entries
+#check case_id multiple entries
+cohort |>
+  get_dupes(case_id)   #case_id unique
+#check michart_log_id multiple entries
+cohort |>
+  get_dupes(michart_log_id)  #michart_log_id unique
+```
+
+### Merge Demographics and Comorbidities
+
+```{r}
+#organize comorbidities
+comor_codes <- list(
+  obesity           = c("E66.9", "E66.813", "E66.1", "E66.09", "E66.01"),
+  anemia            = c("D64.9", "D50.0", "D64.81"),
+  htn               = c("I10"),
+  hld               = c("E78.5", "E78.49", "E78.2", "E78.00"),
+  diabetes          = c("E11.9", "E11.8", "E11.69", "E11.65", "E11.59", "E11.49", "E11.43", "E11.42", "E11.40", "E11.3299", "E11.319", "E11.29", "E11.22", "E11.21", "E10.9", "E10.8", "E10.69", "E10.65", "E10.3293", "E10.22"),
+  hypothyroidism    = c("E89.0", "E03.9", "E03.8"),
+  copd              = c("J44.9", "J44.1", "J43.9", "J42"),
+  asthma            = c("J45.990", "J45.909", "J45.50", "J45.40", "J45.30", "J45.20"),
+  osa               = c("G47.33", "G47.34", "G47.30"),
+  gerd              = c("K21.9", "K21.00"),
+  ckd               = c("N18.9", "N18.6", "N18.5", "N18.4", "N18.32", "N18.31", "N18.30", "N18.2", "N18.1", "I12.9", "I13.2", "I13.0", "E11.22"),
+  acutekidneyfailure= c("N17.9", "N17.0"),
+  heartfailure      = c("I50.9", "I500.42", "I50.33", "I50.32", "I50.30", "I50.22", "I50.20"),
+  afib              = c("I48.92", "I48.91", "I48.21", "I48.20", "I48.19", "I48.11", "I48.0"),
+  endometriosis     = c("N80.9", "N80.8", "N80.512", "N80.3A3", "N80.341", "N80.321", "N80.3", "N80.202", "N80.2", "N80.129", "N80.123", "N80.122", "N80.121", "N80.111", "N80.103", "N80.102", "N80.101", "N80.1", "N80.0"),
+  anticoagulant     = c("Z79.01"),
+  tobaccouse        = c("Z72.0", "Z87.891", "F17.210", "F17.200")
+)
+# Unnest and tidy logic:
+dx_flags <- map_dfc(names(comor_codes), function(comorb) {
+  dx %>%
+    mutate(flag = as.integer(dx_cd %in% comor_codes[[comorb]])) %>%
+    group_by(michart_log_id) %>%
+    summarise(!!comorb := max(flag)) %>%
+    ungroup() %>%
+    select(-michart_log_id)
+})
+
+# Reattach michart_log_id
+output <- dx %>%
+  distinct(michart_log_id) %>%
+  bind_cols(dx_flags)
+# spot check using any comorbidity
+output %>%
+  filter(htn==1)|>
+  select(michart_log_id, htn)|>
+  print(n=100)
+#merge cohort and dx
+output$michart_log_id <- as.character(output$michart_log_id)
+case_complete <- left_join(cohort, output, by = "michart_log_id") #n=2328 unique case
+```
+
+### Merge Diagnosis
+
+```{r}
+# --- Organize diagnosis ---
+pathology_codes <- list(
+  vulvar_benign = c("N90.89", "N90.7", "N90.69", "N90.60", "N76.6", "N76.2", "N75.1", "N75.0", "D28.0"),
+  vulvar_precancer = c("N90.4", "N90.3", "N90.1", "N90.0", "L90.0"),
+  vulvar_cancer = c("D07.1", "C51.9", "C51.8", "C51.2", "C51.1", "C51.0"),
+  vaginal_benign = c("N89.8", "N84.2", "N76.5", "D28.1"),
+  vaginal_precancer = c("N89.3", "N89.1", "N89.0"),
+  vaginal_cancer = c("D07.2", "C52"),
+  cervical_benign = c("N88.8", "N84.1", "N72", "D26.0"),
+  cervical_precancer = c("N87.9", "N87.1", "N87.0", "R87.623", "R87.622", "R87.621", "R81.613", "R87.611", "R87.610"),
+  cervical_cancer = c("Z85.41", "D06.9", "D06.0", "C53.9", "C53.8", "C53.1", "C53.0"),
+  uterine_benign = c("N85.9", "N85.2", "N85.01", "N84.0", "D26.9", "D26.7", "D26.1", "D25.9", "D25.2", "D25.1", "D25.0", "D39.0"),
+  uterine_precancer = c("N85.00", "N85.02"),
+  uterine_cancer = c("Z85.42", "D07.00", "C55", "C54.9", "C54.8", "C54.2", "C54.1", "C54.0"),
+  ovarianft_peritoneal_benign = c("D20.1", "D20.0", "D19.1", "N83.9", "N83.8", "N83.519", "N83.512", "N83.511", "N83.292", "N83.209", "N83.202", "N83.201", "N83.12", "N83.11", "N83.02", "N83.01", "N83.00", "N70.93", "N70.92", "N70.91", "N70.13", "N70.11", "N70.01", "D39.12", "D39.11", "D39.10", "D27.9", "D27.1", "D27.0"),
+  ovarianft_peritoneal_cancer = c("C48.1", "Z85.43", "C79.63", "C57.4", "C57.02", "C57.01", "C57.00", "C56.9", "C56.3", "C56.2", "C56.1"),
+  gi_benign = c("D13.39", "D13.1", "D12.9", "D12.8", "D12.7", "D12.6", "D12.5", "D12.3", "D12.1", "D12.0", "D3A.020", "D37.3"),
+  gi_cancer = c("D01.3", "C21.0", "C20", "C19", "C18.9", "C18.7", "C18.4", "C18.2", "C18.1", "C17.2"),
+  femalegenital_unspecified_benign = c("D49.59", "D28.9", "D28.7", "D49.9", "D48.9", "D48.7", "D36.9", "D36.7", "D28.2"),
+  femalegenital_unspecified_cancer = c("Z85.40", "Z85.44", "D07.39", "C80.1", "C79.9", "C79.89", "C79.82", "C57.9"),
+  placental_benign = c("D39.2", "O43.219", "O43.213", "O43.212", "O43"),
+  placental_cancer = c("C58"),
+  lymphnode_benign = c("D36.0"),
+  urinarytract_benign = c("D30.4", "D30.3"),
+  urinarytract_cancer = c("D09.19", "C68.0", "C67.8", "C67.5", "C67.3"),
+  melanoma = c("D03.8", "D03.59", "C43.59", "C43.9"),
+  skin_cancer = c("C44.99", "C44.599", "C44.520", "C44.519")
+)
+# Unnest and tidy logic:
+path_flags <- map_dfc(names(pathology_codes), function(path) {
+  dx %>%
+    mutate(flag = as.integer(dx_cd %in% pathology_codes[[path]])) %>%
+    group_by(michart_log_id) %>%
+    summarise(!!path := max(flag)) %>%
+    ungroup() %>%
+    select(-michart_log_id)
+})
+
+# Reattach michart_log_id
+output_path <- dx %>%
+  distinct(michart_log_id) %>%
+  bind_cols(path_flags)
+# spot check 
+output_path %>%
+  filter(vulvar_cancer==1)|>
+  select(michart_log_id, vulvar_cancer)|>
+  print(n=100)
+#--- Organize cancer/benign ---
+cancer_benign_codes <- list(
+  cancer = c(
+    "D07.1", "C51.9", "C51.8", "C51.2", "C51.1", "C51.0", 
+    "D07.2", "C52", "Z85.41", "D06.9", "D06.0", "C53.9", 
+    "C53.8", "C53.1", "C53.0", "Z85.42", "D07.00", "C55", 
+    "C54.9", "C54.8", "C54.2", "C54.1", "C54.0", "C48.1", 
+    "Z85.43", "C79.63", "C57.4", "C57.02", "C57.01", "C57.00", 
+    "C56.9", "C56.3", "C56.2", "C56.1", "D01.3", "C21.0", 
+    "C20", "C19", "C18.9", "C18.7", "C18.4", "C18.2", 
+    "C18.1", "C17.2", "Z85.40", "Z85.44", "D07.39", "C80.1", 
+    "C79.9", "C79.89", "C79.82", "C57.9", "C58", "D09.19", 
+    "C68.0", "C67.8", "C67.5", "C67.3", "D03.8", "D03.59", 
+    "C43.59", "C43.9", "C44.99", "C44.599", "C44.520", "C44.519"
+  ),
+  benign = c(
+    "N90.89", "N90.7", "N90.69", "N90.60", "N76.6", "N76.2", 
+    "N75.1", "N75.0", "D28.0", "N90.4", "N90.3", "N90.1", 
+    "N90.0", "L90.0", "N89.8", "N89.3", "N89.1", "N89.0", 
+    "N88.8", "N84.1", "N72", "D26.0", "N87.9", "N87.1", 
+    "N87.0", "R87.623", "R87.622", "R87.621", "R81.613", 
+    "R87.611", "R87.610", "N85.9", "N85.2", "N85.01", "N84.0", 
+    "D26.9", "D26.7", "D26.1", "D25.9", "D25.2", "D25.1", 
+    "D25.0", "D39.0", "N85.00", "N85.02", "D20.1", "D20.0", 
+    "D19.1", "N83.9", "N83.8", "N83.519", "N83.512", "N83.511", 
+    "N83.292", "N83.209", "N83.202", "N83.201", "N83.12", "N83.11", 
+    "N83.02", "N83.01", "N83.00", "N70.93", "N70.92", "N70.91", 
+    "N70.13", "N70.11", "N70.01", "D39.12", "D39.11", "D39.10", 
+    "D27.9", "D27.1", "D27.0", "D13.39", "D13.1", "D12.9", 
+    "D12.8", "D12.7", "D12.6", "D12.5", "D12.3", "D12.1", 
+    "D12.0", "D3A.020", "D37.3", "D49.59", "D28.9", "D28.7", 
+    "D49.9", "D48.9", "D48.7", "D36.9", "D36.7", "D28.2", 
+    "D39.2", "O43.219", "O43.213", "O43.212", "O43", "D36.0", 
+    "D30.4", "D30.3"
+  )
+)
+# Unnest and tidy logic:
+cancer_flags <- map_dfc(names(cancer_benign_codes), function(cancer) {
+  dx %>%
+    mutate(flag = as.integer(dx_cd %in% cancer_benign_codes[[cancer]])) %>%
+    group_by(michart_log_id) %>%
+    summarise(!!cancer := max(flag)) %>%
+    ungroup() %>%
+    select(-michart_log_id)
+})
+
+# Reattach michart_log_id
+output_cancer <- dx %>%
+  distinct(michart_log_id) %>%
+  bind_cols(cancer_flags)
+#--- Merge case, output_path, output_cancer by michart_log_id
+output_path$michart_log_id <- as.character(output_path$michart_log_id)
+output_cancer$michart_log_id <- as.character(output_cancer$michart_log_id)
+case_complete <- left_join(case_complete, output_path, by = "michart_log_id") #n=2328 unique case 
+case_complete <- left_join(case_complete, output_cancer, by = "michart_log_id") #n=2328 unique case for outcome
+```
+
+### Merge QI data
+
+```{r}
+### organize QI data
+#create a list
+indicator_codebook <- list(
+  conversion = "GYN: 14. Conversion from laparoscopy to laparotomy",
+  death = "GYN:1:Death",
+  transfusion_periop = "GYN:12.1:Bleeding: transfusion, perioperative",
+  ebl_1000 = "GYN:12.41:Bleeding: BL >= 1,000cc",
+  ebl_1500 = "GYN:12.42:Bleeding: BL >= 1,500cc",
+  ebl_2000 = "GYN:12.43:Bleeding: BL >= 2,000cc",
+  ebl_2500 = "GYN:12.44:Bleeding: BL >= 2,500cc",
+  injury_major = "GYN:5.3:Surgical injury: major vessel",
+  transfusion_periop_pph = "OB:12.1:Bleeding: transfusion, perioperative OR PPH",
+  transfusion_periop_4 = "OB:12.6:Bleeding: transfusion, perioperative or PPH, 4 or more units packed RBC"
+)
+#create indicator columns
+wanted_vars <- names(indicator_codebook)
+qi_flagged <- map_dfc(
+  wanted_vars,
+  ~ qi %>%
+      mutate(flag = as.integer(indicator_wlist == indicator_codebook[[.x]])) %>%
+      group_by(michart_log_id) %>%
+      summarise(!!.x := max(flag), .groups = "drop") %>%
+      select(-michart_log_id)
+)
+
+result <- qi %>% distinct(michart_log_id) %>% bind_cols(qi_flagged)
+print(result) #n=471 obs
+# merge qi data
+result$michart_log_id <- as.character(result$michart_log_id)
+
+case_complete <- left_join(case_complete, result, by = "michart_log_id") #n=2328 cases
+```
+
+### Merge Surgical type and T&S data
+
+```{r}
+#merge category} 
+category <- category |>   
+  filter(!is.na(preop_t_s))  
+category$michart_log_id <- as.character(category$michart_log_id)  
+case_mis <- left_join(category, case_complete,by = "michart_log_id") #n=877 unique case
+
+```
+
+### **Variable Transformation**
+
+```{r}
+####################tidy variables################################
+#calculate bmi
+case_mis <- case_mis |>
+  mutate(height_m=height_in*0.0254,
+         bmi=weight_kg/height_m ^ 2,
+         bmigroup = case_when(bmi < 18.5 ~ "Under weight",
+                              bmi < 25 ~ "Normal weight",
+                              bmi < 30 ~ "Overweight",
+                              bmi >= 30 ~ "Obese"))
+case_mis$bmigroup<-  forcats::fct_relevel(case_mis$bmigroup, "Under weight", "Normal weight", "Overweight","Obese")
+# create variable 
+#relevel
+case_mis$cohort <- forcats::fct_relevel(case_mis$cohort, "Pre-Intervention", "Post-Intervention")
+# create binary variable 
+case_mis <- case_mis |>
+  mutate(ts = if_else(preop_t_s == "N", 0, 1))
+label(case_mis$ts)<- "Type & Screen"
+# convert transfusion_periop NA to 0
+case_mis <- case_mis |>
+  mutate(transfusion_periop=as.numeric(transfusion_periop))|>
+  mutate(transfusion_periop=case_when(is.na(transfusion_periop) ~ 0,
+                       TRUE ~ transfusion_periop))
+label(case_mis$transfusion_periop)<- "Periop transfusion"
+
+```
+
+### Fix missing data
+
+```{r}
+#fix missing diagnosis
+case_mis <- case_mis |>
+  mutate(cancertype=case_when(diagnosis_2=="cancer" ~ "Cancer",
+                              TRUE ~ diagnosis_2))
+#collect mrns that have missing ebl
+case_noebl <- case_mis|>
+  filter(is.na(ebl))|>
+  select(mrn.x, michart_log_id)
+export(case_noebl, "rawdata/case_noebl.csv")
+#import ebl data
+case_ebl <- read_csv("rawdata/case_noebl.csv")
+#old codes: merge
+case_ebl$michart_log_id <- as.character(case_ebl$michart_log_id) 
+case_mis <- case_mis %>%
+  left_join(case_ebl, by = "michart_log_id", suffix = c("_1", "_2")) %>%
+  mutate(ebl = coalesce(ebl_1, ebl_2)) 
+#updated
+case_mis$ebl.y <- as.character(case_mis$ebl.y) 
+case_mis <- case_mis %>%
+  mutate(ebl = coalesce(ebl.x, ebl.y)) 
+ebl <- case_mis |>
+  select(ebl.x, ebl.y,ebl)
+case_mis <- case_mis |>
+  mutate(
+    ebl = if_else(ebl == "N/A", "0", ebl),  # Everything is a string now!
+    ebl = as.numeric(ebl)                   # Convert to numeric
+  )
+```
+
+### **Variable Labeling**
+
+```{r}
+label(case_mis$age.y)<- "Age"
+label(case_mis$race.y)<- "Race"
+label(case_mis$ethnicity.y)<- "Ethnicity"
+label(case_mis$bmi)<- "BMI"
+label(case_mis$ebl)<- "EBL"
+```
+
+### Create Dataset for Demographic Table
+
+```{r}
+#############create dataset for demographic############################
+#keep single MRN entry by first visit
+mrn_mis <- case_mis |>
+  arrange(mrn.x, casedate) |>
+  distinct(mrn.x, .keep_all = TRUE)   #n=871
+
+```
+
+### **Save Final Data**
+
+```{r}
+#save
+export(case_complete, "case_complete.rds") #unique case n=2328
+export(case_mis, "case_mis.rds") #unique case n=877
+export(mrn_mis, "mrn_mis.rds") #unique mrn n=871
+```
+
+## Descriptive summary
+
+Table 1 Demographics (by unique MRN, first visit)
+
+```{r}
+# descriptive summary
+mrn_mis |>  
+  select(age.y, race.y, ethnicity.y, bmi, ebl, alcohol_use:tobaccouse, cohort) |>
+  tbl_summary(
+    #missing = "no",
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()
+```
+
+Table 2 Type and Screen rates (by case)
+
+All cases
+
+```{r}
+#Table 2 Type and Screen rates (by case)
+case_mis |>  
+  select(cohort, ts, transfusion_periop) |>
+  tbl_summary(
+    #missing = "no",
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+by diagnosis
+
+```{r}
+#by diagnosis
+case_mis |> 
+  filter(cancertype=="Benign/unknown")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+
+case_mis |> 
+  filter(cancertype=="Cancer")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+
+case_mis |> 
+  filter(cancertype=="Pre-cancer")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+Data discrepancy
+
+## Bivariate analysis
+
+```{r}
+#| echo: false
+data2 |>
+  select( var of interest) |>
+  tbl_summary(
+    by=var,
+    # missing = "no",
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()|>
+modify_header(
+    stat_1 ~ "**something**",
+    stat_2 ~ "**something**"
+  ) |> 
+  modify_spanning_header(all_stat_cols() ~ "**whatever**")|>
+  modify_caption("**Table 2. whatever Characteristics by whatever**")
+```
+
+## Conclusion
+
+## References
+
+Data Discrepancy: raw data sheet "Cohort" demographics and sheet "Categories" surgical type, some don't match: total 271 cases are not listed in categories.
+
+```{r}
+case_notype <- category|>
+  filter(is.na(column1))|>
+  select(mrn, michart_log_id)
+export(case_notype, "case_notype.csv")
+
+
+
+
+```
+
+## Abstract
+
+SGO 2026 Winter Meeting (not accepted)
+
+|  |  |
+|------------------------------------|------------------------------------|
+| **Title:** | Reducing Unnecessary Preoperative Type and Screen Utilization: A Quality Improvement Initiative in Minimally Invasive Gynecologic Oncology Surgery |
+| **Objectives:** | To evaluate the impact of reducing unnecessary preoperative type and screen (T&S) testing for patients undergoing minimally invasive gynecologic oncology surgery. |
+| **Methods:** | We conducted a pre/post quality improvement study at a single academic medical center to assess outcomes of implementing selective use of the preoperative T&S. In December 2022, gynecologic oncology surgeons were presented with institutional data demonstrating that transfusion rates for minimally invasive surgeries (MIS) were 1.8% and were subsequently encouraged to discontinue routine use of the preoperative T&S for these cases. The pre-intervention period was January 2021-December 2022 and post-intervention period was January 2023-December 2024. A random selection of MIS cases (laparoscopic and robotic cases and vaginal hysterectomies) during the study period were reviewed to compare T&S utilization rates before and after the intervention. T&S utilization was stratified by preoperative diagnosis (cancer, pre-cancer, or benign/unknown). Perioperative rates of transfusion and transfusion reactions were assessed. Cost savings of omitting preoperative T&S were calculated. |
+| **Results:** | Of the 381 MIS cases identified during the study period, 188 occurred before and 193 after the intervention. Preoperative T&S use significantly decreased post-intervention from 96.3% (181/188) to 42.5% (82/193) (p \< 0.001). This reduction was consistent across all preoperative diagnosis types: cancer (96.1% pre-intervention to 45.0% post-intervention), pre-cancer (94.0% pre-intervention to 40.4% post-intervention), and benign/unknown diagnoses (100.0% pre-intervention to 39.0% post-intervention) (all p\<0.001, Table 1). Perioperative transfusion rates were low in both groups (1.6% pre-intervention vs 2.1% post-intervention, significance not calculated due to low event rates), and no transfusion reactions occurred. From a cost-savings standpoint, avoidance of preoperative T&S in 111 cases during the post-intervention period resulted in an estimated institutional savings of \$27,528, based on a per-test cost of \$248. |
+| **Conclusions:** | This quality improvement initiative suggests that selective use of preoperative T&S in minimally invasive gynecologic oncology surgery is feasible, safe and cost-effective. |
+
+## Data analysis round 2
+
+```{r}
+#import raw data
+category <- read_excel("rawdata/Type & Screen Data_121725.xlsx", 
+    sheet = "Categories - T&S ") #n=878
+category <- category|> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+#merge category
+category <- category |>   
+  filter(!is.na(preop_t_s))  
+category$michart_log_id <- as.character(category$michart_log_id)  
+case_mis <- left_join(category, case_complete,by = "michart_log_id") #n=877 unique case
+#calculate bmi
+case_mis <- case_mis |>
+  mutate(height_m=height_in*0.0254,
+         bmi=weight_kg/height_m ^ 2,
+         bmigroup = case_when(bmi < 18.5 ~ "Under weight",
+                              bmi < 25 ~ "Normal weight",
+                              bmi < 30 ~ "Overweight",
+                              bmi >= 30 ~ "Obese"))
+case_mis$bmigroup<-  forcats::fct_relevel(case_mis$bmigroup, "Under weight", "Normal weight", "Overweight","Obese")
+# create binary variable 
+case_mis <- case_mis |>
+  mutate(ts = if_else(preop_t_s == "N", 0, 1))
+label(case_mis$ts)<- "Type & Screen"
+# convert transfusion_periop NA to 0
+case_mis <- case_mis |>
+  mutate(transfusion_periop=as.numeric(transfusion_periop))|>
+  mutate(transfusion_periop=case_when(is.na(transfusion_periop) ~ 0,
+                       TRUE ~ transfusion_periop))
+label(case_mis$transfusion_periop)<- "Periop transfusion"
+#relevel
+case_mis$cohort <- forcats::fct_relevel(case_mis$cohort, "Pre-Intervention", "Post-Intervention")
+#fix missing diagnosis
+case_mis <- case_mis |>
+  mutate(cancertype=case_when(diagnosis_2=="ba" ~ "Benign/unknown",
+                              diagnosis_2=="ca" ~ "Cancer",
+                              TRUE ~ diagnosis_2))
+#keep single MRN entry by first visit
+mrn_mis <- case_mis |>
+  arrange(mrn.x, casedate) |>
+  distinct(mrn.x, .keep_all = TRUE)   #n=871
+export(case_mis, "case_mis.rds") #unique case n=871
+export(mrn_mis, "mrn_mis.rds") #unique mrn n=877
+```
+
+```{r}
+# Table 1 Demographics (by unique MRN, first visit)
+mrn_mis |>  
+  select(age, race, ethnicity, bmi, ebl, alcohol_use:tobaccouse, cohort) |>
+  tbl_summary(
+    #missing = "no",
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()
+#Table 2 Type and Screen rates (by case)
+case_mis |>  
+  select(cohort, ts, transfusion_periop) |>
+  tbl_summary(
+    #missing = "no",
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+#by diagnosis
+case_mis |> 
+  filter(cancertype=="Benign/unknown")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+
+case_mis |> 
+  filter(cancertype=="Cancer")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+
+case_mis |> 
+  filter(cancertype=="Pre-cancer")|>
+  select(cohort, ts) |>
+  tbl_summary(
+    by=cohort,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p()
+```
+
+notes: ebl data no updates
+
+### 2/25/2026
+
+877 vs 878 cases-missing one case
+
+```{r}
+#identify missing case and missing data
+category1 <- read_excel("rawdata/Type & Screen Data 022526.xlsx", 
+    sheet = "T&S + Comorbidities") #n=878
+category1 <- category1|> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+category1$michart_log_id <- as.character(category1$michart_log_id)
+#category n=877
+#case_complete n=2328
+missingcase <- anti_join(category1, category, by="michart_log_id")
+#michart id: 3435312
+#missing data
+case_no <- category1|>
+  filter(is.na(diagnosis_2))|>
+  select(mrn, michart_log_id)
+#mrn, michart_log_id
+1
+014225766
+3435312
+2
+101561174
+3087333
+```
+
+Analysis
+
+```{r}
+#import raw data
+category <- read_excel("rawdata/Type & Screen Data 022626.xlsx", 
+    sheet = "T&S + Comorbidities") #n=877
+category <- category|> 
+  janitor::clean_names() |> 
+  janitor::remove_empty(which = c("rows", "cols"))
+#merge category
+category <- category |>   
+  filter(!is.na(preop_t_s))  
+category$michart_log_id <- as.character(category$michart_log_id)  
+case_mis <- left_join(category, case_complete,by = "michart_log_id") #n=877 unique case
+#calculate bmi
+case_mis <- case_mis |>
+  mutate(height_m=height_in*0.0254,
+         bmi=weight_kg/height_m ^ 2,
+         bmigroup = case_when(bmi < 18.5 ~ "Under weight",
+                              bmi < 25 ~ "Normal weight",
+                              bmi < 30 ~ "Overweight",
+                              bmi >= 30 ~ "Obese"))
+case_mis$bmigroup<-  forcats::fct_relevel(case_mis$bmigroup, "Under weight", "Normal weight", "Overweight","Obese")
+# create binary variable 
+case_mis <- case_mis |>
+  mutate(ts = if_else(preop_t_s == "N", 0, 1))
+label(case_mis$ts)<- "Type & Screen"
+# convert transfusion_periop NA to 0
+case_mis <- case_mis |>
+  mutate(transfusion_periop=as.numeric(transfusion_periop))|>
+  mutate(transfusion_periop=case_when(is.na(transfusion_periop) ~ 0,
+                       TRUE ~ transfusion_periop))
+label(case_mis$transfusion_periop)<- "Periop transfusion"
+#relevel
+case_mis$cohort <- forcats::fct_relevel(case_mis$cohort, "Pre-Intervention", "Post-Intervention")
+#fix missing diagnosis
+case_mis <- case_mis |>
+  mutate(cancertype=case_when(diagnosis_2=="ba" ~ "Benign/unknown",
+                              diagnosis_2=="ca" ~ "Cancer",
+                              TRUE ~ diagnosis_2))
+#keep single MRN entry by first visit
+mrn_mis <- case_mis |>
+  arrange(mrn.x, casedate) |>
+  distinct(mrn.x, .keep_all = TRUE)   #n=871
+export(case_mis, "case_mis.rds") #unique case n=871
+export(mrn_mis, "mrn_mis.rds") #unique mrn n=877
+```
+
+Manuscript
