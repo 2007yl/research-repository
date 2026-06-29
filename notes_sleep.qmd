@@ -1,0 +1,938 @@
+---
+title: ""
+author: ""
+date: 
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title:
+
+Sleep Disturbances and Menopausal Symptoms: Findings from the National Poll on Healthy Aging
+
+## Team
+
+Joey White
+
+## Background
+
+### Aging people's sleep
+
+**Age-related changes**
+
+-   [**Circadian rhythm**](https://www.google.com/search?q=Circadian+rhythm&sca_esv=3c872d09a5272a46&rlz=1C1GCEA_enUS1024US1025&ei=qvQNaa70FfLCp84P-fmokAk&ved=2ahUKEwicy9yOmOCQAxUWDTQIHQi_DgcQgK4QegQIAxAB&uact=5&oq=what+affects+aging+people+sleep&gs_lp=Egxnd3Mtd2l6LXNlcnAiH3doYXQgYWZmZWN0cyBhZ2luZyBwZW9wbGUgc2xlZXBIrFZQAFjNUnADeAGQAQCYAdYBoAGXGaoBBzIyLjExLjG4AQPIAQD4AQGYAhqgArwTwgILEAAYgAQYkQIYigXCAgsQABiABBixAxiDAcICCxAuGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAgUQLhiABMICDhAuGIAEGLEDGNEDGMcBwgIIEAAYgAQYsQPCAgUQABiABMICBBAAGAPCAgsQLhiABBjRAxjHAcICDhAAGIAEGLEDGIMBGIoFwgILEAAYgAQYsQMYigXCAggQLhiABBixA8ICBxAAGIAEGArCAgYQABgWGB7CAgsQABiABBiGAxiKBcICBRAAGO8FwgIIEAAYogQYiQXCAggQABiABBiiBMICCBAAGBYYChgewgIFECEYoAHCAgUQIRirAsICBRAhGJ8FmAMAkgcGMTYuOS4xoAfLtwGyBwYxNi45LjG4B7wTwgcGMC4yMC42yAc9&sclient=gws-wiz-serp&mstk=AUtExfDqN0-pbpIz-k0WOucpH9W6Ym2G14kxHbJdsYwQgI_JKVTsqk5bUAOWMuR1Ga_1NsghcWncO0BDnjNYXbPvkBoKkvjfJhGspeRe4zRK0RoL_okcA6FOeGKPN4s4IaIvGwL53bC7TGuD5sK_VdPEil_6DpcA1KbIhLXQCi1ktE3xQiw&csui=3) **and hormones:** The body's internal clock becomes less steady, leading to earlier sleep and wake times. The production of melatonin, a key sleep hormone, decreases, making sleep lighter and more easily disrupted.
+
+-   [**Sleep structure**](https://www.google.com/search?q=Sleep+structure&sca_esv=3c872d09a5272a46&rlz=1C1GCEA_enUS1024US1025&ei=qvQNaa70FfLCp84P-fmokAk&ved=2ahUKEwicy9yOmOCQAxUWDTQIHQi_DgcQgK4QegQIAxAD&uact=5&oq=what+affects+aging+people+sleep&gs_lp=Egxnd3Mtd2l6LXNlcnAiH3doYXQgYWZmZWN0cyBhZ2luZyBwZW9wbGUgc2xlZXBIrFZQAFjNUnADeAGQAQCYAdYBoAGXGaoBBzIyLjExLjG4AQPIAQD4AQGYAhqgArwTwgILEAAYgAQYkQIYigXCAgsQABiABBixAxiDAcICCxAuGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAgUQLhiABMICDhAuGIAEGLEDGNEDGMcBwgIIEAAYgAQYsQPCAgUQABiABMICBBAAGAPCAgsQLhiABBjRAxjHAcICDhAAGIAEGLEDGIMBGIoFwgILEAAYgAQYsQMYigXCAggQLhiABBixA8ICBxAAGIAEGArCAgYQABgWGB7CAgsQABiABBiGAxiKBcICBRAAGO8FwgIIEAAYogQYiQXCAggQABiABBiiBMICCBAAGBYYChgewgIFECEYoAHCAgUQIRirAsICBRAhGJ8FmAMAkgcGMTYuOS4xoAfLtwGyBwYxNi45LjG4B7wTwgcGMC4yMC42yAc9&sclient=gws-wiz-serp&mstk=AUtExfDqN0-pbpIz-k0WOucpH9W6Ym2G14kxHbJdsYwQgI_JKVTsqk5bUAOWMuR1Ga_1NsghcWncO0BDnjNYXbPvkBoKkvjfJhGspeRe4zRK0RoL_okcA6FOeGKPN4s4IaIvGwL53bC7TGuD5sK_VdPEil_6DpcA1KbIhLXQCi1ktE3xQiw&csui=3)**:** Older adults spend less time in deep, restorative sleep and wake up more frequently during the night.
+
+-   **Sleep pressure:** The homeostatic sleep drive, which builds up the longer you are awake, may decline, leading to less consolidated sleep. 
+
+**Health and lifestyle factors**
+
+-   **Chronic pain:** Conditions like arthritis or back pain can make it difficult to stay comfortable throughout the night.
+
+-   **Illnesses:** Many health conditions common in older adults, such as heart disease, diabetes, and lung diseases, can disrupt sleep.
+
+-   **Mental health:** Anxiety and depression are common and can interfere with both falling and staying asleep.
+
+-   **Medications:** The drugs prescribed for various health conditions can have side effects that disrupt sleep.
+
+-   **Nocturia:** The increased need to urinate during the night due to prostate or bladder problems is a frequent cause of awakening.
+
+-   **Lifestyle:** Factors like a lack of physical activity, frequent daytime napping, or a poor sleep environment can negatively impact nighttime sleep. 
+
+## Data source
+
+NPHA (National Poll on Healthy Aging)
+
+General health questions:
+
+Q1: In general, how would you rate your physical health?
+
+Q2: In general, how would you rate your mental health?
+
+Q3: How many adults and children age 0-17 live in your household not including yourself?
+
+Q5: What type(s) of health insurance do you currently have?
+
+Q6: Do you have a disability, impairment, or chronic health condition that limits your activities?
+
+Q7: In the past year, how often have you felt a lack of companionship?
+
+Q8: In the past year, how often have you felt isolated from others?
+
+Q9: In the past year, how often have you had contact with family, friends, or neighbors who do not live with you?
+
+Q10A: In general, how satisfied are you with your current social activities/social life?
+
+Q10B: In general, how satisfied are you with the relationships you have with those close to you?
+
+Q11: What is your relationship status?
+
+Q48: What is the main reason you use/practice integrative medicine strategies?
+
+**Menopause questions:**
+
+Q59: Which of the following best describes your menopausal status?
+
+Q60: In the past year, have you experienced any of the following symptoms? (G. sleep problems)
+
+Q61: How much do these symptoms interfere with your day-to-day life?
+
+Q62: Have you talked with your health care provider about any of these symptoms?
+
+Q63: Have you discussed potential treatment for these symptoms with your health care provider?
+
+Q63A: Did you treat/receive treatment for your symptoms?
+
+Q64: Overall, how well do you think your symptoms are managed?
+
+Q65: Do your symptoms interfere with your...
+
+## Hypothesis
+
+## Study population
+
+Female age 50-80, postmenopausal
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'Wave 10 survey completion N=2,277'
+      [2]: 'Female N=1,225'
+      [3]: 'Exclude 24 missing menopausal status and 12 missing important measures'
+      [4]: 'Exclude 181 pre/menopausal status'
+      [5]: 'Study population Postmenopausal women N=1,008'
+      ")
+```
+
+## Objective
+
+1.  Characterize postmenopausal women sleeping problems
+
+2.  Identify factors associated with sleeping problems
+
+## Exposure
+
+## Primary outcome
+
+## Secondary outcome
+
+## Variables of interest
+
+-Demographic characteristics: age, race, ethnicity, education, marital status, employment status, income, region, metropolitan area.
+
+-Comorbidity characteristics:
+
+-Menopause characteristics:
+
+## Methods
+
+**Describing NPHA Wave 10**
+
+The University of Michigan National Poll on Healthy Aging (NPHA) is a recurring, nationally representative household survey of adults age 50-80 on health-related issues.
+
+Starting in August 2021, NPHA surveys are conducted using NORC’s AmeriSpeak® panel, a nationally representative probability-sample panel of U.S. households. NPHA surveys are fielded twice a year with a sample of approximately 2,000 AmeriSpeak® members age 50–80.
+
+Wave 10 of the National Poll on Healthy Aging contains five sections of data on the following topics: health and household, aging in place, arthritis, integrative medicine, and women’s health.
+
+Data for Wave 10 of the National Poll on Healthy Aging were collected through an internet and phone-based survey in January and February 2022.
+
+**Describing AmeriSpeak and its panel methodology**
+
+Recommended by AmeriSpeak and NORC: Funded and operated by NORC at the University of Chicago, AmeriSpeak® is a probability-based panel designed to be representative of the US household population. Randomly selected US households are sampled using area probability and address-based sampling, with a known, non-zero probability of selection from the NORC National Sample Frame. These sampled households are then contacted by US mail, telephone, and field interviewers (face to face). The panel provides sample coverage of approximately 97% of the U.S. household population. Those excluded from the sample include people with P.O. Box only addresses, some addresses not listed in the USPS Delivery Sequence File, and some newly constructed dwellings. While most AmeriSpeak households participate in surveys by web, non-internet households can participate in AmeriSpeak surveys by telephone. Households without conventional internet access but having web access via smartphones are allowed to participate in AmeriSpeak surveys by web. AmeriSpeak panelists participate in NORC studies or studies conducted by NORC on behalf of governmental agencies, academic researchers, and media and commercial organizations.
+
+**Weighting**
+
+Survey data were weighted to align with the most recent benchmarks from the Current Population Survey (CPS) developed by the U.S. Census Bureau, using factors such as gender, age, education, race/ethnicity, housing tenure, telephone status, and Census Division. Sampling details see surveyreport page 5.
+
+**Sample size**
+
+A total of 2,277 respondents completed the survey, 2,128 by web mode and 149 by phone. For this study, we used the R package "survey" to subset female participants (unweighted n = 1225). After excluding 36 individuals due to missing values on menopausal status and sleep problems, and 181 individuals at premenopausal or menopausal status, the final unweighted sample consisted of 1008 postmenopausal female respondents. Weights calibrated to the full panel sample were applied to analyses of this postmenopausal female subpopulation, ensuring that weighted estimates are representative of U.S. postmenopausal women aged 50-80.
+
+**Measures**
+
+Sociodemographic variables: Age, race/ethnicity, education, household income, marital status, employment status.
+
+Health variables: comorbidities
+
+Life style variables: overall physical and mental health, physical and other interventions.
+
+Menopause variables: symptoms and managements.
+
+**Statistical Analysis**
+
+Weighted median and interquartile range were calculated to describe continuous data. Unweighted frequencies and weighted proportions were calculated to describe the distribution of categorical data. Differences between those who did and did not have sleep problems were assessed using a survey-weighted Wilcoxon rank-sum test or Chi-square test with Rao and Scott’s second-order correction. All data management and analyses were conducted using R (version 4.3.0). Statistical significance was set at p \< .05.
+
+## Data management (Import, Cleaning, Variable Creation)
+
+### Load Packages
+
+```{r}
+library(tidyverse) #for import, cleaning, wrangling
+library(gtsummary) #for summarizing
+library(labelled) #for variable labelling
+library(rio) #import/export 
+library(janitor) #for cleaning and tabulation helpers
+library(visdat) #data visualization for missingness
+library(haven)  # import Stata data
+library(Hmisc)
+```
+
+### Import data
+
+```{r}
+#--- Import raw datasets  ---
+data <- read_dta("rawdata/NPHA_Wave10_January2022.dta")
+
+# Convert haven_labelled columns to factors
+data <- data %>%
+  mutate(
+    across(where(is.labelled), as_factor)
+  )
+```
+
+### Initial Data Check and Cleaning
+
+```{r}
+#--- Basic structure and missingness checks ---
+str(data)          # Data structure
+head(data)         # First 6 rows
+dim(data)          # Number of rows & columns
+names(data)        # Variable names
+visdat::vis_miss(data) # Visualize missing data
+
+#replace empty string with NA, whole dataset, all columns
+data[data == ''] <- NA 
+#replace only on selected columns
+data <- data |> mutate_at('selected var', ~na_if(., '')) 
+
+#--- Custom NA summary function ---
+check_na <- function(df) {
+  total_na <- sum(is.na(df))
+  na_per_column <- colSums(is.na(df))
+  list(total_na = total_na, na_per_column = na_per_column)
+}
+check_na(data)
+
+#--- Duplicates ---
+data |> get_dupes()
+```
+
+### Recode values to NA
+
+```{r}
+#--- Recode values to NA---
+recode_to_na <- function(df, targets = c("DON'T KNOW", "SKIPPED ON WEB", "REFUSED")) {
+  # Apply to all columns (character or factor)
+  for (col in names(df)) {
+    # For factor columns
+    if (is.factor(df[[col]])) {
+      # Set factor elements matching targets to NA
+      df[[col]][as.character(df[[col]]) %in% targets] <- NA
+      # Drop the unused levels (optional, but tidy)
+      df[[col]] <- droplevels(df[[col]])
+    } else if (is.character(df[[col]])) {
+      # For character columns
+      df[[col]][df[[col]] %in% targets] <- NA
+    }
+    # For other types (numeric etc.), skip
+  }
+  return(df)
+}
+data <- recode_to_na(data)
+```
+
+### **Variable Transformation and Labeling**
+
+```{r}
+#--- Recode variables for analysis ---
+#create variable for any menopausal symptom
+data <- data |>
+  mutate(
+    across(q60a:q60i, ~ as.character(as_factor(.x)))
+  ) |>
+  rowwise() |>
+  mutate(
+      symptom = case_when(
+      any(c_across(q60a:q60i) == 1, na.rm = TRUE) ~ "Yes",
+      all(is.na(c_across(q60a:q60i))) ~ NA_character_,
+      any(c_across(q60a:q60i) == 2, na.rm = TRUE) ~ "No",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  ungroup()
+
+#recode each menopause symptom
+recode_q60 <- function(x) {
+  case_when(
+    x == 1 ~ "Yes",
+    x == 2 ~ "No",
+    is.na(x) ~ NA_character_,
+    TRUE ~ as.character(x)
+  )
+}
+
+data <- data |>
+  mutate(
+    across(
+      q60a:q60i,
+      recode_q60
+    )
+  )
+#create variable for sleep problem
+data <- data |>
+  mutate(
+     sleep=case_when(q60g=="Yes" ~ 1,
+                         q60g=="No" ~ 0,
+                         TRUE ~ NA),
+         sleep=as.numeric(sleep))
+data <- data |>
+  mutate(sleep_cat=as_factor(q60g),
+         sleep_cat=
+  case_when(
+    sleep_cat == 1 ~ "Yes",
+    sleep_cat == 2 ~ "No",
+    TRUE ~ NA))
+
+###demographics
+data <- data |>
+  mutate(racethnicity_new= case_when (
+    racethnicity %in% c("Other, non-Hispanic", "2+, non-Hispanic", "Asian, non-Hispanic" ) ~ "Other, non-Hispanic",
+    TRUE ~ racethnicity),
+    educ5_new = case_when (
+      educ5 %in% c("Less than HS", "HS graduate or equivalent") ~ "High School Graduate or Less",
+      educ5 %in% c("Bachelor's degree", "Post grad study/professional degree") ~ "Bachelor’s degree or higher (Bachelor’s + postgraduate)",
+      TRUE ~ educ5),
+    marital_new = case_when (
+      marital %in% c("Married", "Living with partner") ~ "Married or Partnered",
+      marital %in% c("Widowed", "Divorced", "Separated") ~ "Previously married",
+      TRUE ~ marital),
+    employ_new = case_when ( 
+      employ %in% c("Working - as a paid employee", "Working - self-employed") ~ "Working",
+      TRUE ~ "Not working"))
+###life styles
+#physical health and mental health: combine excellent and very good, combine good and fair
+data <- data |>
+  mutate(
+    q1_new = as_factor(q1),
+    q1_new = case_when (
+      q1_new %in% c(1:2) ~ "Very good or Excellent",
+      q1_new %in% c(3:4) ~ "Good or Fair",
+      q1_new==5 ~ "Poor",
+      TRUE ~ q1_new),
+    q2_new = as_factor(q2),
+    q2_new = case_when (
+      q2_new %in% c(1:2) ~ "Very good or Excellent",
+      q2_new %in% c(3:4) ~ "Good or Fair",
+      q2_new==5 ~ "Poor",
+      TRUE ~ q2_new))
+#q46a:q46i: Currently Acupuncture, chiropractice, yoga, etc. combine Yes, Not now, but have done in the past, No, but have interest in trying it
+data <- data |>
+  mutate(
+    across(
+      q46a:q46i,
+      as_factor,
+      .names = "{.col}_new"
+    )
+  )
+recode_q46 <- function(x) {
+  case_when(
+    x %in% c(1:3) ~ "Yes, Previously tried, or interested",
+    x ==4 ~ "No, and not interested in trying it",
+    TRUE ~ x
+  )
+}
+
+data <- data |>
+  mutate(
+    across(
+      q46a_new:q46i_new,
+      recode_q46
+    )
+  )
+#q46b, q46c, q46d, q46f, q46g, q46h:Combine biofeedback, clinical hypnosis, guided imagery, meditation, tai chi, and yoga into: "Holistic and spiritual interventions including biofeedback, hypnosis, guided imagery, meditation, tai chi, and yoga"
+yes_label <- "Yes, Previously tried, or interested"
+no_label  <- "No, and not interested in trying it"
+
+data <- data |>
+  mutate(
+    q46_hol = case_when(
+      if_all(
+        c(q46b_new, q46c_new, q46d_new, q46f_new, q46g_new, q46h_new),
+        is.na
+      ) ~ NA_character_,
+
+      if_any(
+        c(q46b_new, q46c_new, q46d_new, q46f_new, q46g_new, q46h_new),
+        ~ .x == yes_label
+      ) ~ yes_label,
+
+      TRUE ~ no_label
+    )
+  )
+#q46a, q46e, q46i: Combine Acupuncture, massage therapy, chiropractic care into: "Physical Interventions including acupuncture, massage therapy, chiropractic care"
+data <- data |>
+  mutate(
+    q46_phy = case_when(
+      if_all(
+        c(q46a_new, q46e_new, q46i_new),
+        is.na
+      ) ~ NA_character_,
+
+      if_any(
+        c(q46a_new, q46e_new, q46i_new),
+        ~ .x == yes_label
+      ) ~ yes_label,
+
+      TRUE ~ no_label
+    )
+  )
+#q48_1:q48_5: use acupuncture, yoga, etc for: Combine "Physical Symptoms" and "Acute Injury" into:"Physical Symptoms or Acute Injury"; combine "Mental Health", "Stress Management", and "Relaxation" into: "Mental Health, Stress Management, or Relaxation"
+data <- data |>
+  mutate(
+    across(
+      q48_1:q48_5,
+      as_factor,
+      .names = "{.col}new"
+    )
+  )
+recode_q48 <- function(x) {
+  case_when(
+    x %in% c(1,3) ~ "Physical Symptoms or Acute Injury",
+    x %in% c(2,5,6) ~ "Mental Health, Stress Management, or Relaxation",
+    x ==4 ~ "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)",
+    x ==7 ~ "Other",
+    TRUE ~ x
+  )
+}
+
+data <- data |>
+  mutate(
+    across(
+      q48_1new:q48_5new,
+      recode_q48
+    )
+  )
+```
+
+### **Factor Level Orders & Additional Recoding**
+
+```{r}
+#--- Convert variable and set preferred level order ---
+data$symptom <- forcats::fct_relevel(data$symptom, "Yes", "No")
+data$q60g <- forcats::fct_relevel(data$q60g, "Yes", "No")
+data$sleep_cat <- forcats::fct_relevel(data$sleep_cat, "Yes", "No")
+data$racethnicity_new <- forcats::fct_relevel(data$racethnicity_new,"White, non-Hispanic", "Black, non-Hispanic", "Other, non-Hispanic", "Hispanic")
+data$educ5_new <-  forcats::fct_relevel(data$educ5_new, "High School Graduate or Less", "Vocational/tech school/some college/ associates", "Bachelor’s degree or higher (Bachelor’s + postgraduate)")
+data$marital_new <- forcats::fct_infreq(data$marital_new)
+data$metro <- forcats::fct_infreq(data$metro)
+
+data$q1_new <- forcats::fct_relevel(data$q1_new, "Very good or Excellent", "Good or Fair", "Poor")
+data$q2_new <- forcats::fct_relevel(data$q2_new, "Very good or Excellent", "Good or Fair", "Poor")
+data$q46_hol <- forcats::fct_relevel(data$q46_hol, "Yes, Previously tried, or interested", "No, and not interested in trying it")
+data$q46_phy <- forcats::fct_relevel(data$q46_phy, "Yes, Previously tried, or interested", "No, and not interested in trying it")
+data$q48_1new <- forcats::fct_relevel(data$q48_1new, "Physical Symptoms or Acute Injury", "Mental Health, Stress Management, or Relaxation", "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)")
+data$q48_2new <- forcats::fct_relevel(data$q48_2new, "Physical Symptoms or Acute Injury", "Mental Health, Stress Management, or Relaxation", "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)", "Other")
+data$q48_3new <- forcats::fct_relevel(data$q48_3new, "Physical Symptoms or Acute Injury", "Mental Health, Stress Management, or Relaxation", "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)", "Other")
+data$q48_4new <- forcats::fct_relevel(data$q48_4new, "Physical Symptoms or Acute Injury", "Mental Health, Stress Management, or Relaxation", "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)", "Other")
+data$q48_5new <- forcats::fct_relevel(data$q48_5new, "Physical Symptoms or Acute Injury", "Mental Health, Stress Management, or Relaxation", "Chronic disease (e.g.such as, diabetes, obesity, high blood pressure)", "Other")
+```
+
+### **Variable Labelling**
+
+```{r}
+#--- Label variables for reporting/plotting ---
+#check labels
+label_list <- sapply(data |> select(hl003newa:hl003newn), function(x) attr(x, "label"))
+print(label_list)
+
+sub_data <- data |> select(hl003newa:hl003newn)
+# Remove label attributes from each column
+sub_data2 <- sub_data
+for (nm in names(sub_data2)) attr(sub_data2[[nm]], "label") <- NULL
+tbl_summary(sub_data2)
+
+#demographics
+label(data$age)    <- "Age"
+label(data$racethnicity_new) <- "Race/Ethnicity"
+label(data$marital_new)   <- "Marital Status"
+label(data$educ5_new)<- "Education"
+label(data$employ_new)  <- "Employment Status"
+label(data$income4)    <- "Income"
+label(data$metro)<- "Metro"
+#survey questions
+label(data$q1) <- "Physical health in general"
+label(data$q1_new) <- "Physical health in general"
+label(data$q2) <- "Mental health in general"
+label(data$q2_new) <- "Mental health in general"
+label(data$q7) <- "Lack of companionship in the past year"
+label(data$q8) <- "Felt isolated in the past year"
+label(data$q9) <- "had contact with family/friends/neighbors in the past year"
+label(data$q10a) <- "Current social activities in general"
+label(data$q10b) <- "Relationships in general"
+label(data$q12_1) <- "Provide care to an adult who lives with me"
+label(data$q12_2) <- "Provide care to an adult who does not live with me"
+label(data$q13_1) <- "Receive services from a paid caregiver"
+label(data$q13_2) <- "Receive services from an unpaid caregiver"
+label(data$q46a) <- "Currently receive acupuncture"
+label(data$q46b) <- "Currently receive biofeedback"
+label(data$q46c) <- "Currently receive clinical hypnosis"
+label(data$q46d) <- "Currently receive guided imagery"
+label(data$q46e) <- "Currently receive massage therapy"
+label(data$q46f) <- "Currently receive meditation"
+label(data$q46g) <- "Currently receive Tai chi"
+label(data$q46h) <- "Currently receive yoga"
+label(data$q46i) <- "Currently receive chiropractic care"
+label(data$q46_hol) <- "Holistic and spiritual interventions including biofeedback, hypnosis, guided imagery, meditation, tai chi, and yoga"
+label(data$q46_phy) <- "Physical Interventions including acupuncture, massage therapy, chiropractic care"
+label(data$q48_1) <- "Use acupuncture for"
+label(data$q48_2) <- "Use message therapy for"
+label(data$q48_3) <- "Use meditation for"
+label(data$q48_4) <- "Use yoga for"
+label(data$q48_5) <- "Use chiropractic care for"
+label(data$q48_1new) <- "Currently use acupuncture for"
+label(data$q48_2new) <- "Currently use message therapy for"
+label(data$q48_3new) <- "Currently use meditation for"
+label(data$q48_4new) <- "Currently use yoga for"
+label(data$q48_5new) <- "Currently use chiropractic care for"
+label(data$q49) <- "How integrative medicine strategies benefit" 
+label(data$q58a) <- "How mental status impacts health" 
+label(data$q58b) <- "How environment (personal and work) impacts health" 
+label(data$q58c) <- "How relationships impact health" 
+
+label(data$hl003newa)  <- "Hypertension"
+label(data$hl003newb)  <- "Diabetes"
+label(data$hl003newc) <- "High blood cholesterol level"
+label(data$hl003newd)   <- "Cancer"
+label(data$hl003newe) <- "Lung disease"        
+label(data$hl003newf) <- "Heart disease"
+label(data$hl003newg) <- "Stroke"
+label(data$hl003newh) <- "Psychiatric problem"
+label(data$hl003newi) <- "Alzheimer"
+label(data$hl003newj) <- "Dementia"
+label(data$hl003newk) <- "Arthritis or rheumatism"
+label(data$hl003newl) <- "COVID-19"
+label(data$hl003newm) <- "Other"
+label(data$hl003newn) <- "None"
+#menopause questions
+label(data$q59) <- "Menopausal status"
+label(data$q60a) <- "Menstrual changes"
+label(data$q60b) <- "Hot flashes/night sweats"
+label(data$q60c) <- "Weight gain/slowed metabolism"
+label(data$q60d) <- "Reduced libido or sexual drive"
+label(data$q60e) <- "Mood swings/irritability"
+label(data$q60f) <- "Pelvic/bladder pain"
+label(data$q60g) <- "Sleep problems"
+label(data$q60h) <- "Urinary Tract Infections"
+label(data$q60i) <- "Other"
+label(data$symptom) <- "Any menopausal symptom"
+label(data$q61) <- "How much do these symptoms interfere with your day-to-day life?"
+label(data$q62) <- "Have you talked with your health care provider about any of these symptoms?"
+label(data$q63) <- "Have you discussed potential treatment for these symptoms with your health care provider?"
+label(data$q63a) <- "If you have discussed with a provider, did you treat/receive treatment for your symptoms?"
+label(data$q64) <- "If you treated/received treatment, overall, how well do you think your symptoms are managed?"
+label(data$q65a) <- "Do symptoms interfere with your self-confidence"
+label(data$q65b) <- "Do symptoms interfere with your romantic relationships"
+label(data$q65c) <-  "Do symptoms interfere with your ability to be sexually active"
+label(data$sleep_cat) <- "Sleep problems"
+```
+
+### **Distribution & Missing Data Checks**
+
+```{r}
+#--- Normality tests ---
+shapiro.test(data$age)     
+
+#--- List caseid with missing info ---
+data |>
+  filter(is.na(variable)) |>
+  select(caseid) |>
+  print(n = 100)
+```
+
+### **Save Final Data**
+
+```{r}
+#--- Save cleaned/curated dataframe ---
+export(data, "data.rds") #n=2277
+```
+
+## Descriptive summary (unweighted)
+
+### Postmenopausal women N=1008 (unweighted)
+
+```{r}
+#demographics-unweighted
+#female, exclude q59 "don't know", "skipped", "refused", postmenopausal only
+data |>
+  filter(gender == "Female") |> #n=1225
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  filter(!is.na(sleep)) |> #n=1008
+  select(age, racethnicity_new, educ5_new, marital_new, employ_new, income4,metro, sleep_cat)|>
+  tbl_summary(
+    by=sleep_cat,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |>  
+  modify_caption("**Table 1. Demographic Characteristics (unweighted)**")
+
+#comorbidities
+data|>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  filter(!is.na(sleep)) |> #n=1008
+  select(hl003newa:hl003newh, hl003newj:hl003newl, sleep_cat)|>
+  tbl_summary(
+    by=sleep_cat,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |> 
+  modify_caption("**Table 2. Comorbidities (unweighted)**")
+
+#life style
+data|>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  filter(!is.na(sleep)) |> #n=1008
+  select(q1_new, q2_new, q7, q8, q10a, q10b, q12_1, q12_2, q46_hol, q46_phy,q46a, q48_1new,q46e,q48_2new,q46f, q48_3new, q46h, q48_4new, q46i,q48_5new, sleep_cat)|>
+  tbl_summary(
+    by=sleep_cat,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |> 
+  modify_caption("**Table 3. Life style (unweighted)**")
+#currently receive acupincture n=19, massage therapy n=214, meditation n=214, yoga n=117, chiropractice n=141
+
+#menopause_1
+data|>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  filter(!is.na(sleep)) |> #n=1008
+  select(symptom,q60a:q60f, q60h, sleep_cat)|>
+  tbl_summary(
+    by = sleep_cat,
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |> 
+  modify_caption("**Table 4. Postmenopause health-symptom (unweighted)**")
+
+#menopause_2
+data|>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  filter(!is.na(sleep)) |> #n=1008
+  filter(symptom == "Yes") |> # n=832
+  select(q61,q62,q63, q63a,q64,q65a:q65c)|>
+  tbl_summary(
+    missing = "no",
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 4b. Postmenopause health-symptom management (unweighted)**")
+```
+
+## Descriptive summary (weighted)
+
+### Sample weights
+
+```{r}
+library(survey)
+# sample design parameters
+sleepdesign<-svydesign(ids = ~1, weights=~weight, data=data)
+#use the subset() function to create design objects that will produce analyses just for the cases of interest.  
+#female; exclude missing menopausal status and sleep problems; only postmenopausal
+sleepdesign.post  <- subset(sleepdesign, gender=="Female" & str_starts(q59, "Postmenopausal") & !is.na(sleep))
+```
+
+### Weighted descriptive statistics
+
+```{r}
+#demographics-weighted
+sleepdesign.post |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    include = c(age, racethnicity_new, educ5_new, marital_new, employ_new, income4,metro),
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("Table 1. Weighted descriptive statistics of demographic characteristics")
+
+#comorbidities
+sleepdesign.post |>
+  tbl_svysummary(
+  include = c(hl003newa:hl003newh, hl003newj:hl003newl),
+  digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 2. Comorbidities (weighted)**")
+
+#life style
+sleepdesign.post |>
+  tbl_svysummary(
+  include = c(q1_new, q2_new, q7, q8, q10a, q10b, q12_1, q12_2, q46_hol, q46_phy,q46a, q48_1new,q46e,q48_2new,q46f, q48_3new, q46h, q48_4new, q46i,q48_5new),
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 3. Life style (weighted)**")
+
+#menopause_1
+sleepdesign.post |>
+  tbl_svysummary(
+  include = c(symptom,q60a:q60i),
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 4a. Postmenopause health-symptom (weighted)**")
+
+#check subset first then apply weights: results same as apply weights first then subset.Reason: simple sample design; complex sample design (strata: may have different results)
+post <- data |>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal"))
+postdesign<-svydesign(ids = ~1, weights=~weight, data=post)
+postdesign |>
+  tbl_svysummary(
+  include = c(symptom,q60a:q60i),
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 4a. Postmenopause health-symptom (weighted)**")
+post.manage <- post |>
+  filter(symptom == "Yes")
+post.managedesign<-svydesign(ids = ~1, weights=~weight, data=post.manage)
+post.managedesign |>
+  tbl_svysummary(
+  include = c(q61,q62,q63, q63a,q64,q65a:q65c),
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Table 4b. Postmenopause health-symptom management (weighted)**")
+```
+
+### Bivariate analysis by sleep problems (weighted)
+
+```{r}
+#if any error message about incompatible types.
+sleepdesign.post <- update(
+  sleepdesign.post,
+  sleep_cat = as_factor(sleep_cat)
+)
+#demographics 
+sleepdesign.post |>
+  tbl_svysummary(
+    #missing = "no",
+    # summarize a subset of the columns
+    by=sleep_cat,
+    include = c(age, racethnicity_new, educ5_new, marital_new, employ_new, income4,metro),
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_footnote(
+    p.value ~ "Wilcoxon rank-sum test; Pearson's Chi-square test with Rao & Scott adjustment"
+  ) |>
+  add_overall() |>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |>   
+  modify_caption("**Table 1. Demographic Characteristics (weighted)**")  
+
+# Survey-weighted Wilcoxon rank-sum test
+svyranktest(
+  age ~ sleep_cat,
+  design = sleepdesign.post,
+  test = "wilcoxon"
+)
+
+
+
+#comorbidities 
+sleepdesign.post |>
+  tbl_svysummary(
+    by=sleep_cat,
+  include = c(hl003newa:hl003newh, hl003newj:hl003newl),
+  digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p() |>
+  modify_footnote(
+    p.value ~ "Pearson's Chi-square test with Rao & Scott adjustment"
+  ) |>
+ # add_overall() |>  
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |>   
+  modify_caption("**Table 2. Comorbidities (weighted)**")  
+#life style 
+sleepdesign.post |>
+  tbl_svysummary(
+    by=sleep_cat,
+  include = c(q1_new, q2_new, q7, q8, q10a, q10b, q12_1, q12_2, q46_hol, q46_phy),
+  digits = list(all_categorical() ~ c(0, 1)))|>  
+  add_p () |>
+  modify_footnote(
+    p.value ~ "Pearson's Chi-square test with Rao & Scott adjustment"
+  ) |>
+  add_overall()|>   
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |>   
+  modify_caption("**Table 3. Life style (weighted)**") 
+
+sleepdesign.post |>
+  tbl_svysummary(
+    by=sleep_cat,
+  include = c(q46a, q48_1new,q46e,q48_2new,q46f, q48_3new, q46h, q48_4new, q46i,q48_5new),
+  digits = list(all_categorical() ~ c(0, 1)))|>  
+  add_overall()|>   
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |>   
+  modify_caption("**Table 3. Life style-intervention (weighted)**") 
+
+#menopause 
+sleepdesign.post |>
+  tbl_svysummary(
+  by=sleep_cat,  
+  include = c(q60a:q60f,q60h,q60i),
+   digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p () |>
+  modify_footnote(
+    p.value ~ "Pearson's Chi-square test with Rao & Scott adjustment"
+  ) |>
+  add_overall() |>
+  modify_spanning_header(all_stat_cols() ~ "**Postmenopausal women sleep problems**") |> 
+  modify_caption("**Table 4. Postmenopause health-symptom (weighted)**")
+```
+
+## Results
+
+Among postmenopausal women in the survey-weighted design,
+
+demographic:
+
+the age distribution differs significantly between the two groups, p = 0.004.
+
+comorbidities:
+
+Stroke, psychiatric problem, Arthritis or rheumatism, COVID-19: weighted proportions differ significantly between the two groups.
+
+## Conclusion
+
+## References
+
+Q1: q59, what are symptoms of menopause?
+
+Q2: women age 50-80, half have sleep problems. describe their life style, comorbidities, menopausal status.
+
+Q3. women with symptoms: describe their life style, comorbidities, menopausal symptoms.
+
+## Abstract
+
+## Manuscript Discussions
+
+### 03/11/2026
+
+**Comments: majority (\>80%) respondents are at postmenopausal stage; including postmenopausal women only makes more sense.**
+
+### 6/10/2026
+
+**Menopause questions:**
+
+Q59: Which of the following best describes your menopausal status?
+
+Q60: In the past year, have you experienced any of the following symptoms? (G. sleep problems)
+
+Q61: How much do these symptoms interfere with your day-to-day life?
+
+Q62: Have you talked with your health care provider about any of these symptoms?
+
+Q63: Have you discussed potential treatment for these symptoms with your health care provider?
+
+Q63A: Did you treat/receive treatment for your symptoms?
+
+Q64: Overall, how well do you think your symptoms are managed?
+
+Q65: Do your symptoms interfere with your...
+
+**Q59. Which of the following best describes your menopausal status?**
+
+RESPONSE OPTIONS:
+
+1\. Premenopausal - I have no symptoms of menopause
+
+2\. Perimenopausal - I have some symptoms of menopause and have seen changes in my menstruation patterns
+
+3\. Menopausal - Menstruation stopped within the past year, and I have regular menopause symptoms
+
+4\. Menopausal - Menstruation stopped within the past year, and I do not have regular menopause symptoms
+
+5\. Postmenopausal with symptoms - Menstruation stopped more than a year ago and I still experience some menopause symptoms
+
+6\. Postmenopausal without symptoms - Menstruation stopped more than a year ago and I no longer experience any menopause symptoms
+
+Comments:
+
+n=773 selected 6 (Postmenopausal without symptoms), however, 375 out of 773 (49%) reported having sleep problems: many participants didn't consider sleep problems menopausal symptoms.
+
+Solution: Q59 provides menopausal status information. don't use it for menopausal symptoms.
+
+**Q59-Menopause Status**
+
+**Q60-Menopause Symptom**
+
+```{r}
+#create variable for any menopausal symptom
+#logic: Scenario 1 treats "No" + NA as missing, while Scenario 2 treats "No" + NA as "No".
+data <- data |>
+  mutate(
+    across(q60a:q60i, ~ as.character(as_factor(.x)))
+  ) |>
+  rowwise() |>
+  mutate(
+    symptom_scenario1 = case_when(
+      any(c_across(q60a:q60i) == 1, na.rm = TRUE) ~ "Yes",
+      all(is.na(c_across(q60a:q60i))) ~ NA_character_,
+      any(is.na(c_across(q60a:q60i))) ~ NA_character_,
+      all(c_across(q60a:q60i) == 2, na.rm = TRUE) ~ "No",
+      TRUE ~ NA_character_
+    ),
+    
+    symptom_scenario2 = case_when(
+      any(c_across(q60a:q60i) == 1, na.rm = TRUE) ~ "Yes",
+      all(is.na(c_across(q60a:q60i))) ~ NA_character_,
+      any(c_across(q60a:q60i) == 2, na.rm = TRUE) ~ "No",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  ungroup()
+
+data |>
+  filter(gender == "Female") |>
+  filter(! q59 %in% c("SKIPPED ON WEB", "DON'T KNOW", "REFUSED")) |>#n=1201
+  filter(str_starts(q59, "Postmenopausal")) |> #n=1020
+  select(symptom_scenario1, symptom_scenario2)|>
+  tbl_summary()
+#results: scenario1 missing n=48; scenario2 missing n=4; in this survey scenario2 is okay.
+#sample size unweighted: total postmenopausal women N=1020 (Q59), any menopausal symptom (Q60) n=838, missing n=4, no menopausal symptom n= 178
+```
+
+## Old analysis
+
+### Data overview N=1201
+
+```{r}
+library(tidyverse) library(gtsummary)  
+# read rds 
+data <- readRDS("data.rds") 
+# descriptive summary; Wilcoxon rank-sum test, Chi-square test, Fisher's Exact test #demographics by menopause symptoms data|>   select(age, racethnicity, educ5, marital, employ, income4, region4, metro, internet, housing, hhsize, symptom)|>   tbl_summary(     by=symptom,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Menopause symptoms**") |>   modify_caption("**Table 1. Demographic Characteristics**") #demographics by sleep problems data|>   select(age, racethnicity, educ5, marital, employ, income4, region4, metro, internet, housing, hhsize, sleep)|>   tbl_summary(     by=sleep,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Sleep problems**") |>   modify_caption("**Table 1. Demographic Characteristics**")}
+
+#Table 2 Comorbidities
+
+data|>   select(hl003newa:hl003newn, symptom)|>   tbl_summary(     by=symptom,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Menopause symptoms**") |>   modify_caption("**Table 2. Comorbidities**")  data|>   select(hl003newa:hl003newn, sleep)|>   tbl_summary(     by=sleep,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Sleep problems**") |>   modify_caption("**Table 2. Comorbidities**")}
+
+# Table 3 Life style
+
+label_list <- sapply(data |> select(q1, q2, q6, q7, q8, q9, q10a, q10b, q12_1, q12_2, q12_3, q13_1, q13_2, q18, q24, q25, q29, q46a:q46i, q48_1:q48_5, q47_1: q47_5, q49, q51, q52, q57, q58a, q58b, q58c), function(x) attr(x, "label")) print(label_list) sub_data <- data |> select(q1, q2, q6, q7, q8, q9, q10a, q10b, q12_1, q12_2, q12_3, q13_1, q13_2, q18, q24, q25, q29, q46a:q46i, q48_1:q48_5, q47_1: q47_5, q49, q51, q52, q57, q58a, q58b, q58c) # Remove label attributes from each column sub_data2 <- sub_data for (nm in names(sub_data2)) attr(sub_data2[[nm]], "label") <- NULL tbl_summary(sub_data2)  sapply(sub_data2, levels) # unable to translate '    DON<92>T KNOW' to a wide string # List the variables to clean vars_to_clean <- c("q6", "q18", "q24", "q25", "q29") data <- data|>   mutate(q6=replace(q6, q6=="DON\x92T", "DON'T KNOW"))#didn't work table(data$q6) #q6:Do you have a disability, impairment, or chronic health condition #q18: "Is there a place or organization in your community that feels welcoming for peop #q24: "Does anyone in your household (not including yourself) have a disability, #q25:"How difficult is it for you to use the main rooms in your home due to clutter  #q29: "How important is it for you to be able to stay in your current home for as long   data|>   select(q1, q2, q7, q8, q9, q10a, q10b, q12_1, q12_2, q13_1, q13_2, q46a:q46e, q46f:q46i, q48_1:q48_5, q49, q58a, q58b, q58c, symptom)|>   tbl_summary(     by=symptom,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Menopause symptoms**") |>   modify_caption("**Table 3. Life style**")  data|>   select(q1, q2, q7, q8, q9, q10a, q10b, q12_1, q12_2, q13_1, q13_2, q46a:q46e, q46f:q46i, q48_1:q48_5, q49, q58a, q58b, q58c, sleep)|>   tbl_summary(     by=sleep,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**sleep problems**") |>   modify_caption("**Table 3. Life style**")}
+
+#Table 4 Menopause
+
+{r} 
+data|>   select(q59, q60a:q60i, symptom)|>   tbl_summary(      by=symptom,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Menopause symptoms**") |>   modify_caption("**Menopause**")   data|>   select(q59, q60a:q60f, q60h,q60i, sleep)|>   tbl_summary(      by=sleep,     digits = list(all_categorical() ~ c(0, 1)))|>   add_overall()|>   modify_spanning_header(all_stat_cols() ~ "**Sleep problems**") |>   modify_caption("**Menopause**")}
+```
