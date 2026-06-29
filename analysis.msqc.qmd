@@ -1,0 +1,2229 @@
+---
+title: "Summary"
+author: "Yang Liu"
+date: 
+format: html
+execute:
+  echo: false
+  warning: false
+editor: visual
+---
+
+## Title:
+
+## Team
+
+Gabrielle Schweitzen, Nicole Mahnert
+
+## Background
+
+Complex surgery refers to a surgical procedure that is considered intricate, high-risk, and requires specialized skills and resources. It typically involves: 
+
+-   Extensive surgical dissection**:** Involving multiple organs or body systems. 
+
+-   Advanced techniques: Such as minimally invasive surgery, robotic surgery, or advanced imaging. 
+
+-   **Prolonged surgery time:** Usually lasting several hours or more. 
+
+-   **Increased risk of complications:** Due to the complexity of the procedure and the patient's underlying health conditions. 
+
+-   **Postoperative care requirements:** Including extended hospital stays, rehabilitation, and ongoing medical monitoring. 
+
+use the MSQC database to determine which patient and surgery related factors impact the complexity / length of a hysterectomy. The goal with this would be to help to determine which cases should be referred, determine case/ OR scheduling time, and improve billing for complex procedures. 
+
+## Research question
+
+Which preoperative and intraoperative factors help to predict surgical complexity (proxy for complexity will be OR time and complications).
+
+## Hypothesis
+
+Patients with larger uterine (in dimension), prior pelvic surgery and endometriosis are more likely to have complex surgery.
+
+## Study population
+
+Inclusion: Patients who underwent laparoscopic hysterectomy (including robotic) for benign indications between 2019-2023.
+
+```{r}
+#| echo: false
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+
+      # edge definitions with the node IDs
+      tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+      }
+
+      [1]: 'MSQC hysterectomy patients 2019-2023 (N=28,280)'
+      [2]: 'Benign N=27,976'
+      [3]: 'Laparoscopic and Robotic N=17,299 '
+      [4]: 'Exclude participants who had missing uterine dimension (n=6338), uterine dimension <3 cm or >30 cm (n=42), missing BMI data (n=4), surgery time < 30 minutes or > 650 minutes (n=17)'
+      [5]: 'Study population N=10898'
+      ")
+```
+
+## Objective
+
+help to determine which cases should be referred, determine case/ OR scheduling time, and improve billing for complex procedures
+
+## Outcome
+
+### Postop complications (variable "category")
+
+1.  **Direct complication:** **most categories retired, only captured 3 - Organ/Space SSI, 17 - Transfusion**
+
+    ```{r}
+    23 - Hysterectomy - Bleeding Complications (Retired)
+
+    24 - Hysterectomy - Ileus/Small Bowel Obstruction (Retired)
+
+    25 - Hysterectomy - Bowel Injury (Retired)
+
+    26 - Hysterectomy - Ureteral Obstruction (Retired)
+
+    27 - Hysterectomy - Bladder Injury (Retired)
+
+    28 - Hysterectomy - Fistula (Retired)
+
+    29 - Hysterectomy - Vaginal Cuff Dehiscence (Retired)
+
+    3 - Organ/Space SSI
+
+    30 - Hysterectomy - Vaginal Cuff Cellulitis (Retired)
+
+    32 - Gynelogic - Cuff infection (Retired)
+
+    33 - Gynelogic - Pelvic abscess (Retired)
+
+    17 - Transfusions w/in first 72 hrs postop
+    ```
+
+2.  **Indirect complication:** **most categories retired, only captured 13 and 4**
+
+    ```{r}
+    11 - Stroke/CVA
+
+    12 - Cardiac Arrest req. CPR - Intraop (Retired)
+
+    13 - Cardiac Arrest req. CPR - Postop
+
+    14 - Myocardial Infarction - Intraop (Retired)
+
+    15 - Myocardial Infarction - Postop
+
+    16 - Cardiac Dysrhythmias (Retired)
+
+    18 - Deep Vein Thrombosis req. Therapy (Retired 2024)
+
+    34 - Gastrointestinal - Anastomotic leak (Retired)
+
+    35 - Nerve Injury - Upper Extremity (Retired)
+
+    36 - Nerve Injury - Lower Extremity (Retired)
+
+    37 - Other (Retired)
+
+    38 - Septic Shock (Retired)
+
+    4 - Pneumonia
+
+    5 - Unplanned Intubation - Intraop (Retired)
+
+    6 - Unplanned Intubation - Postop (Retired)
+
+    7 - Pulmonary Embolism (Retired 2024)
+
+    8 - Acute Kidney Injury (Retired)
+    ```
+
+3.  **Minor complication:**
+
+39 - Postop Ileus requiring NG tube or NPO
+
+1 - Superficial Incisional SSI
+
+10 - Urinary Tract Infection (UTI) - CAUTI
+
+### Surgery time:
+
+Median time for a standard TLH +/- removal of tubes is 90m and when it weighs over 250g it is 130m. And then maybe we would look at 480m
+
+### General complications:
+
+Presentation to ED or Urgnt care; Readmission; Return to operating room.
+
+## Variables of interest
+
+-Demographic and medical history characteristics:  age, race, BMI, insurance, sleep apnea, hypertension, copd, smoking, other intraoperative procedure.  
+
+-Clinical and surgical characteristics: uterine dimension, prior pelvic surgery, indication for procedure
+
+-outcome variables: surgery time, general complications.
+
+**\*Notes for outcome variables:** direct complications, most retired; indirect complications, most retired; minor complications, not retired, but rare and least important.
+
+## Data management (Import, Cleaning, Variable Creation)
+
+### Load Packages
+
+```{r}
+library(tidyverse) #for import, cleaning, wrangling
+library(gtsummary) #for summarizing
+library(labelled) #for variable labelling
+library(rio) #import/export 
+library(janitor) #for cleaning and tabulation helpers
+library(visdat) #data visualization for missingness
+library(Hmisc)
+```
+
+### Import data
+
+```{r}
+#import raw data
+data <-  read_csv("rawdata/raw_data_deidentified.csv") #n=48637
+cmp<- read_csv("rawdata/postop_occurrences_deidentified.csv") #n=6910
+event <-read_csv("rawdata/postop_events_deidentified.csv") #n=8417
+```
+
+### Inclusion criteria
+
+```{r}
+# inclusion #surgical_approach:   =54 (Robotic) or 55 (Laparoscopic) 
+#indication_for_procedure: benign, != 1 and 2 
+#surgery year=2019-2023 
+#preop_uterine_size_e: 2 (dimensions) available 
+data <- data|>   
+  filter(surgery_year %in% c(2019:2023))|> #n=28280    
+  filter(!indication_for_procedure_e %in% c("{1|3|6}", "{1|3}",   "{1|6}","{1|7|6}","{1|7}","{1}","{2|7|5}", "{2|7|6}", "{2|7}", "{2|8}","{2}",  "{3|1}",  "{4|1|5}", "{4|1|6}", "{5|2|7}", "{5|7|2}", "{6|3|1}", "{6|7|1}", "{7|1|6}",  "{7|1}",  "{7|2}", "{7|6|1}", "{8|1}"))|>   #n=27976  
+  filter(surgical_approach %in% c(54,55))|> #n=17299   
+  filter(preop_uterine_size_e==2) #n=10961
+
+#verify continuous variables
+summary(data$uterine_dimension_largest_no) #min and max funny values
+sum(data$uterine_dimension_largest_no > 30) 
+sum(data$uterine_dimension_largest_no < 3) 
+summary(data$val_surgtime)
+summary(data$bmi)
+summary(data$val_age)
+# exclusion: surg time <30 or >650 min; missing BMI
+data <- data|> 
+  mutate(val_surgtime=as.numeric(val_surgtime))|>
+  filter(between(val_surgtime, 30, 650)) |>  # keep surg time 30–650 (inclusive)
+  filter(!is.na(bmi))                         # exclude missing BMI (4 cases)
+#n=10940 (21 cases removed)
+# exclusion: uterine size <3 or >30 cm.
+data <- data|> 
+  mutate(uterine=as.numeric(uterine_dimension_largest_no))|>
+  filter(between(uterine, 3, 30)) #n=10898, 42 cases removed
+```
+
+### Initial Data reformating and merging
+
+```{r}
+## reshape cmp data long to wide
+cmp1 <- cmp %>%
+  select(category, study_cid)
+# Convert category to character and then identify all unique category values
+all_categories <- cmp1$category |> na.omit() |> unique() |> sort()
+
+# Make wide data
+cmp1_wide <- cmp1 %>%
+  mutate(category = as.numeric(category)) %>%
+  # Create indicator for each category
+  pivot_wider(
+    id_cols = study_cid,
+    names_from = category,
+    values_from = category,
+    values_fn = ~ ifelse(length(.x) > 0, 1, 0),
+    values_fill = list(category = 0),
+    names_prefix = "category"
+  )   #n=6095 unique id
+
+## reshape event data long to wide
+event1<- event|>
+  select(e_eventtype, study_cid)
+# Convert e_eventtype to character and then identify all unique e_eventtype values
+all_e_eventtype <- event1$e_eventtype |> na.omit() |> unique() |> sort()
+
+# Make wide data
+event_wide <- event1 %>%
+  mutate(e_eventtype = as.numeric(e_eventtype)) %>%
+  # Create indicator for each e_eventtype
+  pivot_wider(
+    id_cols = study_cid,
+    names_from = e_eventtype,
+    values_from = e_eventtype,
+    values_fn = ~ ifelse(length(.x) > 0, 1, 0),
+    values_fill = list(e_eventtype = 0),
+    names_prefix = "e_eventtype"
+  )   #n=6489 unique id
+
+# merge datasets. Note: cmp1_wide n=6095 unique id and event_wide n=6489 unique id including 2016-2023, data has 2019-2023.most obs from cmp and event were not added to data.
+data <- left_join(x=data, y=cmp1_wide, by="study_cid") #n=10961
+data <- left_join(x=data, y=event_wide, by="study_cid") #n=10961
+
+#replace NA values with 0
+data <- data %>%
+  mutate(across(category3:e_eventtype5, ~replace_na(.x, 0)))
+```
+
+### **Variable Transformation and Labeling**
+
+#### Demographic variables
+
+```{r}
+data <-
+  data |>
+  mutate(race_new=case_when(race %in% c("{0|10}", "{10}","{10|70}", " {70|10}") ~ "White",
+                        race %in% c("{0|20}", "{20}", "{20|70}", "{70|20}") ~ "Black or African American",
+                        race %in% c("{30}") ~ "American Indian or Alaska Native",
+                        race %in% c( "{40}") ~ "Native Hawaiian or Pacific Islander",
+                        race %in% c("{50}") ~  "Asian",
+                        race %in% c("{0}", "{70}", "{0|70}") ~  "Unknown",
+                        race %in% c("{0|10|80}","{10|80}", "{70|10|80}", "{20|80}","{30|80}", "{40|80}","{50|80}", "{0|70|80}", "{0|80}", "{70|80}", "{80}") ~  "Hispanic",   #80 hispanic, not in codebook
+                        TRUE ~ "Multiracial"))|>
+    mutate(bmigroup = case_when(bmi < 18.5 ~ "Underweight",
+                              bmi < 25 ~ "Normal weight",
+                              bmi < 30 ~ "Overweight",
+                              bmi >= 30 ~ "Obese"))|>
+  mutate(insurance = case_when(e_insurance_type %in% c(1, 2) ~ "Commercial insurance",
+                                      e_insurance_type %in% c(3, 999) ~ "Public insurance",
+                                      e_insurance_type %in% c(4:5) ~ "Uninsured/other"))
+#notes from MSQC team: 80 is “Hispanic, Latino/Latina/Latinx, or Spanish Origin”. At some point in 2024, “ethnicity_hispanic” was retroactively merged into “race” (the data dictionary took a while to get updated) so to accurately determine whether an individual patient is Hispanic, you should combine race contains 80 and ethnicity_hispanic = 1 (having either one means “yes”). 
+#check raw data
+ethnicity<- data |>
+  filter(ethnicity_hispanic==2)|>
+  select(race,race_new,race_new1)|>
+  tbl_summary() 
+ethnicity #ethnicity unknown n=450
+ethnicity1<- data |>
+  filter(ethnicity_hispanic==1)|>
+  select(race,race_new,race_new1)|>
+  tbl_summary()
+ethnicity1 #hispanic n=350
+#notes from MSQC team: 80 is “Hispanic, Latino/Latina/Latinx, or Spanish Origin”. At some point in 2024, “ethnicity_hispanic” was retroactively merged into “race” (the data dictionary took a while to get updated) so to accurately determine whether an individual patient is Hispanic, you should combine race contains 80 and ethnicity_hispanic = 1 (having either one means “yes”). 
+#"race" containing "80" n=349; "ethnicity_hispanic" =1 n=350;USE "ethnicity_hispanic"
+data <-
+  data |>
+  mutate(race1=case_when(race %in% c("{0|10}", "{10}","{10|70}", " {70|10}","{0|10|80}","{10|80}", "{70|10|80}") ~ "White",
+                        race %in% c("{0|20}", "{20}", "{20|70}", "{70|20}","{20|80}") ~ "Black or African American",
+                        race %in% c("{30}","{30|80}") ~ "American Indian or Alaska Native",
+                        race %in% c( "{40}","{40|80}") ~ "Native Hawaiian or Pacific Islander",
+                        race %in% c("{50}","{50|80}") ~  "Asian",
+                        race %in% c("{0}", "{70}", "{0|70}","{0|70|80}", "{0|80}", "{70|80}", "{80}") ~  "Unknown",
+                        TRUE ~ "Multirace"),
+  race2=case_when(race1 %in% c("American Indian or Alaska Native", "Native Hawaiian or Pacific Islander","Multirace") ~ "Other",
+                   TRUE ~ race1),
+  ethnicity=factor(ethnicity_hispanic,
+                   levels=0:2,
+                   labels=c("No", "Yes", "Unknown"))
+)
+data<- data |>
+  mutate(ethnicity = as.character(ethnicity),
+         ethnicity=case_when(is.na(ethnicity) ~ "Unknown",
+                             TRUE ~ ethnicity))
+data<- data |>
+  mutate(ethnicity = as.character(ethnicity),
+         ethnicity = case_when(ethnicity=="Yes"~ "Hispanic",
+                               ethnicity=="No" ~ "Non-Hispanic",
+                               TRUE ~ ethnicity))
+data <- data |>
+  mutate(
+    race2=as.character(race2),
+  race3=case_when(race2 %in% c("Asian", "Other", "Unknown") ~ "Other/Unknown",
+                   TRUE ~ race2))
+```
+
+#### postop complications:
+
+```{r}
+#recode category (postop complications)
+data<- data |>
+  mutate(direct_cmp = as.integer(if_any(starts_with("category"), ~ . %in% c(23:29,3,30,32,33,17))),
+         indirect_cmp = as.integer(if_any(starts_with("category"), ~ . %in% c(5:8,34:38,4,11:16,18))),
+         minor_cmp = as.integer(if_any(starts_with("category"), ~ . %in% c(39,1,10))))
+         
+            # Replace NA values with 0 for these columns
+  mutate(
+    direct_cmp = replace_na(direct_cmp, 0),
+    indirect_cmp = replace_na(indirect_cmp, 0),
+    minor_cmp = replace_na(minor_cmp, 0)
+  ))
+
+#check postop complications
+#direct_cmp most categories retired, only captured 3 - Organ/Space SSI, 17 - Transfusion
+data |>
+  filter(direct_cmp==1)|>
+  select(direct_cmp, starts_with("category"))|>
+  tbl_summary()
+#indirect_cmp
+data |>
+  filter(indirect_cmp==1)|>
+  select(indirect_cmp, starts_with("category"))|>
+  tbl_summary()
+#minor_cmp
+data |>
+  filter(minor_cmp==1)|>
+  select(minor_cmp, starts_with("category"))|>
+  tbl_summary()
+```
+
+#### general complications:
+
+```{r}
+#recode event
+data<- data|>
+    mutate(
+    ed = as.integer(if_any(starts_with("e_eventtype"), ~ . == 4)),
+    readmission = as.integer(if_any(starts_with("e_eventtype"), ~ . == 5)),
+    return = as.integer(if_any(starts_with("e_eventtype"), ~ . == 6))
+  ) %>%
+  # Replace NA values with 0 for these columns
+  mutate(
+    ed = replace_na(ed, 0),
+    readmission = replace_na(readmission, 0),
+    return = replace_na(return, 0)
+  )  
+```
+
+#### Indication for procedure (retired)
+
+```{r}
+
+#questions for team:other_procedure_e,indication_for_procedure_e,prior_abdominopelvic_surgery_e)
+#Response: other_procedure_e binary; indication_for_procedure_e, 
+#Only adeno
+#Any adeno
+#Only aub, fibroids
+#Any aub, fibroids
+#Other: no adeno, aub, fibroids
+data <- data |>
+  mutate(procedure = if_else(other_procedure_e == "{0}", 0, 1),
+         indication=case_when(indication_for_procedure_e == "{6}" ~ "Only adeno",
+                              indication_for_procedure_e %in% c("{3|6|4}", "{3|6|5}", "{3|6}", "{3|8|6|4}", "{4|3|6}", "{4|5|6|8}", "{4|5|6}","{4|6|5}","{4|6}", "{5|3|6}", "{5|6}","{6|3}", "{6|4|3}","{6|4|9}","{6|4}", "{6|5}","{6|8|3}", "{6|8|5}", "{6|8}","{6|9}","{8|3|5|6}","{8|6|3}","{8|6|9}", "{8|6}","{8|9|4|6}", "{9|6}") ~ "Adeno and other", #contain 6
+                              indication_for_procedure_e == "{7}" ~ "Only aub/ fibroids",
+                              indication_for_procedure_e %in% c("{3|4|7}","{3|5|7|8}"," {3|5|7}", " {3|7|5}", "{3|7|8}","{3|7|9}", "{3|7}","{3|8|7}",  "{4|3|7}", "{4|5|7}", "{4|7|3}", "{4|7|8}", "{4|7|9}","{4|7}","{5|3|7}", "{5|7|3}", "{5|7|4}","{5|7|8}", "{5|7|9}", "{5|7}", "{7|3|4}", "{7|3|5}", "{7|3|8}","{7|3}","{7|4|3}", "{7|4|5}","{7|4}","{7|5|3}","{7|5|4}", "{7|5|8}", "{7|5|9}", "{7|5}", "{7|8|3}", "{7|8|5}", "{7|8}","{7|9|5}","{7|9}", "{8|7|3}","{8|7|4}","{8|7|5}", "{8|7|9}", "{8|7}","{9|7}") ~ "Aub/fibroids and other", #contain 7
+                              indication_for_procedure_e %in% c("{3|5|6|7}","{3|6|7|8}", "{3|6|7}", "{3|7|5|6}", "{3|7|6|4}","{3|7|6|5}", "{3|7|6|8}", "{3|7|6}", "{3|7|8|6}", "{4|5|6|7}", "{4|6|7}", "{4|7|6}", "{5|4|6|7}", "{5|6|7|8}","{5|6|7}", "{5|7|4|6}", "{5|7|6|3}", "{5|7|6}","{6|3|7}","{6|4|7}","{6|5|7}", "{6|7|3}", "{6|7|4|8}","{6|7|4}", "{6|7|5}","{6|7|8}", "{6|7|9|5}","{6|7|9}","{6|7}", "{6|8|7}", "{6|9|7}", "{7|3|6}", "{7|4|6|5}", "{7|4|6}", "{7|5|3|6}", "{7|5|6}", "{7|6|3}", "{7|6|4|9}", "{7|6|4}","{7|6|5}", "{7|6|8|3}", "{7|6|8|5}", "{7|6|8}", "{7|6|9|4}", "{7|6|9}", "{7|6}", "{7|8|6|5}", "{7|8|6}", "{7|9|6}", "{8|6|7|5}", " {8|6|7}","{8|7|5|6}","{8|7|6|3}", "{8|7|6|5}", "{8|7|6}","{8|7|9|6|3}", "{9|7|6}") ~ "Adeno, aub,fibroid and other", #contain 6, 7
+                              TRUE ~ "Other"),
+         priorpelvicsurgery = if_else(prior_abdominopelvic_surgery_e == "{1}", 0, 1), #1 - Abdominopelvic surgery not performed
+         priorpelvic_csection = case_when(                                prior_abdominopelvic_surgery_e %in% c("{1|2}", "{2|1}", "{2}", "{2|3|1}", "{2|3|4}", "{2|3|5|4}", "{2|3|5}", "{2|3}","{2|4|3|1}", "{2|4|3}", "{2|4|5}", "{2|4}", "{2|5|3|4}", "{2|5|3}", "{2|5|4}", "{2|5}", "{3|2|4}", "{3|2|5}", "{3|2}", "{3|4|2}", "{3|5|2}", "{4|2|3}", "{4|2|5}", "{4|2}", "{4|3|2}", "{5|2|3}", "{5|2}", "{5|3|2}", "{5|4|2}") ~ "Yes", # contain 2 C-Section
+                        TRUE ~ "No"), 
+         priorpelvic_robotic = case_when(prior_abdominopelvic_surgery_e %in% c("{1|3}","{2|3|1}", "{2|3|4}","{2|3|5|4}",  "{2|3|5}", "{2|3}", "{2|4|3|1}", "{2|4|3}", "{2|5|3|4}", "{2|5|3}", "{3|1}", "{3|2|4}", "{3|2|5}", "{3|2}", "{3|4|2}", "{3|4}", "{3|5|2}", "{3|5|4}", "{3|5}", "{3}", "{4|2|3}","{4|3|2}", "{4|3}", "{4|5|3}", "{5|2|3}", "{5|3|2}", "{5|3|4}", "{5|3}") ~  "Yes",
+                        TRUE ~ "No"), #contain 3 Laparoscopic/robotic approach
+             priorpelvic_open = case_when(                          prior_abdominopelvic_surgery_e %in% c("{1|4}", "{1|5}", "{2|3|4}","{2|3|5|4}","{2|3|5}","{2|4|3|1}", "{2|4|3}","{2|4|5}", "{2|4}", "{2|5|3|4}", "{2|5|3}", "{2|5|4}", "{2|5}","{3|2|4}", "{3|2|5}" , "{3|4|2}", "{3|4}", "{3|5|2}", "{3|5|4}", "{3|5}", "{4|1}", "{4|2|3}", "{4|2|5}", "{4|2}", "{4|3|2}", "{4|3}", "{4|5|3}", "{4|5}", "{4}", "{5|1}", "{5|2|3}", "{5|2}", "{5|3|2}", "{5|3|4}", "{5|3}", "{5|4|2}", "{5|4}", "{5}") ~ "Yes", #contain 4-Laparotomy/open approach, 5- Approach not identified; note: 5 should not be included
+                        TRUE ~ "No"))
+```
+
+#### Indication for procedure-more efficient codes in use
+
+```{r}
+#code using package "stringr"; indication n(%) is slightly different
+data <- data |>
+  mutate(
+    procedure = if_else(other_procedure_e == "{0}", 0, 1),
+    indication = case_when(
+      indication_for_procedure_e == "{6}" ~ "Only adeno",
+      str_detect(indication_for_procedure_e, "\\b6\\b") & !str_detect(indication_for_procedure_e, "\\b7\\b") ~ "Adeno and other",
+      indication_for_procedure_e == "{7}" ~ "Only aub/ fibroids",
+      str_detect(indication_for_procedure_e, "\\b7\\b") & !str_detect(indication_for_procedure_e, "\\b6\\b") ~ "Aub/fibroids and other",
+      str_detect(indication_for_procedure_e, "\\b6\\b") & str_detect(indication_for_procedure_e, "\\b7\\b") ~ "Adeno, aub, fibroid and other",
+      TRUE ~ "Other"
+    ),
+    priorpelvicsurgery = if_else(prior_abdominopelvic_surgery_e == "{1}", 0, 1),
+    priorpelvic_csection = if_else(str_detect(prior_abdominopelvic_surgery_e, "\\b2\\b"), "Yes", "No"),
+    priorpelvic_robotic = if_else(str_detect(prior_abdominopelvic_surgery_e, "\\b3\\b"), "Yes", "No"),
+    priorpelvic_open = if_else(str_detect(prior_abdominopelvic_surgery_e, "\\b4\\b"), "Yes", "No")
+  )
+```
+
+#### Surgeon volume
+
+```{r}
+###calculate annual surgeon volume: tertile###
+volume <-
+  data|>
+  filter(surgery_year==2022)|> # do the same thing for 2019-2023
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() 
+
+volume <-
+  volume|>
+  summarise(
+    q1 = quantile(frequency, 0.33),
+    q2 = quantile(frequency, 0.66),
+    q3 = max(frequency))
+volume
+#2019, 2, 5, 71
+#2020, 2, 4, 62
+#2021, 2, 6, 78
+#2022, 2, 6, 67
+#2023, 3, 7, 70
+#calculate #surgeons
+s_all <-
+  data|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  )  # total 623 surgeons
+#group by year
+s2019 <-
+  data|>
+  filter(surgery_year==2019)|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2019=case_when(frequency<=2 ~"low",
+                              frequency<=5 ~"medium",
+                               frequency>5 ~"high"))  
+#calculate #cases in each category
+s2019 |>
+  select(frequency,volume2019)|>
+  tbl_summary(by=volume2019)
+sum <- s2019 |> 
+  select(frequency, volume2019) |> 
+  group_by(volume2019) |> 
+  summarise(
+    total_frequency = sum(frequency) 
+  ) |> 
+  ungroup()
+sum
+
+s2020 <-
+  data|>
+  filter(surgery_year==2020)|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2020=case_when(frequency<=2 ~"low",
+                              frequency<=4 ~"medium",
+                           frequency>4 ~"high"))
+
+
+s2021 <-
+  data|>
+  filter(surgery_year==2021)|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2021=case_when(frequency<=2 ~"low",
+                               frequency<=6 ~"medium",
+                               frequency>6 ~"high"))
+
+s2022 <-
+  data|>
+  filter(surgery_year==2022)|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2022=case_when(frequency<=2 ~"low",
+                               frequency<=6 ~"medium",
+                               frequency>6 ~"high"))
+s2023 <-
+  data|>
+  filter(surgery_year==2023)|>
+  select(amphysician_id)|>
+  group_by(amphysician_id) |>
+  summarise(
+    frequency = n()
+  ) |>
+  ungroup() |>
+  mutate(volume2023=case_when(frequency<=3 ~"low",
+                               frequency<=7 ~"medium",
+                               frequency>7 ~"high"))
+#merge
+test2019 <-
+  s2019 |>
+  select(amphysician_id, volume2019)|>
+  full_join(s_all, s2019,by=join_by(amphysician_id), relationship="many-to-many")
+
+test2020 <-
+  s2020 |>
+  select(amphysician_id, volume2020)|>
+  full_join(test2019, s2020,by=join_by(amphysician_id), relationship="many-to-many")
+
+test2021 <-
+  s2021 |>
+  select(amphysician_id, volume2021)|>
+  full_join(test2020, s2021,by=join_by(amphysician_id), relationship="many-to-many")
+
+test2022 <-
+  s2022 |>
+  select(amphysician_id, volume2022)|>
+  full_join(test2021, s2022, by=join_by(amphysician_id), relationship="many-to-many")
+
+ test2023 <-
+  s2023 |>
+  select(amphysician_id, volume2023)|>
+  full_join(test2022, s2023,by=join_by(amphysician_id), relationship="many-to-many")
+
+#merge
+data <-
+  full_join(data, test2023,  by=join_by(amphysician_id), relationship="many-to-many")
+
+data<-
+  data |>
+  mutate(volume_new=case_when(c(surgery_year==2019 & volume2019=="low")~"low",
+                          c(surgery_year==2019 & volume2019=="medium")~"medium",                              c(surgery_year==2019 & volume2019=="high")~"high",
+                          c(surgery_year==2020 & volume2020=="low")~"low",
+                          c(surgery_year==2020 & volume2020=="medium")~"medium", 
+                          c(surgery_year==2020 & volume2020=="high")~"high",
+                          c(surgery_year==2021 & volume2021=="low")~"low",
+                          c(surgery_year==2021 & volume2021=="medium")~"medium", 
+                          c(surgery_year==2021 & volume2021=="high")~"high",
+                          c(surgery_year==2022 & volume2022=="low")~"low",
+                          c(surgery_year==2022 & volume2022=="medium")~"medium", 
+                          c(surgery_year==2022 & volume2022=="high")~"high",
+                          c(surgery_year==2023 & volume2023=="low")~"low",
+                          c(surgery_year==2023 & volume2023=="medium")~"medium", 
+                          c(surgery_year==2023 & volume2023=="high")~"high"))
+
+library(Hmisc)
+data$volume_new <- forcats::fct_relevel(data$volume_new, "high", "medium", "low")
+
+```
+
+#### Outcome Variables
+
+```{r}
+#val_surgtime: median 90 min, when it weighs over 250g it is 130m. And then maybe we would look at 480m
+data<- data |>
+  mutate(complex_surgtime=case_when(val_surgtime >= 90 ~ 1,
+                                    TRUE ~ 0))
+data<- data |>
+  mutate(complex_surgtime1=case_when(val_surgtime >= 130 ~ 1,
+                                    TRUE ~ 0))
+data<- data |>
+  mutate(complex_surgtime2=case_when(val_surgtime < 90 ~ "<90 min",
+                                     val_surgtime <= 130 ~ "90-130 min",
+                                     val_surgtime >130 ~ ">130 min"
+                                    ))
+data<- data |>
+  mutate(surgtime4=case_when(val_surgtime < 90 ~ "<90 min",
+                                     val_surgtime <= 130 ~ "90-130 min",
+                                     val_surgtime <= 240 ~ "131-240 min",
+                                     val_surgtime > 240 ~ ">240 min"
+                                    ))
+```
+
+#### Postoperative Diagnosis variables
+
+Endometriosis: N80 family
+
+Adenomyosis: N80.03
+
+Dysmenorrhea: Primary N94.4, Secondary N94.5, Unspecified N94.6
+
+Pelvic Pain: R10.2
+
+Infertility: N97 family (N97.0, N97.1, N97.2, N97.8, N97.9)
+
+Fibroids: D25.0, D25.1, D25.2, D25.9
+
+AUB: N93.9, N93.8, N92.0, N92.6, N95.0
+
+Cervical dysplasia: N87.0, N87.1, N87.9, D06.9, Z87.140
+
+Gender dysphoria: F64.8, F64.9, F64
+
+Hyperplasia: N85.0, N85.01, N85.02
+
+Endometrial polyp: N84
+
+PID: N73.9, N73, N73.4, N74.4
+
+Pelvic organ prolapse: N81 family
+
+Personal history of cancer: Z85, Z80.3, Z15.02. Z15.01, Z84.81
+
+```{r}
+#Single categorical label each person
+data <- data %>%
+  mutate(
+    dx = str_to_upper(str_trim(dx_icd10_cd)),
+
+    dx_category = case_when(
+      # Endometriosis: N80* except N8003
+      str_starts(dx, "N80") & dx != "N8003" ~ "Endometriosis",
+
+      # Adenomyosis
+      dx == "N8003" ~ "Adenomyosis",
+
+      # Dysmenorrhea
+      dx == "N944" ~ "Primary dysmenorrhea",
+      dx == "N945" ~ "Secondary dysmenorrhea",
+      dx == "N946" ~ "Unspecified dysmenorrhea",
+
+      # Pelvic pain
+      dx == "R102" ~ "Pelvic pain",
+
+      # Infertility: N97*
+      str_starts(dx, "N97") ~ "Infertility",
+
+      # Fibroids
+      dx %in% c("D250","D251","D252","D259") ~ "Fibroids",
+
+      # AUB
+      dx %in% c("N939","N938","N920","N926","N950") ~ "AUB",
+
+      # Cervical dysplasia
+      dx %in% c("N870","N871","N879","D069","Z87140") ~ "Cervical dysplasia",
+
+      # Gender dysphoria: F64*
+      str_starts(dx, "F64") ~ "Gender dysphoria",
+
+      # Hyperplasia
+      dx %in% c("N850","N8501","N8502") ~ "Hyperplasia",
+
+      # Endometrial polyp: N84*
+      str_starts(dx, "N84") ~ "Endometrial polyp",
+
+      # PID: N73* or N74*
+      str_starts(dx, "N73") | str_starts(dx, "N74") ~ "PID",
+
+      # Pelvic organ prolapse: N81*
+      str_starts(dx, "N81") ~ "Pelvic organ prolapse",
+
+      # Personal history of cancer (as provided)
+      str_starts(dx, "Z85") | dx == "Z803" | dx %in% c("Z1501","Z1502","Z8481") ~
+        "Personal history of cancer",
+
+      TRUE ~ "Other"
+    )
+  )
+label(data$dx_category)="Postoperative diagnosis"
+# Optional: verify distribution
+dx_tab <- data %>%
+  count(dx_category, sort = TRUE) %>%
+  mutate(pct = n / sum(n))
+dx_tab
+#note: each patient had one ICD-10 code, but might have multiple indications.
+```
+
+### **Variable Recoding for Statistical Analysis**
+
+```{r}
+#recode "other_procedure_e" binary
+data <- data |>
+  mutate(procedure = if_else(other_procedure_e == "{0}", 0, 1))
+#recode sleep_apnea
+data <- data |>
+  mutate(sleep_apnea=case_when(sleep_apnea==2 ~ "Yes",
+                               sleep_apnea==1 ~ "No"))
+#recode race for regression analysis (combine groups <1%)
+data <- data |>
+  mutate(race_new = as.character(race_new), 
+    race_new1=case_when(race_new %in% c("American Indian or Alaska Native", "Native Hawaiian or Pacific Islander","Multirace") ~ "Other",
+                                            TRUE ~ race_new))
+```
+
+### **Factor Level Orders**
+
+```{r}
+#relevel categorical variables
+data$indication <- forcats::fct_relevel(data$indication, "Only adeno", "Adeno and other", "Only aub/ fibroids", "Aub/fibroids and other","Adeno, aub, fibroid and other",  "Other")
+#data$race_new <- forcats::fct_infreq(data$race_new)
+data$race_new <- forcats::fct_relevel(data$race_new, "White", "Black or African American", "Asian", "American Indian or Alaska Native", "Native Hawaiian or Pacific Islander", "Multirace", "Hispanic", "Unknown")
+data$race_new1 <- forcats::fct_relevel(data$race_new1, "White", "Black or African American", "Asian", "Other", "Unknown", "Hispanic")
+data$complex_surgtime2 <- forcats::fct_relevel(data$complex_surgtime2, "<90 min", "90-130 min", ">130 min")
+data1$volume <- relevel(data1$volume, ref="low")
+data$dx_category <- forcats::fct_infreq(data$dx_category)
+data$surgtime4 <- forcats::fct_relevel(data$surgtime4, "<90 min", "90-130 min", "131-240 min", ">240 min")
+data$race2 <- forcats::fct_relevel(data$race2, "White", "Black or African American", "Asian", "Other", "Unknown")
+data$ethnicity <- forcats::fct_relevel(data$ethnicity, "Non-Hispanic", "Hispanic", "Unknown")
+data$race3 <- forcats::fct_relevel(data$race3, "White", "Black or African American", "Other/Unknown")
+data$indication <- relevel(data$indication, ref="Only aub/ fibroids")
+
+```
+
+### **Variable Labelling**
+
+```{r}
+label(data$val_age) = "Age"
+label(data$race_new) = "Race/Ethnicity"
+label(data$race_new1) = "Race/Ethnicity"
+label(data$insurance) = "Insurance"
+label(data$bmi) = "BMI"
+label(data$bmigroup) = "BMI"
+label(data$sleep_apnea) = "Sleep apnea"
+label(data$hypertension) = "Hypertension"
+label(data$chf) = "CHF"
+label(data$dialysis) = "Dialysis"
+label(data$smoker) = "Tobacco use within 1 year"
+label(data$copd) = "COPD"
+label(data$procedure) = "Other procedures performed"
+label(data$indication) = "Indication for procedure"
+label(data$uterine_dimension_largest_no) = "Uterine Dimension (CM)"
+label(data$e_eventtype4) = "Presentation to ED or urgent care"
+label(data$e_eventtype5) = "Readmission"
+label(data$e_eventtype6) = "Return to operation room"
+label(data$direct_cmp) = "Direct complication"
+label(data$indirect_cmp) = "Indirect complication"
+label(data$minor_cmp) = "Minor complication"
+label(data$priorpelvicsurgery) = "Prior pelvic surgery"
+label(data$priorpelvic_csection) = "Prior C-section"
+label(data$priorpelvic_robotic) = "Prior laparoscopic/robotic surgery"
+label(data$priorpelvic_open) = "Prior laparotomy/open surgery"
+label(data$val_surgtime) = "Surgical time (minutes)"
+label(data$category3) = "Organ/Space SSI"
+label(data$category39) = "Postop Ileus requiring NG tube or NPO"
+label(data$category1) = "Superficial Incisional SSI"
+label(data$category2) = "Deep Incisional SSI"
+label(data$category19) = "Sepsis"
+label(data$category9) = "Urinary Tract Infection  - Non-CAUTI"
+label(data$category17) = "Transfusions w/in first 72 hrs postop"
+label(data$category10) = "Urinary Tract Infection (UTI) - CAUTI"
+label(data$category20) = "Severe Sepsis/Septic Shock"
+label(data$category4) = "Pneumonia"
+label(data$category13) = "Cardiac Arrest req. CPR - Postop"
+label(data$category21) = "C-difficile"
+label(data$category41) = "VTE (PE/DVT)"
+label(data$volume_new) <- "Surgeon volume"
+label(data$race2)="Race"
+label(data$ethnicity)="Ethnicity"
+label(data$race3)="Race"
+
+```
+
+### **Distribution & Missing Data Checks**
+
+```{r}
+#--- Normality tests ---
+shapiro.test(data$val_age)     
+shapiro.test(data$bmi)  
+#--- Custom NA summary function ---
+check_na <- function(df) {
+  total_na <- sum(is.na(df))
+  na_per_column <- colSums(is.na(df))
+  list(total_na = total_na, na_per_column = na_per_column)
+}
+check_na(data)
+#bmi missing n=4
+data<-data|>
+  # Complete case n=10,957        
+# NOTE: This creates a logical vector, taking on values TRUE and FALSE        
+  mutate(nomiss = !is.na(bmi) & !is.na(bmigroup))  
+```
+
+### **Save Final Data**
+
+```{r}
+export(cmp1_wide, "cmp1_wide.rds")
+export(event_wide, "event_wide.rds")
+export(test2023, "surgeonvolume.rds")
+export(data, "data.rds")
+```
+
+## Methods
+
+Age, BMI, uterine dimension, and surgical time were collected as continuous. Race, ethnicity, insurance, comorbidities, surgeon volume, ....were collected as categorical.
+
+surgical time stratification
+
+Median(IQR) and proportions were calculated to describe the distribution of patients demographic, comorbidities, intraoperative, and postoperative characteristics. Complex surgery predictors included age, race, ethnicity, insurance, BMI, comorbidities, tobacco use, uterine dimension, surgeon volume, indication, and prior procedures. Differences between stratified surgical times were assessed using the Chi-square test for categorical variables and Kruskal-wallis rank sum test for continuous variables.
+
+In multivariable linear regression modeling log-transformed surgical time, coefficients were exponentiated to express effect sizes as percent differences in operative duration, and then translated into approximate differences in minutes using a median surgical time. Association between uterine size and surgical time was measured after adjusting for covariates. Covariates included age, race, ethnicity, insurance, BMI, sleep apnea, hypertension, smoking status, COPD, surgeon volume, other procedures, and prior pelvic surgeries.
+
+All data management and analyses were conducted using R (version 4.3.0). Statistical significance was set at p\< .05.
+
+## Descriptive summary
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(gtsummary)
+library(rio)
+# read rds
+data <- readRDS("data.rds") 
+# descriptive summary
+# Demographics
+data |>
+  select(val_age, race3, ethnicity, insurance, bmi, sleep_apnea, hypertension, 
+         smoker, copd, uterine_dimension_largest_no, val_surgtime,volume_new,  procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Demographic and Clinical Characteristics**")
+# Demographics, stratified by surgery time
+data |>
+  select(val_age, race3, ethnicity, insurance, bmi, sleep_apnea, hypertension, smoker, copd, uterine_dimension_largest_no, volume_new, surgtime4, procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+ # add_p (test = all_categorical() ~ "chisq.test") |>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Patients Characteristics, stratified by surgery time**")
+
+#Postoperative diagnosis
+data |>
+  select(dx_category) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Postoperative diagnosis**")
+
+#outcome
+data |>
+  select(category3:e_eventtype6, e_eventtype4, e_eventtype5) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Surgical Outcome**")
+
+```
+
+## Bivariate analysis
+
+```{r}
+#| echo: false
+data |>
+  select(val_age, race3, ethnicity, insurance, bmi, sleep_apnea, hypertension, smoker, copd, uterine_dimension_largest_no, volume_new, surgtime4, procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  add_p (test = all_categorical() ~ "chisq.test") |>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Patients Characteristics, stratified by surgery time**")
+```
+
+### Multivariable Logistic Regression
+
+#### Selection of Variables 
+
+Include all demographic and preoperative variables that are clinically relevant.
+
+Continuous: val_surgtime, val_age, bmi, uterine_dimension_largest_no
+
+Categorical variables: insurance, sleep_apnea, hypertension, smoker, copd, volume_new, procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open
+
+Outcome: val_surgtime, in minutes
+
+Primary variable: uterine_dimension_largest_no, in centimeter
+
+Covariates: val_age, bmi, insurance, sleep_apnea, hypertension, smoker, copd, volume_new, procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open
+
+Measure: beta coefficients (effect size)
+
+#### Check distribution of continuous data
+
+note: small samples-normality test; large samples-plots plus residual diagnostics
+
+Data distribution: histogram/QQ plot
+
+```{r}
+#note: if histogram empty----there are extreme outliers stretching the x‑axis so the bars are invisible.
+age  <- na.omit(data$val_age)
+time <- na.omit(data$val_surgtime)
+bmi <- na.omit(data$bmi)
+uterine <- na.omit(data$uterine) 
+
+
+par(mfrow=c(2,2))
+#age
+hist(age,  breaks="FD", main="Age", xlab="Age")
+qqnorm(age);  qqline(age, col=2)
+#bmi
+hist(bmi,  breaks="FD", main="BMI", xlab="BMI")
+qqnorm(bmi);  qqline(bmi, col=2)
+#uterine
+hist(uterine,  breaks="FD", main="uterine", xlab="uterine")
+qqnorm(uterine);  qqline(uterine, col=2)
+# Histogram (zoom to central range so bars are visible)
+ut <- quantile(uterine, c(0.01, 0.99), na.rm = TRUE)
+hist(uterine, xlim = ut, breaks="FD", main="Uterine Dimension", xlab="Uterine Dimension")
+qqnorm(uterine);  qqline(uterine, col=2)
+#time
+hist(time,  breaks="FD", main="time", xlab="time")
+qqnorm(time);  qqline(time, col=2)
+# Histogram (zoom to central range so bars are visible)
+xr <- quantile(time, c(0.01, 0.99), na.rm = TRUE) 
+hist(time,
+     breaks = "FD",
+     xlim = xr,
+     main = "Surgical time (minutes)",
+     xlab = "Minutes",
+     col  = "grey80",
+     border = "white")
+
+# QQ plot
+qqnorm(time, main = "QQ plot: surgical time")
+qqline(time, col = 2, lwd = 2)
+
+par(mfrow = c(1, 1))
+```
+
+**Results:** surgical time is right skewed; use log time.
+
+#### Verify categorical variables
+
+```{r}
+#verify categorical variables
+# Categorical
+data$race3      <- factor(data$race3)
+data$ethnicity  <- factor(data$ethnicity)
+data$volume_new <- factor(data$volume_new)
+
+# Binary (choose one style)
+data$sleep_apnea  <- factor(data$sleep_apnea, levels=c(0,1), labels=c("No","Yes"))
+data$hypertension <- factor(data$hypertension, levels=c(0,1), labels=c("No","Yes"))
+data$smoker       <- factor(data$smoker, levels=c(0,1), labels=c("No","Yes"))
+data$copd         <- factor(data$copd, levels=c(0,1), labels=c("No","Yes"))
+data$procedure    <- factor(data$procedure, levels=c(0,1), labels=c("No","Yes"))  # rename labels if needed
+```
+
+#### Unadjusted linear regression
+
+```{r}
+# unadjusted
+summary(lm(val_surgtime ~ uterine, data=data))
+# unadjusted log
+summary(lm(log(val_surgtime) ~ uterine, data=data))
+```
+
+#### Multivaraible linear regression
+
+```{r}
+m1 <- lm(log(val_surgtime) ~ uterine + val_age + race3 + ethnicity + insurance + bmi + sleep_apnea + hypertension + smoker +  copd + volume_new +  procedure + indication +priorpelvic_csection + priorpelvic_robotic +priorpelvic_open, data=data)
+```
+
+#### Summarize output in table
+
+```{r}
+table_summary <- tbl_regression(m1)
+table_summary
+```
+
+#### Beta coefficents convert to minutes change
+
+-   outcome is log(time)
+
+-   \% change = `100*(exp(beta) - 1)`
+
+-   \% change x median surgical time = minutes change
+
+-   Example: **procedure (β = 0.253):** ≈ **+29%** for procedure=1 vs 0, 29%x111 (median time)=32 minutes
+
+    patients who had other procedures had a 32-minute increase in surgical time.
+
+#### Effect-size table (Minutes change)
+
+Increments: age per 10 years, uterine size per 5 cm, bmi per 5 units.
+
+```{r}
+# Make an effect-size table for lm(log(time) ~ ...)
+# - Drops intercept by default
+# - Converts to % change and "minutes change at reference time"
+# - Allows clinically meaningful increments for continuous predictors
+logtime_effect_table <- function(model,
+                                 t_ref = 111,
+                                 increments = c(val_age = 10, bmi = 5, uterine = 5),
+                                 drop_intercept = TRUE,
+                                 conf_level = 0.95,
+                                 digits = 2) {
+  stopifnot(inherits(model, "lm"))
+
+  b  <- coef(model)
+  ci <- confint(model, level = conf_level)
+
+  # align CI rows with coefficients (in case of dropped terms)
+  ci <- ci[names(b), , drop = FALSE]
+
+  if (drop_intercept && "(Intercept)" %in% names(b)) {
+    keep <- names(b) != "(Intercept)"
+    b  <- b[keep]
+    ci <- ci[keep, , drop = FALSE]
+  }
+
+  # helper to compute effects for a given multiplier k
+  eff_for_k <- function(k, term_label_suffix = "") {
+    bb  <- k * b
+    cc1 <- k * ci[, 1]
+    cc2 <- k * ci[, 2]
+
+    pct  <- 100 * (exp(bb)  - 1)
+    pctL <- 100 * (exp(cc1) - 1)
+    pctU <- 100 * (exp(cc2) - 1)
+
+    min  <- t_ref * (exp(bb)  - 1)
+    minL <- t_ref * (exp(cc1) - 1)
+    minU <- t_ref * (exp(cc2) - 1)
+
+    out <- data.frame(
+      term = paste0(names(b), term_label_suffix),
+      pct = pct, low_pct = pctL, high_pct = pctU,
+      min_at_ref = min, low_min_at_ref = minL, high_min_at_ref = minU,
+      row.names = NULL,
+      check.names = FALSE
+    )
+    out
+  }
+
+  # Base table (per 1-unit change; for factors this is the level vs reference)
+  base <- eff_for_k(k = 1, term_label_suffix = "")
+
+  # Add scaled rows for selected continuous terms
+  scaled <- NULL
+  if (!is.null(increments) && length(increments) > 0) {
+    for (nm in names(increments)) {
+      if (nm %in% names(b)) {
+        k <- as.numeric(increments[[nm]])
+        scaled <- rbind(
+          scaled,
+          eff_for_k(k = k, term_label_suffix = paste0(" (per ", k, " ", nm, " units)"))[
+            base$term == nm, , drop = FALSE
+          ]
+        )
+      }
+    }
+  }
+
+  # Combine, format
+  out <- rbind(base, scaled)
+
+  # Round numeric columns
+  num_cols <- setdiff(names(out), "term")
+  out[num_cols] <- lapply(out[num_cols], \(x) round(x, digits))
+
+  # A little readability
+  attr(out, "t_ref_minutes") <- t_ref
+  attr(out, "conf_level") <- conf_level
+  out
+}
+
+# Example usage:
+tab <- logtime_effect_table(
+  m1,
+  t_ref = 111,
+  increments = c(val_age = 10, bmi = 5, uterine = 5)
+)
+tab
+```
+
+#### Output
+
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| term                                    | pct       | low_pct | high_pct | min_at_ref (minutes change) | low_min_at_ref | high_min_at_ref |
+|                                         |           |         |          |                             |                |                 |
+|                                         | (percent) |         |          |                             |                |                 |
++=========================================+==========:+========:+=========:+============================:+===============:+================:+
+| uterine                                 | 4.45      | 4.12    | 4.79     | 4.94                        | 4.58           | 5.32            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| val_age                                 | 0.35      | 0.26    | 0.43     | 0.38                        | 0.29           | 0.48            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| race3Black or African American          | 26.50     | 23.75   | 29.32    | 29.42                       | 26.36          | 32.54           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| race3Other/Unknown                      | 12.00     | 8.46    | 15.66    | 13.33                       | 9.39           | 17.38           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| ethnicityHispanic                       | 2.04      | -2.32   | 6.59     | 2.26                        | -2.58          | 7.31            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| ethnicityUnknown                        | 2.28      | -1.64   | 6.35     | 2.53                        | -1.82          | 7.05            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| insurancePublic insurance               | 1.16      | -1.28   | 3.66     | 1.29                        | -1.42          | 4.06            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| insuranceUninsured/other                | 3.57      | -5.72   | 13.77    | 3.96                        | -6.34          | 15.28           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| bmi                                     | 0.15      | 0.05    | 0.25     | 0.16                        | 0.05           | 0.27            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| sleep_apneaYes                          | -0.83     | -3.05   | 1.43     | -0.93                       | -3.38          | 1.59            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| hypertension                            | 1.91      | -0.01   | 3.88     | 2.12                        | -0.01          | 4.30            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| smoker                                  | -4.48     | -6.34   | -2.59    | -4.97                       | -7.03          | -2.87           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| copd                                    | -1.83     | -7.49   | 4.17     | -2.03                       | -8.31          | 4.63            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| volume_newmedium                        | 15.31     | 13.11   | 17.55    | 16.99                       | 14.56          | 19.48           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| volume_newlow                           | 27.75     | 24.56   | 31.02    | 30.80                       | 27.26          | 34.43           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| procedure                               | 27.03     | 25.00   | 29.09    | 30.00                       | 27.75          | 32.29           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| indicationOnly adeno                    | 0.86      | -2.05   | 3.85     | 0.95                        | -2.28          | 4.28            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| indicationAdeno and other               | 6.92      | 1.64    | 12.49    | 7.69                        | 1.82           | 13.86           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| indicationAub/fibroids and other        | -3.76     | -6.36   | -1.08    | -4.17                       | -7.06          | -1.19           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| indicationAdeno, aub, fibroid and other | -4.97     | -6.73   | -3.18    | -5.52                       | -7.47          | -3.53           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| indicationOther                         | 11.77     | 8.83    | 14.78    | 13.06                       | 9.80           | 16.40           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| priorpelvic_csectionYes                 | 3.43      | 1.79    | 5.10     | 3.81                        | 1.99           | 5.66            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| priorpelvic_roboticYes                  | 2.74      | 0.84    | 4.66     | 3.04                        | 0.93           | 5.18            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| priorpelvic_openYes                     | 8.33      | 4.26    | 12.56    | 9.25                        | 4.73           | 13.94           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| val_age (per 10 val_age units)          | 3.52      | 2.62    | 4.42     | 3.90                        | 2.91           | 4.91            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| bmi (per 5 bmi units)                   | 0.74      | 0.23    | 1.24     | 0.82                        | 0.26           | 1.38            |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+| uterine (per 5 uterine units)           | 24.35     | 22.38   | 26.35    | 27.03                       | 24.84          | 29.25           |
++-----------------------------------------+-----------+---------+----------+-----------------------------+----------------+-----------------+
+
+#### Linear regression results summary
+
+In multivariable linear regression modeling log-transformed surgical time, coefficients were exponentiated to express effect sizes as percent differences in operative duration, and then translated into approximate differences in minutes using a median surgical time of 111 minutes. Uterine size was independently associated with longer operative times after adjusting for covariates age, race, ethnicity, BMI, sleep apnea, hypertension, smoking status, COPD, surgeon volume, other procedures, and prior pelvic surgeries. Each 1-cm increase in uterine size corresponded to an estimated 4.5% increase in surgical time, which is 4.94 minutes longer at reference time (95% CI 4.58-5.32). Each 5-cm increase in uterine size corresponded to 27.03 minutes longer at reference time (95% CI 24.84-29.25).
+
+Age and BMI were independently associated with longer operative times but had smaller effect sizes compared to uterine size: each 1-year increase in age corresponded to an estimated 0.35% increase (0.38 minutes), or about 4 minutes increase per 10 years; each 1 unit increase in BMI corresponded to an estimated 0.15% increase (0.16 minutes), or about 0.8 minute increase per 5 units. Race was an independent factor associated with longer operative times: Black or African American patients had 26.5% longer operative times (about 29 additional minutes at 111 minutes) compared to White patients. Prior pelvic surgeries were also associated with longer operative time: 3.81 minutes (95% CI 1.99-5.66), 3.04 minutes (95% CI 0.93-5.18), 9.25 minutes (95% CI 4.73-13.94) for C-section, robotic, and open surgeries respectively. Several intraoperative factors were also associated with longer times relative to their reference groups, including low- and medium-volume settings and the presence of additional procedures, each corresponding to roughly 15–28% longer operative duration (about 17–31 additional minutes at 111 minutes). Ethnicity, insurance, hypertension, sleep apnea and COPD were not associated with operative time in this model, while smoking status was associated with slightly shorter times.
+
+## Conclusion
+
+Uterine size was independently associated with longer operative times after adjusting for covariates age, race, ethnicity, BMI, sleep apnea, hypertension, smoking status, COPD, surgeon volume, other procedures, and prior pelvic surgeries.
+
+## References
+
+1.  Surg Endosc. 2020 Feb;34(2):758-769. doi: 10.1007/s00464-019-06825-8. Epub 2019 May 16.
+
+**Comparing benign laparoscopic and abdominal hysterectomy outcomes by time**
+
+<https://pubmed.ncbi.nlm.nih.gov/31098703/>
+
+-Prior study of the effects of operative time on outcomes for laparoscopic hysterectomy showed that morbidity significantly increases in cases greater than 240 min \[12, 22\].
+
+-Predictors of operative time in our cohort included older age, black race, BMI, lower pre-operative HCT, HTN, and uterus \> 250 g.
+
+-However, the database does not include important variables such as **surgeon volume**, expertise in the surgical approaches utilized, **case complexity**, or intraoperative unintended visceral injury. These factors could significantly impact the duration of surgery as well as surgical outcomes.
+
+-Operative time: 20-60 min, 60-120 min, 120-180 min, 180-240 min, \>=240 min
+
+-Complication composite: wound, cardiac, renal, pulmonary, clotting, sepsis, uti, bleeding, return to OR
+
+**Abstract**
+
+**Background:** While laparoscopic hysterectomy has benefits compared to abdominal hysterectomy, the operative times are longer. Longer operative times have been associated with negative outcomes. This study's purpose was to elucidate if there is an operative time at which 30-day outcomes for laparoscopic hysterectomy become inferior to a more expeditiously completed abdominal hysterectomy.
+
+**Methods:** This was a retrospective cohort study (Canadian Task Force classification II-2) using the American College of Surgeons National Surgical Quality Improvement Program database to identify women undergoing hysterectomy for benign indications from 2010 to 2016 by current procedural terminology code. Hysterectomy cases were stratified by approach and 60-min intervals. 30-day post-operative outcomes were analyzed by operative time and approach.
+
+**Results:** 109,821 hysterectomies were included in our analysis, of which 66,560 (61%) were laparoscopic, and 43,261 (39%) were abdominal. In a multivariable logistic regression analysis comparing outcomes by surgical approach and operative time, there was no time combination in which patients who had a abdominal hysterectomy had significantly lower odds of the composite complications variable. This was true even in laparoscopic hysterectomies greater than 240 min compared to abdominal hysterectomies completed between 20 and 60 min. When compared to laparoscopic hysterectomies greater than 240 min, abdominal hysterectomies between 20 and 60 min had lower odds of sepsis and abdominal hysterectomies less than 180 min had lower odds of urinary tract infection.
+
+**Conclusion:** Given that benefits persist even in prolonged cases, a laparoscopic approach should be offered to most patients undergoing benign hysterectomy. Surgical efficiency should be prioritized for any surgical approach.
+
+2.  **Longer Operative Time During Benign Laparoscopic and Robotic Hysterectomy Is Associated With Increased 30-Day Perioperative Complications**
+
+    J Minim Invasive Gynecol. 2015 Sep-Oct;22(6):1049-58. doi: 10.1016/j.jmig.2015.05.022.
+
+    <https://pubmed.ncbi.nlm.nih.gov/26070725/>
+
+    **Abstract**
+
+    **Study objective:** The relationship between operative time and perioperative morbidity has not been fully characterized in gynecology. We aimed to determine the impact of operative time on 30-day perioperative complications after laparoscopic and robotic hysterectomy.
+
+    **Design:** Patients undergoing laparoscopic and robotic hysterectomy for benign disease from 2006 to 2011 within the National Surgical Quality Improvement Program (NSQIP) database were identified by Current Procedural Terminology code. Operative times were stratified into 60-minute intervals and complication rates analyzed. Primary outcomes included 30-day overall, medical, and surgical complications. Bivariate analyses using χ(2), Fisher's exact, and one-way analysis of variance tests were performed to compare clinical and procedural characteristics associated with longer operative time and complications. Multivariable logistic regression analyses were then performed to determine the independent association between operative time and perioperative complications.
+
+    **Design classification:** Canadian Task Force classification II-2 (Evidence obtained from well-designed cohort or case-control studies preferably from more than 1 center or research group).
+
+    **Setting:** American College of Surgeons NSQIP.
+
+    **Patients:** Patients who underwent laparoscopic or robotic hysterectomy for benign disease from 2006 to 2011 at any institution participating in NSQIP.
+
+    **Interventions:** None, retrospective database study.
+
+    **Measurements and main results:** Of the 7630 laparoscopic and robotic hysterectomies identified, 399 patients (5.2%) experienced complications, most commonly urinary tract infection (UTI; 2.1%), superficial surgical site infection (1.0%), and blood transfusion (1.0%). Return to the operating room was required in 97 patients (1.3%), and there were 4 deaths, for a mortality rate of .05%. Complications increased steadily with longer operative time. **Operative time ≥ 240 minutes was associated with increased overall complications** (13.8% vs 4.6%, p \< .001), surgical complications (5.4% vs 1.5%, p \< .001), medical complications (10.4% vs 3.2%, p \< .001), return to the operating room (2.7% vs 1.2%, p = .002), deep venous thrombosis (.5% vs .06%, p = .011), pulmonary embolism (.7% vs .1%, p = .012), and blood transfusion (3.4% vs .8%, p \< .001). These associations remained statistically significant after multivariable regression analysis. Based on continuous regression modeling, each additional hour of operative time would be expected to increase odds of overall complications (odds ratio \[OR\], 1.4; 95% confidence interval \[CI\], 1.28-1.54; p \< .001), medical complications (OR, 1.42; 95% CI, 1.28-1.57; p \< .001), surgical complications (OR, 1.32; 95% CI, 1.17-1.49; p \< .001), venous thromboembolism (OR, 1.47; 95% CI, 1.12-1.92; p = .005), UTI (OR, 1.20; 95% CI, 1.05-1.36; p = .006), blood transfusion (OR, 1.42; 95% CI, 1.18-1.71; p \< .001), and return to the operating room (OR, 1.25; 95% CI, 1.08-1.45; p = .003).
+
+    **Conclusion:** We demonstrated a direct, independent association between operative time and 30-day complications after laparoscopic and robotic hysterectomy. Future research should aim to further delineate risk factors for prolonged operative time and morbidity in laparoscopic hysterectomy to allow surgeons to maximize preoperative planning and optimize patient selection for minimally invasive hysterectomy.
+
+3.  **Comparative Analysis of 30-Day Complications in Transgender Men Undergoing Different Routes of Hysterectomy: A Study Utilizing American College of Surgeons National Surgical Quality Improvement Program (ACS-NSQIP) Data**
+
+    Cureus. 2025 May 31;17(5):e85118. doi: 10.7759/cureus.85118. eCollection 2025 May.
+
+    <https://pubmed.ncbi.nlm.nih.gov/40589675/>
+
+    **Abstract**
+
+    **Introduction:** Gender-affirming surgeries, including hysterectomy, have been shown to reduce distress and improve quality of life for transgender men. However, the safety and efficacy of different hysterectomy approaches in transgender men have not been extensively studied. Here, we aim to compare postoperative complications among the different hysterectomy approaches in transgender men.
+
+    **Methods:** This retrospective cohort study utilized the American College of Surgeons National Surgical Quality Improvement Program (ACS-NSQIP) database from 2012 to 2020 to compare 30-day postoperative complications across different routes of hysterectomy in transgender men. Transgender men who underwent hysterectomy were identified using International Classification of Diseases (ICD)-9 and ICD-10 codes for gender dysphoria. Routes of hysterectomy included laparoscopic hysterectomy (LH), laparoscopic-assisted vaginal hysterectomy (LAVH), abdominal hysterectomy (AH), and vaginal hysterectomy (VH). Descriptive statistics, bivariate analysis, and multivariate logistic regression were performed to evaluate the association between hysterectomy routes and complications.
+
+    **Results:** A total of 1333 transgender men were included. Most patients underwent LH (N=1068, 80.1%), followed by LAVH (N=169, 12.7%), VH (N=54, 4.1%), and AH (N=42, 3.2%). The overall 30-day incidence of complications was 6.5%, with surgical site infection and unplanned reoperation being the most common complications. LAVH was associated with a higher incidence of unplanned intubation, while AH had a higher incidence of bleeding requiring transfusion. After adjusting for baseline comorbidities, LAVH was associated with significantly greater odds of unplanned intubation compared with LH (adjusted odds ratio (aOR) 95% confidence interval (CI) 28.1 (2.3-\>100)).
+
+    **Conclusion:** This study provides important insights into the 30-day postoperative outcomes of different hysterectomy approaches in transgender men. LH appears to have the lowest incidence of complications, whereas LAVH and AH present higher risks for specific complications. These findings can aid in informed decision-making and surgical planning, ultimately improving care for transgender men undergoing hysterectomy.
+
+## Discussions
+
+Topic: Linear regression vs Logistic regression
+
+Model: o4 mini reasoning model
+
+Key points:
+
+use linear regression to quantify how each factor shifts expected surgery duration, use logistic regression to identify risk factors for long procedure.
+
+Questions:
+
+define complex surgery:
+
+-   **Prolonged surgery time:**
+
+-   **Increased risk of complications:** Due to the complexity of the procedure and the patient's underlying health conditions. post surgery complication?
+
+-   **Postoperative care requirements:** Including extended hospital stays, rehabilitation, and ongoing medical monitoring. extended hospital stays, ED visit, readmission
+
+    ### 11/17/2025
+
+```{r}
+data |>
+  select(dx_icd10_cd)|>
+  tbl_summary()
+```
+
+surgery time breakdown: \<90, 90-130, \>130
+
+add variables: surgeon volume, case complexity (indication "Adeno, aub, fibroid and other" is more complex than other categories).
+
+dx_icd10_cd: postop diagnosis
+
+any complication:
+
+3 - Organ/Space SSI,
+
+17 - Transfusion,
+
+13 - Cardiac Arrest req. CPR - Postop,
+
+4 - Pneumonia,
+
+39 - Postop Ileus requiring NG tube or NPO
+
+1 - Superficial Incisional SSI
+
+10 - Urinary Tract Infection (UTI) - CAUTI
+
+Presentation to ED or Urgnt care;
+
+Readmission;
+
+Return to operating room.
+
+Table 1: demographic, comorbidities, surgery by surgery time breakdown
+
+Table 2: complications by surgery time breakdown
+
+complications captured:
+
+|            |            |
+|:-----------|:----------:|
+| category3  | 128 (1.2%) |
+| category39 | 19 (0.2%)  |
+| category1  | 61 (0.6%)  |
+| category2  | 5 (\<0.1%) |
+| category19 | 54 (0.5%)  |
+| category9  | 115 (1.0%) |
+| category17 | 54 (0.5%)  |
+| category10 | 6 (\<0.1%) |
+| category20 | 20 (0.2%)  |
+
+|           |            |
+|:----------|:----------:|
+| category4 | 7 (\<0.1%) |
+
+|            |            |
+|:-----------|:----------:|
+| category13 | 4 (\<0.1%) |
+
+|            |            |
+|:-----------|:----------:|
+| category21 | 6 (\<0.1%) |
+
+|            |           |
+|:-----------|:---------:|
+| category41 | 27 (0.2%) |
+
+### **3/5/2026**
+
+Q: After reviewing the timepoints, could we re-analyze with the following breakdown:
+
+\<90 minutes, 90 – 130 minutes, 131-240 minutes, \>240 minutes
+
+A:Yes
+
+```{r}
+data<- data |>
+  mutate(surgtime4=case_when(val_surgtime < 90 ~ "<90 min",
+                                     val_surgtime <= 130 ~ "90-130 min",
+                                     val_surgtime <= 240 ~ "131-240 min",
+                                     val_surgtime > 240 ~ ">240 min"
+                                    ))
+data$surgtime4 <- forcats::fct_relevel(data$surgtime4, "<90 min", "90-130 min", "131-240 min", ">240 min")
+```
+
+Q: When looking at Table 1, Is there a way for us to separate Race and Ethnicity?
+
+A: Yes
+
+```{r}
+#check raw data
+ethnicity<- data |>
+  filter(ethnicity_hispanic==2)|>
+  select(race,race_new,race_new1)|>
+  tbl_summary() 
+ethnicity #ethnicity unknown n=450
+ethnicity1<- data |>
+  filter(ethnicity_hispanic==1)|>
+  select(race,race_new,race_new1)|>
+  tbl_summary()
+ethnicity1 #hispanic n=350
+#notes from MSQC team: 80 is “Hispanic, Latino/Latina/Latinx, or Spanish Origin”. At some point in 2024, “ethnicity_hispanic” was retroactively merged into “race” (the data dictionary took a while to get updated) so to accurately determine whether an individual patient is Hispanic, you should combine race contains 80 and ethnicity_hispanic = 1 (having either one means “yes”). 
+#"race" containing "80" n=349; "ethnicity_hispanic" =1 n=350;USE "ethnicity_hispanic"
+data <-
+  data |>
+  mutate(race1=case_when(race %in% c("{0|10}", "{10}","{10|70}", " {70|10}","{0|10|80}","{10|80}", "{70|10|80}") ~ "White",
+                        race %in% c("{0|20}", "{20}", "{20|70}", "{70|20}","{20|80}") ~ "Black or African American",
+                        race %in% c("{30}","{30|80}") ~ "American Indian or Alaska Native",
+                        race %in% c( "{40}","{40|80}") ~ "Native Hawaiian or Pacific Islander",
+                        race %in% c("{50}","{50|80}") ~  "Asian",
+                        race %in% c("{0}", "{70}", "{0|70}","{0|70|80}", "{0|80}", "{70|80}", "{80}") ~  "Unknown",
+                        TRUE ~ "Multirace"),
+  race2=case_when(race1 %in% c("American Indian or Alaska Native", "Native Hawaiian or Pacific Islander","Multirace") ~ "Other",
+                   TRUE ~ race1),
+  ethnicity=factor(ethnicity_hispanic,
+                   levels=0:2,
+                   labels=c("No", "Yes", "Unknown"))
+)
+data<- data |>
+  mutate(ethnicity = as.character(ethnicity),
+         ethnicity=case_when(is.na(ethnicity) ~ "Unknown",
+                             TRUE ~ ethnicity))
+data<- data |>
+  mutate(ethnicity = as.character(ethnicity),
+         ethnicity = case_when(ethnicity=="Yes"~ "Hispanic",
+                               ethnicity=="No" ~ "Non-Hispanic",
+                               TRUE ~ ethnicity))
+data$race2 <- forcats::fct_relevel(data$race2, "White", "Black or African American", "Asian", "Other", "Unknown")
+data$ethnicity <- forcats::fct_relevel(data$ethnicity, "Non-Hispanic", "Hispanic", "Unknown")
+label(data$race2)="Race"
+label(data$ethnicity)="Ethnicity"
+```
+
+Q: Under indications for procedures, can we include the full CPP code; for example, the #6 indication was for “Adenomyosis, Chronic Pelvic Pain, and Endometriosis.
+
+A:
+
+~~1 - Cancer of Cervix, Ovary, or Uterine Sarcoma~~
+
+~~2 - Cancer of Endometrium~~
+
+-   3 - Family history, personal history of other CA, gender transition, OB complications (placenta previa/accreta/increta or percreta)
+
+-   4 - PID, pelvic mass
+
+-   5 - Cervical Dysplasia/carcinoma in situ, Endometrial hyperplasia-with or without Atypia, EIN
+
+-   6 - Adenomyosis, Chronic Pelvic Pain, Endometriosis
+
+-   7 - AUB, Uterine Fibroids
+
+-   8 - Pelvic Organ Prolapse
+
+-   9 - Other, not listed above
+
+    Please check if the grouped categories for indications have any errors:
+
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category    | old                           | Code rules                     | Codes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Full description                                                                                                                                                                                                                                                                                                                                                                |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category1   | Only adeno                    | 6                              | {6}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Adenomyosis, Chronic Pelvic Pain, Endometriosis                                                                                                                                                                                                                                                                                                                                 |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category2   | Adeno and other               | 6 and any from3,4,5,8,9        | {3\|6\|4}, {3\|6\|5}, {3\|6}, {3\|8\|6\|4}, {4\|3\|6}, {4\|5\|6\|8}, {4\|5\|6},{4\|6\|5},{4\|6}, {5\|3\|6}, {5\|6},{6\|3}, {6\|4\|3},{6\|4\|9},{6\|4}, {6\|5},{6\|8\|3}, {6\|8\|5}, {6\|8},{6\|9},{8\|3\|5\|6},{8\|6\|3},{8\|6\|9}, {8\|6},{8\|9\|4\|6}, {9\|6}                                                                                                                                                                                                                                                                                                                                                                                                                                                | Adenomyosis, Chronic Pelvic Pain, Endometriosis and any from (Family history, personal history of other CA, gender transition, OB complications (placenta previa/accreta/increta or percreta),PID, pelvic mass,- Cervical Dysplasia/carcinoma in situ, Endometrial hyperplasia-with or without Atypia, EIN,Pelvic Organ Prolapse or other not listed)                           |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category3   | Only aub/ fibroids            | 7                              | {7}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | AUB, Uterine Fibroids                                                                                                                                                                                                                                                                                                                                                           |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category4   |  Aub/fibroids and other       | 7 and any from3,4,5,8,9        | {3\|4\|7},{3\|5\|7\|8}, {3\|5\|7}, {3\|7\|5}, {3\|7\|8},{3\|7\|9}, {3\|7},{3\|8\|7},  {4\|3\|7}, {4\|5\|7}, {4\|7\|3}, {4\|7\|8}, {4\|7\|9},{4\|7},{5\|3\|7}, {5\|7\|3}, {5\|7\|4},{5\|7\|8}, {5\|7\|9}, {5\|7}, {7\|3\|4}, {7\|3\|5}, {7\|3\|8},{7\|3},{7\|4\|3}, {7\|4\|5},{7\|4},{7\|5\|3},{7\|5\|4}, {7\|5\|8}, {7\|5\|9}, {7\|5}, {7\|8\|3}, {7\|8\|5}, {7\|8},{7\|9\|5},{7\|9}, {8\|7\|3},{8\|7\|4},{8\|7\|5}, {8\|7\|9}, {8\|7},{9\|7}                                                                                                                                                                                                                                                                  | AUB, Uterine Fibroids and any from (Family history, personal history of other CA, gender transition, OB complications (placenta previa/accreta/increta or percreta),PID, pelvic mass,- Cervical Dysplasia/carcinoma in situ, Endometrial hyperplasia-with or without Atypia, EIN,Pelvic Organ Prolapse or other not listed)                                                     |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category5   | Adeno, aub, fibroid and other | 6 and 7 and any from 3,4,5,8,9 | {3\|5\|6\|7},{3\|6\|7\|8}, {3\|6\|7}, {3\|7\|5\|6}, {3\|7\|6\|4},{3\|7\|6\|5}, {3\|7\|6\|8}, {3\|7\|6}, {3\|7\|8\|6}, {4\|5\|6\|7}, {4\|6\|7}, {4\|7\|6}, {5\|4\|6\|7}, {5\|6\|7\|8},{5\|6\|7}, {5\|7\|4\|6}, {5\|7\|6\|3}, {5\|7\|6},{6\|3\|7},{6\|4\|7},{6\|5\|7}, {6\|7\|3}, {6\|7\|4\|8},{6\|7\|4}, {6\|7\|5},{6\|7\|8}, {6\|7\|9\|5},{6\|7\|9},{6\|7}, {6\|8\|7}, {6\|9\|7}, {7\|3\|6}, {7\|4\|6\|5}, {7\|4\|6}, {7\|5\|3\|6}, {7\|5\|6}, {7\|6\|3}, {7\|6\|4\|9}, {7\|6\|4},{7\|6\|5}, {7\|6\|8\|3}, {7\|6\|8\|5}, {7\|6\|8}, {7\|6\|9\|4}, {7\|6\|9}, {7\|6}, {7\|8\|6\|5}, {7\|8\|6}, {7\|9\|6}, {8\|6\|7\|5}, {8\|6\|7},{8\|7\|5\|6},{8\|7\|6\|3}, {8\|7\|6\|5}, {8\|7\|6},{8\|7\|9\|6\|3}, {9\|7\|6} | Adenomyosis, Chronic Pelvic Pain, Endometriosis and AUB, Uterine Fibroids and any from (Family history, personal history of other CA, gender transition, OB complications (placenta previa/accreta/increta or percreta),PID, pelvic mass,- Cervical Dysplasia/carcinoma in situ, Endometrial hyperplasia-with or without Atypia, EIN,Pelvic Organ Prolapse or other not listed) |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Category6   | Other                         | No 6 or 7                      | Rest of codes, without {6} or {7}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Family history, personal history of other CA, gender transition, OB complications (placenta previa/accreta/increta or percreta),PID, pelvic mass,- Cervical Dysplasia/carcinoma in situ, Endometrial hyperplasia-with or without Atypia, EIN,Pelvic Organ Prolapse or other not listed                                                                                          |
++-------------+-------------------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+-   Q: When looking at Table 2: Can we please incorporate “conversion to open” as a characteristic?
+
+    A: We may not have the conversion to open data available:
+
+    -   We have decided to include only laparoscopic hysterectomies, which are 54 and 55 in surgical approach.
+
+    Q: Previously, we had discussed inclusion of dx_icd10_cd regarding post-operative diagnoses and wanted to circle back regarding ways for us to address this
+
+    A: A summary of dx_icd10_cd is attached (icd10.html). MSQC codebook and variable spreadsheets don’t have icd10 values. Can you please provide a list of icd10 with respective descriptions?
+
+For  the postop diagnosis codes:
+
+Endometriosis: N80 family
+
+Adenomyosis: N80.03
+
+Dysmenorrhea: Primary N94.4, Secondary N94.5, Unspecified N94.6
+
+Pelvic Pain: R10.2
+
+Infertility: N97 family (N97.0, N97.1, N97.2, N97.8, N97.9)
+
+Fibroids: D25.0, D25.1, D25.2, D25.9
+
+AUB: N93.9, N93.8, N92.0, N92.6, N95.0
+
+Cervical dysplasia: N87.0, N87.1, N87.9, D06.9, Z87.140
+
+Gender dysphoria: F64.8, F64.9, F64
+
+Hyperplasia: N85.0, N85.01, N85.02
+
+Endometrial polyp: N84
+
+PID: N73.9, N73, N73.4, N74.4
+
+Pelvic organ prolapse: N81 family
+
+Personal history of cancer: Z85, Z80.3, Z15.02. Z15.01, Z84.81
+
+```{r}
+#Single column each diagnosis (experimenting)
+test <- data %>%
+  mutate(
+    dx = str_to_upper(str_trim(dx_icd10_cd)), #dx=post-operative diagnoses
+
+    # Endometriosis: starts with N80 except N8003
+    endometriosis = str_starts(dx, "N80") & dx != "N8003",
+
+    # Adenomyosis
+    adenomyosis = dx == "N8003",
+
+    # Dysmenorrhea
+    primary_dysmenorrhea     = dx == "N944",
+    secondary_dysmenorrhea   = dx == "N945",
+    unspecified_dysmenorrhea = dx == "N946",
+
+    # Pelvic pain
+    pelvic_pain = dx == "R102",
+
+    # Infertility
+    infertility = str_starts(dx, "N97"),
+
+    # Fibroids
+    fibroids = dx %in% c("D250","D251","D252","D259"),
+
+    # AUB
+    aub = dx %in% c("N939","N938","N920","N926","N950"),
+
+    # Cervical dysplasia
+    cervical_dysplasia = dx %in% c("N870","N871","N879","D069","Z87140"),
+
+    # Gender dysphoria (covers F640, F649, etc.)
+    gender_dysphoria = str_starts(dx, "F64"),
+
+    # Hyperplasia
+    hyperplasia = dx %in% c("N850","N8501","N8502"),
+
+    # Endometrial polyp (N84*)
+    endometrial_polyp = str_starts(dx, "N84"),
+
+    # PID (N73* or N74*) note: check if N736 belongs
+    pid = str_starts(dx, "N73") | str_starts(dx, "N74"),
+
+    # Pelvic organ prolapse (N81*)
+    pelvic_organ_prolapse = str_starts(dx, "N81"),
+
+    # Personal history of cancer (as provided)
+    personal_history_cancer =
+      str_starts(dx, "Z85") |
+      dx == "Z803" |
+      dx %in% c("Z1501","Z1502","Z8481")
+  ) %>%
+  select(study_cid, dx_icd10_cd, dx, everything())
+
+# Quick check: counts by flag
+flag_counts <- test %>%
+  summarise(across(where(is.logical), ~ sum(.x, na.rm = TRUE))) %>%
+  tidyr::pivot_longer(everything(), names_to = "flag", values_to = "n") %>%
+  arrange(desc(n))
+flag_counts
+```
+
+```{r}
+#Single categorical label each person
+data <- data %>%
+  mutate(
+    dx = str_to_upper(str_trim(dx_icd10_cd)),
+
+    dx_category = case_when(
+      # Endometriosis: N80* except N8003
+      str_starts(dx, "N80") & dx != "N8003" ~ "Endometriosis",
+
+      # Adenomyosis
+      dx == "N8003" ~ "Adenomyosis",
+
+      # Dysmenorrhea
+      dx == "N944" ~ "Primary dysmenorrhea",
+      dx == "N945" ~ "Secondary dysmenorrhea",
+      dx == "N946" ~ "Unspecified dysmenorrhea",
+
+      # Pelvic pain
+      dx == "R102" ~ "Pelvic pain",
+
+      # Infertility: N97*
+      str_starts(dx, "N97") ~ "Infertility",
+
+      # Fibroids
+      dx %in% c("D250","D251","D252","D259") ~ "Fibroids",
+
+      # AUB
+      dx %in% c("N939","N938","N920","N926","N950") ~ "AUB",
+
+      # Cervical dysplasia
+      dx %in% c("N870","N871","N879","D069","Z87140") ~ "Cervical dysplasia",
+
+      # Gender dysphoria: F64*
+      str_starts(dx, "F64") ~ "Gender dysphoria",
+
+      # Hyperplasia
+      dx %in% c("N850","N8501","N8502") ~ "Hyperplasia",
+
+      # Endometrial polyp: N84*
+      str_starts(dx, "N84") ~ "Endometrial polyp",
+
+      # PID: N73* or N74*
+      str_starts(dx, "N73") | str_starts(dx, "N74") ~ "PID",
+
+      # Pelvic organ prolapse: N81*
+      str_starts(dx, "N81") ~ "Pelvic organ prolapse",
+
+      # Personal history of cancer (as provided)
+      str_starts(dx, "Z85") | dx == "Z803" | dx %in% c("Z1501","Z1502","Z8481") ~
+        "Personal history of cancer",
+
+      TRUE ~ "Other"
+    )
+  )
+label(data$dx_category)="Postoperative diagnosis"
+# Optional: verify distribution
+dx_tab <- data %>%
+  count(dx_category, sort = TRUE) %>%
+  mutate(pct = n / sum(n))
+dx_tab
+#note: each patient had one ICD-10 code, but might have multiple indications.
+export(data, "data.rds")
+```
+
+Q: how many there were for: 28, 36, 48, and 50 for surgical approach
+
+A: zero
+
+```{r}
+data <-  read_csv("rawdata/raw_data_deidentified.csv") #n=48637
+data <- data|>   
+  filter(surgery_year %in% c(2019:2023))|> #n=28280    
+  filter(!indication_for_procedure_e %in% c("{1|3|6}", "{1|3}",   "{1|6}","{1|7|6}","{1|7}","{1}","{2|7|5}", "{2|7|6}", "{2|7}", "{2|8}","{2}",  "{3|1}",  "{4|1|5}", "{4|1|6}", "{5|2|7}", "{5|7|2}", "{6|3|1}", "{6|7|1}", "{7|1|6}",  "{7|1}",  "{7|2}", "{7|6|1}", "{8|1}"))  #n=27976  
+data<- data|>
+  filter(surgical_approach %in% c(28, 36, 48,50)) #n=0
+```
+
+updated tables
+
+```{r}
+# descriptive summary
+data |>
+  #filter(nomiss==TRUE)|>
+  select(val_age, race2, ethnicity, insurance, bmi, sleep_apnea, hypertension, chf,  dialysis, smoker, copd, uterine_dimension_largest_no, val_surgtime,volume_new, surgtime4, procedure,indication,priorpelvicsurgery,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Demographic and Clinical Characteristics**")
+
+data |>
+  #filter(nomiss==TRUE)|>
+  select(surgtime4, dx_category) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Postoperative diagnosis**")
+
+data |>
+  #filter(nomiss==TRUE)|>
+  select(surgtime4, category3:e_eventtype6, e_eventtype4, e_eventtype5) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Surgical Outcome**")
+```
+
+Notes:
+
+Demographics:
+
+1.  surgeon volume: "Surgeon volume was assessed by the number of hysterectomy cases in the database attributed to each surgeon per year. Individual surgeons were categorized into tertiles of high, intermediate, and low volume based on their relative annual case contribution. Surgeon volume was categorized on an annual basis, independent of categorization in previous years. This approach accounted for variation in surgeon and hospital participation across the study period, annual differences in case sampling, and year-to-year changes in individual surgeon volume. Given that the MSQC uses a sampling methodology and does not capture all surgical procedures performed at each site, absolute case counts were not meaningful."
+
+    ```{r}
+    ```
+
+    reference: **Identifying potentially modifiable risk factors associated with racially disparate postoperative outcomes following benign hysterectomy**
+
+    American Journal of Obstetrics & Gynecology, 2025;
+
+    <https://doi.org/10.1016/j.ajog.2025.11.036>
+
+2.  
+
+Postoperative diagnosis:
+
+Each patient had a single ICD-10 code in MSQC dataset.
+
+"Other": patients' ICD-10 codes are not included in the provided list.
+
+### 4/7/2026 statistical tests
+
+#### **Inclusion/exclusion:**
+
+surgical time 30-650 minutes
+
+uterine dimension 3-30 cm
+
+exclude 4 cases with missing BMI data
+
+```{r}
+data <- data|> 
+  mutate(val_surgtime=as.numeric(val_surgtime))|>
+  filter(between(val_surgtime, 30, 650)) |>  # keep surg time 30–650 (inclusive)
+  filter(!is.na(bmi))                         # exclude missing BMI (4 cases)
+#n=10940 (21 cases removed)
+
+data <- data|> 
+  mutate(uterine=as.numeric(uterine_dimension_largest_no))|>
+  filter(between(uterine, 3, 30)) #n=10898, 42 cases removed
+```
+
+Variable editing
+
+```{r}
+data <- data |>
+  mutate(
+    race2=as.character(race2),
+  race3=case_when(race2 %in% c("Asian", "Other", "Unknown") ~ "Other/Unknown",
+                   TRUE ~ race2))
+data$race3 <- forcats::fct_relevel(data$race3, "White", "Black or African American", "Other/Unknown")
+label(data$race3)="Race"
+#create new variable for rare complications including post NG tube, deep incisional SSI, UTI-CAUTI, severe sepsis/Septic Shock, pheumonia, cardiac Arrest req. CPR - Postop,C-difficile
+data <- data %>%
+  mutate(
+    cmp_other = if_else(
+      if_any(c(category39, category2, category10, category20, category4, category13, category21),
+             ~ .x == 1),
+      1L, 0L
+    )
+  )
+label(data$cmp_other)="Other complications"
+#create new variable "surgtime240"
+data <- data %>%
+  mutate(surgtime240 = if_else(val_surgtime > 240, 1L, 0L))
+#create new variables for indication
+data |>
+  select(indication)|>
+  tbl_summary()
+data <- data |>
+  mutate(endo=case_when(indication %in% c("Only adeno", "Adeno and other", "Adeno, aub, fibroid and other") ~1,
+                        TRUE ~ 0),
+         fibroid=case_when(indication %in% c("Only aub/ fibroids", "Aub/fibroids and other", "Adeno, aub, fibroid and other") ~ 1,
+                         TRUE ~ 0),
+         endo_fibroid=case_when(indication=="Other" ~ 0,
+                                TRUE ~ 1),
+         endo_and_firoid=case_when(indication=="Adeno, aub, fibroid and other" ~1,
+                                   TRUE ~ 0))
+```
+
+#### Bivariate analysis (simple, fast, less informational)
+
+**example: reference paper Table 1**
+
+Comparing benign laparoscopic and abdominal hysterectomy outcomes by time
+
+<https://pubmed.ncbi.nlm.nih.gov/31098703/>
+
+```{r}
+# Demographics
+data |>
+  select(val_age, race3, ethnicity, insurance, bmi, sleep_apnea, hypertension,chf,  dialysis, smoker, copd, uterine_dimension_largest_no, val_surgtime,volume_new,  procedure,indication,priorpelvicsurgery,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Demographic and Clinical Characteristics**")
+# Demographics, stratified by surgery time
+data |>
+  select(val_age, race3, ethnicity, insurance, bmi, sleep_apnea, hypertension, smoker, copd, uterine_dimension_largest_no, volume_new, surgtime4, procedure,indication,priorpelvicsurgery,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_p (test = all_categorical() ~ "chisq.test") |>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Patients Characteristics, stratified by surgery time**")
+#Postoperative diagnosis
+data |>
+  select(surgtime4, dx_category) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  add_overall()|>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Postoperative diagnosis**")
+#Postoperative diagnosis
+data |>
+  select(dx_category) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Postoperative diagnosis**")
+#outcome
+data |>
+  select(category3:e_eventtype6, e_eventtype4, e_eventtype5) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_caption("**Surgical Outcome**")
+#outcome by time
+data |>
+  select(surgtime4, category3,category1,category19,category9,category17,category41,cmp_other, e_eventtype6, e_eventtype4, e_eventtype5) |>
+  select(where(~ any(. != 0))) |>
+  tbl_summary(
+    by=surgtime4,
+    digits = list(all_categorical() ~ c(0, 1)))|>
+  modify_spanning_header(all_stat_cols() ~ "**Surgery time**")|>
+  modify_caption("**Surgical Outcome**")
+```
+
+Logistic regression (bad idea, should stay with linear regression)
+
+outcome: binary, surgical time \>240 min
+
+bad: assume 30 and 240 the same, 240 and 241 are 0 and 1.
+
+variable: uterine dimension
+
+covariates: age, race, ethnicity, bmi, sleep_apnea, hypertension, smoker, copd, volume_new, procedure,indication,priorpelvic_csection, priorpelvic_robotic
+
+```{r}
+
+data |>
+  select(uterine_dimension_largest_no, surgtime240) |>
+  tbl_uvregression(method = glm, y=surgtime240, exponentiate = TRUE)|>
+  modify_caption("**Table. Univariable logistic regression**")
+
+glm(surgtime240 ~ uterine_dimension_largest_no + val_age + race3 + ethnicity + bmi + sleep_apnea + hypertension + smoker +  copd + volume_new +  procedure + indication + priorpelvic_robotic, data=data, family = binomial) |>
+tbl_regression(exponentiate = TRUE) |>
+modify_caption("**Multivariable logistic regression**")
+```
+
+#### Multivariable Linear Regression (time-consuming, more interpretable, preferred)
+
+example: **Impact of Body Mass Index on Operative Time in Women Undergoing Benign Hysterectomy**
+
+measure: beta coefficients
+
+continuous: val_surgtime, val_age, bmi, uterine_dimension_largest_no
+
+note: small samples-normality test; large samples-plots plus residual diagnostics
+
+categorical variables: insurance, sleep_apnea, hypertension, chf, dialysis, smoker, copd, volume_new, procedure,indication,priorpelvic_csection, priorpelvic_robotic,priorpelvic_open
+
+Data distribution: histogram/QQ plot
+
+```{r}
+#note: if histogram empty----there are extreme outliers stretching the x‑axis so the bars are invisible.
+age  <- na.omit(data$val_age)
+time <- na.omit(data$val_surgtime)
+bmi <- na.omit(data$bmi)
+uterine <- na.omit(data$uterine) 
+
+
+par(mfrow=c(2,2))
+#age
+hist(age,  breaks="FD", main="Age", xlab="Age")
+qqnorm(age);  qqline(age, col=2)
+#bmi
+hist(bmi,  breaks="FD", main="BMI", xlab="BMI")
+qqnorm(bmi);  qqline(bmi, col=2)
+#uterine
+hist(uterine,  breaks="FD", main="uterine", xlab="uterine")
+qqnorm(uterine);  qqline(uterine, col=2)
+# Histogram (zoom to central range so bars are visible)
+ut <- quantile(uterine, c(0.01, 0.99), na.rm = TRUE)
+hist(uterine, xlim = ut, breaks="FD", main="Uterine Dimension", xlab="Uterine Dimension")
+qqnorm(uterine);  qqline(uterine, col=2)
+#time
+hist(time,  breaks="FD", main="time", xlab="time")
+qqnorm(time);  qqline(time, col=2)
+# Histogram (zoom to central range so bars are visible)
+xr <- quantile(time, c(0.01, 0.99), na.rm = TRUE) 
+hist(time,
+     breaks = "FD",
+     xlim = xr,
+     main = "Surgical time (minutes)",
+     xlab = "Minutes",
+     col  = "grey80",
+     border = "white")
+
+# QQ plot
+qqnorm(time, main = "QQ plot: surgical time")
+qqline(time, col = 2, lwd = 2)
+
+par(mfrow = c(1, 1))
+# surgical time is right skewed; consider log time?
+
+```
+
+Regression
+
+outcome: continuous surgical time (log)
+
+primary variable: uterine dimension
+
+covariates: age, race, ethnicity, insurance, bmi, sleep_apnea, hypertension, smoker, copd, volume_new, procedure,indication (?),priorpelvic_csection, priorpelvic_robotic, priorpelvic_open
+
+```{r}
+#verify categorical variables
+# Categorical
+data$race3      <- factor(data$race3)
+data$ethnicity  <- factor(data$ethnicity)
+data$volume_new <- factor(data$volume_new)
+
+# Binary (choose one style)
+#data$sleep_apnea  <- factor(data$sleep_apnea, levels=c(0,1), labels=c("No","Yes"))
+data$hypertension <- factor(data$hypertension, levels=c(0,1), labels=c("No","Yes"))
+data$smoker       <- factor(data$smoker, levels=c(0,1), labels=c("No","Yes"))
+data$copd         <- factor(data$copd, levels=c(0,1), labels=c("No","Yes"))
+data$procedure    <- factor(data$procedure, levels=c(0,1), labels=c("No","Yes"))  # rename labels if needed
+data$endo <- factor(data$endo, levels=c(0,1), labels=c("No","Yes"))
+data$fibroid <- factor(data$fibroid, levels=c(0,1), labels=c("No","Yes"))
+data$endo_fibroid <- factor(data$endo_fibroid, levels=c(0,1), labels=c("No","Yes"))
+data$endo_and_firoid <- factor(data$endo_and_firoid, levels=c(0,1), labels=c("No","Yes"))
+
+
+#verify continuous variables
+summary(data$uterine_dimension_largest_no) #min and max funny values
+sum(data$uterine_dimension_largest_no > 30) #21
+sum(data$uterine_dimension_largest_no < 3) #21
+summary(data$val_surgtime)
+summary(data$bmi)
+summary(data$val_age)
+# unadjusted
+summary(lm(val_surgtime ~ uterine, data=data))
+# unadjusted log
+summary(lm(log(val_surgtime) ~ uterine, data=data))
+# model
+#remove indication and prior pelvic robotic and C section. indication categories too messy; prior pelvic robotic and prior c section overlap with other procedures?
+#check indication new variables
+endo <- lm(log(val_surgtime) ~ endo, data=data)
+fibroid <- lm(log(val_surgtime) ~ fibroid, data=data)
+endo_fibroid<- lm(log(val_surgtime) ~ endo_fibroid, data=data)
+endo_and_firoid <- lm(log(val_surgtime) ~ endo_and_firoid, data=data)
+
+data$indication <- relevel(data$indication, ref="Only aub/ fibroids")
+indication <- lm(log(val_surgtime) ~ indication, data=data)
+
+
+
+m1 <- lm(log(val_surgtime) ~ uterine + val_age + race3 + ethnicity + insurance + bmi + sleep_apnea + hypertension + smoker +  copd + volume_new +  procedure + indication +priorpelvic_csection + priorpelvic_robotic +priorpelvic_open, data=data)
+table_summary <- tbl_regression(m1)
+table_summary
+```
+
+Beta coefficents interpretation:
+
+-   outcome is log(time)
+
+-   \% change = `100*(exp(beta) - 1)`
+
+-   \% change x median surgical time = minutes change
+
+-   Example: **procedure (β = 0.253):** ≈ **+29%** for procedure=1 vs 0, 29%x111 (median time)=32 minutes
+
+-   patients who had other procedures had a 32-minute increase in surgical time.
+
+```{r}
+b  <- coef(m1)
+ci <- confint(m1)
+
+# Percent change
+pct  <- 100*(exp(b) - 1)
+pctL <- 100*(exp(ci[,1]) - 1)
+pctU <- 100*(exp(ci[,2]) - 1)
+
+# Convert to minutes at a reference surgical time (use median = 111)
+t_ref <- 111  
+
+min_change  <- t_ref * (exp(b) - 1)
+min_changeL <- t_ref * (exp(ci[,1]) - 1)
+min_changeU <- t_ref * (exp(ci[,2]) - 1)
+
+out <- data.frame(
+  term = names(b),
+  pct  = pct,  low_pct  = pctL,  high_pct  = pctU,
+  min  = min_change, low_min = min_changeL, high_min = min_changeU,
+  row.names = NULL,
+  )
+
+out
+```
+
+Continuous variables: minutes change is per 1 unit.
+
+age: may try per 10 years.
+
+uterine dimension: may try per 5 cm.
+
+bmi: may try per 10 units.
+
+```{r}
+k <- 10
+term <- "val_age"
+data.frame(
+  term = paste0(term, " (per ", k, "y)"),
+  pct  = 100*(exp(k*b[term]) - 1),
+  low_pct  = 100*(exp(k*ci[term,1]) - 1),
+  high_pct = 100*(exp(k*ci[term,2]) - 1),
+  min  = t_ref*(exp(k*b[term]) - 1),
+  low_min  = t_ref*(exp(k*ci[term,1]) - 1),
+  high_min = t_ref*(exp(k*ci[term,2]) - 1)
+)
+```
+
+cleaned table
+
+```{r}
+# Make an effect-size table for lm(log(time) ~ ...)
+# - Drops intercept by default
+# - Converts to % change and "minutes change at reference time"
+# - Allows clinically meaningful increments for continuous predictors
+logtime_effect_table <- function(model,
+                                 t_ref = 111,
+                                 increments = c(val_age = 10, bmi = 5, uterine = 5),
+                                 drop_intercept = TRUE,
+                                 conf_level = 0.95,
+                                 digits = 2) {
+  stopifnot(inherits(model, "lm"))
+
+  b  <- coef(model)
+  ci <- confint(model, level = conf_level)
+
+  # align CI rows with coefficients (in case of dropped terms)
+  ci <- ci[names(b), , drop = FALSE]
+
+  if (drop_intercept && "(Intercept)" %in% names(b)) {
+    keep <- names(b) != "(Intercept)"
+    b  <- b[keep]
+    ci <- ci[keep, , drop = FALSE]
+  }
+
+  # helper to compute effects for a given multiplier k
+  eff_for_k <- function(k, term_label_suffix = "") {
+    bb  <- k * b
+    cc1 <- k * ci[, 1]
+    cc2 <- k * ci[, 2]
+
+    pct  <- 100 * (exp(bb)  - 1)
+    pctL <- 100 * (exp(cc1) - 1)
+    pctU <- 100 * (exp(cc2) - 1)
+
+    min  <- t_ref * (exp(bb)  - 1)
+    minL <- t_ref * (exp(cc1) - 1)
+    minU <- t_ref * (exp(cc2) - 1)
+
+    out <- data.frame(
+      term = paste0(names(b), term_label_suffix),
+      pct = pct, low_pct = pctL, high_pct = pctU,
+      min_at_ref = min, low_min_at_ref = minL, high_min_at_ref = minU,
+      row.names = NULL,
+      check.names = FALSE
+    )
+    out
+  }
+
+  # Base table (per 1-unit change; for factors this is the level vs reference)
+  base <- eff_for_k(k = 1, term_label_suffix = "")
+
+  # Add scaled rows for selected continuous terms
+  scaled <- NULL
+  if (!is.null(increments) && length(increments) > 0) {
+    for (nm in names(increments)) {
+      if (nm %in% names(b)) {
+        k <- as.numeric(increments[[nm]])
+        scaled <- rbind(
+          scaled,
+          eff_for_k(k = k, term_label_suffix = paste0(" (per ", k, " ", nm, " units)"))[
+            base$term == nm, , drop = FALSE
+          ]
+        )
+      }
+    }
+  }
+
+  # Combine, format
+  out <- rbind(base, scaled)
+
+  # Round numeric columns
+  num_cols <- setdiff(names(out), "term")
+  out[num_cols] <- lapply(out[num_cols], \(x) round(x, digits))
+
+  # A little readability
+  attr(out, "t_ref_minutes") <- t_ref
+  attr(out, "conf_level") <- conf_level
+  out
+}
+
+# Example usage:
+tab <- logtime_effect_table(
+  m1,
+  t_ref = 111,
+  increments = c(val_age = 10, bmi = 5, uterine = 5)
+)
+tab
+```
+
+linear regression results summary:
+
+In multivariable linear regression modeling log-transformed surgical time, coefficients were exponentiated to express effect sizes as percent differences in operative duration, and then translated into approximate differences in minutes using a median surgical time of 111 minutes. Uterine size was independently associated with longer operative times after adjusting for covariates age, race, ethnicity, BMI, sleep apnea, hypertension, smoking status, COPD, surgeon volume, other procedures. Each 1-cm increase in uterine size corresponded to an estimated 4.1% increase in surgical time, which is 4.5 minutes longer surgical time (95% CI 4.2-4.9). Each 5-cm increase in uterine size corresponded to 24.6 minutes longer surgical time (95% CI 22.5-26.6).
+
+and age were independently associated with longer operative times: each 1-cm increase in uterine size corresponded to an estimated \~4% increase in surgical time (≈4–5 minutes at 111 minutes), and each 1-year increase in age corresponded to an estimated \~0.5% increase (≈0.5 minutes), or about a 4–5% increase per decade. Several categorical factors were also associated with longer times relative to their reference groups, including low- and medium-volume settings and the presence of additional procedures, each corresponding to roughly 15–27% longer operative duration (≈17–30 additional minutes at 111 minutes). In contrast, sleep apnea and COPD were not meaningfully associated with operative time in this model (confidence intervals included no difference), while smoking status was associated with slightly shorter times.
+
+Correlation
+
+```{r}
+library(corrr)
+#Spearman's rho (rank-based correlation coefficients,non-parametric)
+correlation_tab <- data %>% 
+  select(val_surgtime, val_age) %>%   # keep numeric variables of interest
+  correlate(method = "spearman")      # create correlation table (using spearman)
+
+correlation_tab    
+
+## remove duplicate entries (the table above is mirrored) 
+correlation_tab <- correlation_tab %>% 
+  shave()
+
+## view correlation table 
+correlation_tab
+
+## base R
+result <-cor.test(data$val_surgtime, data$val_age,  method = "spearman")
+result 
+```
+
+## References for linear regression
+
+1.  Surg Endosc. 2012 Sep;26(9):2579-86. doi: 10.1007/s00464-012-2236-1. Epub 2012 Apr 5.
+
+**The cost of surgical training: analysis of operative time for laparoscopic cholecystectomy**
+
+[M von Strauss Und Torney](https://pubmed.ncbi.nlm.nih.gov/?term=von+Strauss+Und+Torney+M&cauthor_id=22476835) ^[1](https://pubmed.ncbi.nlm.nih.gov/22476835/#full-view-affiliation-1 "Department of Surgery, Basel University Hospital, Spitalstrasse 21, 4031 Basel, Switzerland. mvonstrauss@uhbs.ch")^, [S Dell-Kuster](https://pubmed.ncbi.nlm.nih.gov/?term=Dell-Kuster+S&cauthor_id=22476835), [R Mechera](https://pubmed.ncbi.nlm.nih.gov/?term=Mechera+R&cauthor_id=22476835), [R Rosenthal](https://pubmed.ncbi.nlm.nih.gov/?term=Rosenthal+R&cauthor_id=22476835), [I Langer](https://pubmed.ncbi.nlm.nih.gov/?term=Langer+I&cauthor_id=22476835)
+
+Affiliations Expand
+
+-   PMID: **22476835**
+
+-   DOI: [10.1007/s00464-012-2236-1](https://doi.org/10.1007/s00464-012-2236-1)
+
+**Background:** Duration of surgery is a main cost factor of surgical training. The purpose of this analysis of operative times for laparoscopic cholecystectomies (LC) was to quantify the extra time and related costs in regards to the surgeons' experience in the operating room (OR).
+
+**Methods:** All LC performed between January 01, 2005 and December 31, 2008 in 46 hospitals reporting to the database of the Swiss Association for Quality Management in Surgery (AQC) were analyzed (n = 10,010). Four levels of seniority were specified: resident (R), junior consultant (JC), senior consultant (SC), and attending surgeon (AS). The differences in operative time according to seniority were investigated in a multivariable log-linear and median regression analysis controlling for possible confounders. The OR costs were calculated by using a full cost rate in a teaching hospital.
+
+**Results:** A total of 9,208 LC were available for analysis; 802 had to be excluded due to missing data (n = 212) or secondary major operations (n = 590). Twenty-eight percent of the LC were performed by R as teaching operations (n = 2,591). Compared with R, the multivariable analysis of operative time showed a median difference of -2.5 min (-9.0; 4.8) for JC and -18 min (-25; -11) for SC and -28 min (-35; -10) for AS, respectively. The OR minute costs were \<euro\>17.57, resulting in incremental costs of \<euro\>492 (159; 615) per operation in case of tutorial assistance.
+
+**Conclusions:** The proportion of LC performed as tutorial assistance for R remains low. Surgical training in the OR causes relevant case-related extra time and therefore costs.
+
+2.  Obstet Gynecol. 2022 Apr 1;139(4):589-596. doi: 10.1097/AOG.0000000000004699. Epub 2022 Mar 10.
+
+**Evaluation of Surgical Morbidity After Hysterectomy During an Obesity Epidemic**
+
+[Brittany A Davidson](https://pubmed.ncbi.nlm.nih.gov/?term=Davidson+BA&cauthor_id=35271543) ^[1](https://pubmed.ncbi.nlm.nih.gov/35271543/#full-view-affiliation-1 "Division of Gynecologic Oncology, Department of Obstetrics & Gynecology, Duke University Health System, the Department of Biostatistics & Bioinformatics, Duke University School of Medicine, and Duke University School of Medicine, Durham, North Carolina.")^, [Jeremy M Weber](https://pubmed.ncbi.nlm.nih.gov/?term=Weber+JM&cauthor_id=35271543), [Karen A Monuzsko](https://pubmed.ncbi.nlm.nih.gov/?term=Monuzsko+KA&cauthor_id=35271543), [Tracy Truong](https://pubmed.ncbi.nlm.nih.gov/?term=Truong+T&cauthor_id=35271543), [Laura J Havrilesky](https://pubmed.ncbi.nlm.nih.gov/?term=Havrilesky+LJ&cauthor_id=35271543), [Haley A Moss](https://pubmed.ncbi.nlm.nih.gov/?term=Moss+HA&cauthor_id=35271543)
+
+Affiliations Expand
+
+-   PMID: **35271543**
+
+-   DOI: [10.1097/AOG.0000000000004699](https://doi.org/10.1097/aog.0000000000004699)
+
+**Obective:** To assess 30-day outcomes for hysterectomy by body mass index (BMI) classification and estimate trends in 30-day outcomes by BMI over time.
+
+**Methods:** This is a retrospective cohort study of patients older than age 18 years undergoing hysterectomy with data in the National Surgical Quality Improvement Program database from 2005 to 2018. Exclusions were made for ambiguous indication or route of surgery and missing values in covariates or outcomes of interest. Patient characteristics and outcomes were compared across BMI classifications. Outcomes included operative time, length of stay, and major and minor complications. Multivariable linear regression models were used for continuous outcomes, and modified Poisson regression models were used for binary outcomes. Patients with benign and malignant indications for hysterectomy were analyzed separately. Models were adjusted for age, race, hysterectomy route, hypertension, diabetes, smoking, selected preoperative laboratory values, and cancer type, if applicable.
+
+**Results:** Obesity rate increased from 41.2% in 2005-2007 to 51.8% in 2018. Among 319,462 patients, minimally invasive surgery was the most common approach (58.8% vs 24.5% laparotomy vs 16.7% vaginal). Higher BMI classifications were associated with longer operative times (benign indication: average 25.0 minutes longer, 95% CI 22.1-27.9; malignant indication: average 25.1 minutes longer, 95% CI 20.8-29.4) and higher risk of complications compared with normal-weight BMIs, though operative time declined over time for patients with malignant surgical indications. Relative to normal-weight patients, rates of major complications did not increase until a BMI of 40 for hysterectomy for benign indications and 50 for hysterectomy for malignant indications.
+
+**Conclusion:** Operative times and complications both increase with obesity when performing hysterectomy. Knowledge of evolving risk level at various weight subclassifications can improve shared decision making preoperatively.
+
+3.  JSLS. 2024 Oct-Dec;28(4):e2024.00024. doi: 10.4293/JSLS.2024.00024. Epub 2025 Jan 10.
+
+    **Impact of Body Mass Index on Operative Time in Women Undergoing Benign Hysterectomy**
+
+    [A Caroline Cochrane](https://pubmed.ncbi.nlm.nih.gov/?term=Cochrane+AC&cauthor_id=39803169) ^[1](https://pubmed.ncbi.nlm.nih.gov/39803169/#full-view-affiliation-1 "Wake Forest University Health Sciences, Department of Obstetrics and Gynecology, Winston-Salem, NC. (Drs. Cochrane and Moulder).")^, [Evan Olson](https://pubmed.ncbi.nlm.nih.gov/?term=Olson+E&cauthor_id=39803169) ^[2](https://pubmed.ncbi.nlm.nih.gov/39803169/#full-view-affiliation-2 "The Iowa Clinic, Department of Obstetrics and Gynecology, West Des Moines, IA. (Dr. Olson).")^, [Tim Craven](https://pubmed.ncbi.nlm.nih.gov/?term=Craven+T&cauthor_id=39803169) ^[3](https://pubmed.ncbi.nlm.nih.gov/39803169/#full-view-affiliation-3 "Wake Forest School of Medicine, Department of Biostatistics and Data Science, Winston-Salem, NC. (Dr. Craven).")^, [Erica F Robinson](https://pubmed.ncbi.nlm.nih.gov/?term=Robinson+EF&cauthor_id=39803169) ^[4](https://pubmed.ncbi.nlm.nih.gov/39803169/#full-view-affiliation-4 "University of South Carolina School of Medicine-Greenville, Prisma Health Upstate, Department of Obstetrics and Gynecology, Greenville, SC. (Dr. Robinson).")^, [Janelle K Moulder](https://pubmed.ncbi.nlm.nih.gov/?term=Moulder+JK&cauthor_id=39803169) ^[1](https://pubmed.ncbi.nlm.nih.gov/39803169/#full-view-affiliation-1 "Wake Forest University Health Sciences, Department of Obstetrics and Gynecology, Winston-Salem, NC. (Drs. Cochrane and Moulder).")^
+
+    Affiliations Expand
+
+    -   PMID: **39803169**
+
+    -   PMCID: [PMC11723573](https://pmc.ncbi.nlm.nih.gov/articles/PMC11723573/)
+
+    -   DOI: [10.4293/JSLS.2024.00024](https://doi.org/10.4293/jsls.2024.00024)
+
+    **Background:** Optimization of surgical scheduling represents an opportunity to improve resource utilization and increase patient access. Increasing body mass index (BMI) has been associated with increased operating time and may provide an opportunity to more accurately predict operating time.
+
+    **Objective:** To investigate the relationship between BMI and operative time for benign hysterectomy and develop a predictive model for hysterectomy operating time based on patient BMI.
+
+    **Methods:** A secondary analysis of women undergoing benign laparoscopic, abdominal, or vaginal hysterectomy between 2014 and 2019 was performed using the American College of Surgeons National Surgical Quality Improvement Program database, N=117,691. Our primary outcome was log~10~ transformation of operative time. Multivariable linear regression was used to analyze the relationship between operative time and BMI. A model to predict operating time was created using variables that could be reliably obtained preoperatively.
+
+    **Results:** From our cohort, 22% of benign hysterectomies were performed abdominally, 16% were vaginal, and 62% were laparoscopic, and mean operative times were 144, 133, and 158 minutes, respectively. **For every 10-unit increase in BMI, estimated mean operation time (OT) increased by 12.8%, 8.1%, and 6.5%** for abdominal, vaginal, and laparoscopic hysterectomy, respectively. Neither an expanded nor a concise model was able to account for the variability in log~10~(OT).
+
+    **Conclusion:** Increasing BMI differentially impacts the operative time in abdominal greater than laparoscopic and vaginal hysterectomy. However, operative time for hysterectomy is highly variable, and its estimation is difficult to reliably predict using common preoperative variables.
+
+4.  Obstet Gynecol. 2022 Apr 1;139(4):589-596. doi: 10.1097/AOG.0000000000004699. Epub 2022 Mar 10.
+
+    **Evaluation of Surgical Morbidity After Hysterectomy During an Obesity Epidemic**
+
+    [Brittany A Davidson](https://pubmed.ncbi.nlm.nih.gov/?term=Davidson+BA&cauthor_id=35271543) ^[1](https://pubmed.ncbi.nlm.nih.gov/35271543/#full-view-affiliation-1 "Division of Gynecologic Oncology, Department of Obstetrics & Gynecology, Duke University Health System, the Department of Biostatistics & Bioinformatics, Duke University School of Medicine, and Duke University School of Medicine, Durham, North Carolina.")^, [Jeremy M Weber](https://pubmed.ncbi.nlm.nih.gov/?term=Weber+JM&cauthor_id=35271543), [Karen A Monuzsko](https://pubmed.ncbi.nlm.nih.gov/?term=Monuzsko+KA&cauthor_id=35271543), [Tracy Truong](https://pubmed.ncbi.nlm.nih.gov/?term=Truong+T&cauthor_id=35271543), [Laura J Havrilesky](https://pubmed.ncbi.nlm.nih.gov/?term=Havrilesky+LJ&cauthor_id=35271543), [Haley A Moss](https://pubmed.ncbi.nlm.nih.gov/?term=Moss+HA&cauthor_id=35271543)
+
+    Affiliations Expand
+
+    -   PMID: **35271543**
+
+    -   DOI: [10.1097/AOG.0000000000004699](https://doi.org/10.1097/aog.0000000000004699)
+
+    **Abstract**
+
+    **Objective:** To assess 30-day outcomes for hysterectomy by body mass index (BMI) classification and estimate trends in 30-day outcomes by BMI over time.
+
+    **Methods:** This is a retrospective cohort study of patients older than age 18 years undergoing hysterectomy with data in the National Surgical Quality Improvement Program database from 2005 to 2018. Exclusions were made for ambiguous indication or route of surgery and missing values in covariates or outcomes of interest. Patient characteristics and outcomes were compared across BMI classifications. Outcomes included operative time, length of stay, and major and minor complications. Multivariable linear regression models were used for continuous outcomes, and modified Poisson regression models were used for binary outcomes. Patients with benign and malignant indications for hysterectomy were analyzed separately. Models were adjusted for age, race, hysterectomy route, hypertension, diabetes, smoking, selected preoperative laboratory values, and cancer type, if applicable.
+
+    **Results:** Obesity rate increased from 41.2% in 2005-2007 to 51.8% in 2018. Among 319,462 patients, minimally invasive surgery was the most common approach (58.8% vs 24.5% laparotomy vs 16.7% vaginal). Higher BMI classifications were associated with longer operative times (benign indication: average 25.0 minutes longer, 95% CI 22.1-27.9; malignant indication: average 25.1 minutes longer, 95% CI 20.8-29.4) and higher risk of complications compared with normal-weight BMIs, though operative time declined over time for patients with malignant surgical indications. Relative to normal-weight patients, rates of major complications did not increase until a BMI of 40 for hysterectomy for benign indications and 50 for hysterectomy for malignant indications.
+
+    **Conclusion:** Operative times and complications both increase with obesity when performing hysterectomy. Knowledge of evolving risk level at various weight subclassifications can improve shared decision making preoperatively.
