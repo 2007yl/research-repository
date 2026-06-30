@@ -43,3 +43,4 @@ Predicting gynecologic surgical complexity: Utilization of preoperative and intr
 Sociodemographic factors associated with use of interventions to prevent UTIs
 
 ## Project-15
+Education, women empowerment and discontinuation of FGC in Sierra Leone
