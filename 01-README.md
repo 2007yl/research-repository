@@ -7,12 +7,10 @@ This project analyzes surgical outcomes and racial disparity
 - Data cleaning in R
 - Descriptive statistics
 - Logistic regression models
-- Model configuration
-
+  
 ## Files
 - `01-cleanup.R`: clean and prepare the dataset
-- `01-analysis.R`: run statistical models
-- `01-report.qmd`: report
+- `01-analysis.qmd`: analysis, discussion, report, response to reviewers
 
 ## Notes
 Original data are not included due to privacy/research restrictions.
