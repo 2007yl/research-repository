@@ -10,8 +10,8 @@ This project analyzes surgical outcomes and racial disparity
 - Model configuration
 
 ## Files
-- `01-cleanup.R`: cleans and prepares the dataset
-- `01-analysis.R`: runs statistical models
+- `01-cleanup.R`: clean and prepare the dataset
+- `01-analysis.R`: run statistical models
 - `01-report.qmd`: report
 
 ## Notes
