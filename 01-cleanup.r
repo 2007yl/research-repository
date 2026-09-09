@@ -3,7 +3,6 @@ rm(list=ls())
 graphics.off()
 #Load libraries
 library(tidyverse)
-library(gtsummary)
 library(labelled)
 library(haven)
 library(lubridate)
@@ -12,9 +11,9 @@ library(rio)
 library(skimr)
 #Read Data
 data<- read.csv("C:/Users/ylyl/OneDrive - Michigan Medicine/ResidentsResearch/Residents/2025/Darington Richardson/Racial disparity/Raw data/t1184_liu_04_28_23.csv")
-
+# view data
 glimpse(data)       
-###Analysis ###
+## surgeon volume
 #calculate by year
 s_all <-
   data|>
@@ -103,9 +102,8 @@ data0<-
                           c(surgery_year==2018 & surgeon2018=="low")~"low",
                           c(surgery_year==2018 & surgeon2018=="high")~"high"))
 
-#Clean up: exclude cancer patients;
-#include White and Black patients;
-#calculate BMI; surgeon volume; surgery time; time from surgery to discharge
+#Inclusion/exclusion criteria: exclude cancer patients; include White and Black patients;
+#calculate BMI; surgery time; time from surgery to discharge
 data1 <-
   data0 |>
   filter(gyn_cancer ==0)|>
@@ -325,8 +323,7 @@ data1<-
   mutate(cmp_uti2=case_when(c(cmp_uti==1 | cmp_utinc==1) ~1,
                             TRUE ~0))
   
-#labels
-
+# categorical variables labels
 data1 <-
   data1 |>
   mutate(ethnicity_hispanic =
@@ -616,7 +613,7 @@ data1<-
   mutate(hct=case_when(hct_no <36 ~ "Anemia",
                        hct_no >=36 ~ "Normal"))
 
-#04-28-2023
+#04-28-2023 regroup variables bmi and uterine
 data1<- data1 |>
   mutate(bmigroup1 = case_when(bmi < 30 ~ "Normal",
                               bmi < 40 ~ "Obese",
@@ -671,8 +668,76 @@ data1 <- data1 |>
     labelled::set_variable_labels(
     uterine2 = "Surgical approach & Uterine weight")
 
-#save clean dataset 
-export(data1, "data1.rds")
-export(data1, "data1.csv")  
-###done tidy
+#references:
+#ebl reference: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6485959/
+#hct_no: ref: https://pubmed.ncbi.nlm.nih.gov/17565082/
+#stratified patients into standard categories of anemia (hematocrit <39.0%), 
+#normal hematocrit (39.0%-53.9%), and polycythemia (hematocrit > or =54%). 
+# https://www.redcrossblood.org/donate-blood/dlp/hematocrit.html normal: 36-48%
+
+# 05-22-23 Dr.Mogan notes
+# remove readmission or transfusion
+# old cmp_anymajor group: event_readmit, cmp_ssi, cmp_sep, cmp_ssep, cmp_pn,
+#cmp_cardivas,  cmp_trans, cmp_vte;
+# new cmp_anymajor group: cmp_ssi, cmp_sep, cmp_ssep, cmp_pn,cmp_cardivas, cmp_vte;
+
+###06-19-2023
+#new postop major complications "cmp_anymajor1"
+data1 <-
+  data1 |>
+  mutate (cmp_anymajor1=case_when(cmp_ssi==1 | cmp_sep==1 |
+                                   cmp_ssep==1 |cmp_pn==1 |cmp_cardivas==1|	
+                                   cmp_vte ==1 ~1, TRUE ~0))|>
+  labelled::set_variable_labels(
+    cmp_anymajor1 ="Major Postoperative Complications")
+
+#exclude obs with missing values so the obs in demographics and regression analyses are consistent
+data2 <- data1 |>
+  drop_na(bmigroup1, race1, asaclass, e_teaching, insurance,volume, hct, hb_mis, 
+         bleeding_barrier, surgery_time, prefer, uterine, cmp_anymajor1) #18395 obs
+#relevel and label
+data2$bmigroup1<- forcats::fct_relevel(data2$bmigroup1, "Normal", "Obese", "Morbidly obese" )
+data2 <- data2|>
+  labelled::set_variable_labels(
+    bmigroup1 = "BMI (category)",
+    asaclass = "Asa",
+    volume = "Surgeon volume",
+    uterine = "Uterine weight (category)",
+    specmn_weight_grams = "Uterine weight (continuous)")
+
+#create new variables "mis_uterine" and "open_uterine"
+data2 <- data2 |>
+  mutate(mis_uterine=case_when(hb_mis=="Yes" ~ specmn_weight_grams))|>
+  mutate(open_uterine=case_when(hb_mis=="No" ~ specmn_weight_grams))|>
+  mutate(mis_uterine=as.numeric(mis_uterine))|>
+  mutate(open_uterine=as.numeric(open_uterine))|>
+  mutate(specmn_weight_grams=as.numeric(specmn_weight_grams))|>
+  labelled::set_variable_labels(
+    mis_uterine = "Uterine weight (MIS)",
+    open_uterine = "Uterine weight (Open)",
+    specmn_weight_grams = "Uterine weight (continuous)")
+
+# set reference level
+data2$volume <- forcats::fct_relevel(data2$volume, "high")
+data2$bmigroup1 <- forcats::fct_relevel(data2$bmigroup1, "Normal")
+data2$hb_mis <- forcats::fct_relevel(data2$hb_mis, "Yes")
+data2$asaclass <- forcats::fct_relevel(data2$asaclass, "ASA class <3")
+data2$e_teaching <- forcats::fct_relevel(data2$e_teaching, "Non-teaching Hospital")
+data2$race1 <- forcats::fct_relevel(data2$race1, "White")
+data2$hct <- forcats::fct_relevel(data2$hct, "Normal")
+data2$prefer <- forcats::fct_relevel(data2$prefer, "Yes")
+data2$uterine <- forcats::fct_relevel(data2$uterine, "1:Under 250 g")
+
+#06-22
+data2 <- data2|>
+  mutate_at('skin', ~na_if(., ''))|>
+  mutate(sameday=factor(
+    sameday,
+    levels=0:1,
+    labels = c("No", "Yes")))|>
+  labelled::set_variable_labels(
+    sameday = "Same day discharge") 
+#save complete dataset 
+export(data2, "data2.rds")
+
 
