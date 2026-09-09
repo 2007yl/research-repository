@@ -465,22 +465,8 @@ AIC      |     AICc |      BIC | Tjur's R2 |  RMSE | Sigma | Log_loss | Score_lo
 Q2: remove insurance from the model?
 
 Q3: How to select variables?
-
-1.  there is no definite answer to this question. Sometimes, we need to combine clinic knowledge, public health science, social study, statistics, and common sense. This is hard.
-
-2.  We can include all the variables that were statistically significant in bivariate analysis or univariate logistic regression, but we need to be careful for those too similar, or too closely related to each other.
-
-3.  We can include some variables that were not statistically significant but have clinical significance.
-
-4.  We need to have a theory for each variable included in the model.
-
-    reference: In an explanatory model, the goal is to correctly characterize the relationship of each predictor to the outcome variable. For that purpose, the identities of the variables in the model are critical, and the analyst must take great care in choosing which variables to include and in what mathematical form.
-
-```         
+      
 Q4: model performance, measures of goodness of fit
-
-R2 is commonly used as a measure of goodness of fit in linear regression. R2 doesn't quantify goodness of fit in logistic regression.
-```
 
 Previous question: why switched to mixed effects model?
 
@@ -605,10 +591,6 @@ data2 |>
 ```
 
 ```{r}
-
-```
-
-```{r}
 #table2
 data2 |>
   select(race_new, cmp_anymajor1, cmp_ssi, cmp_sep, cmp_ssep, cmp_pn, cmp_cardivas, cmp_vte, event_edorur, event_return, sameday, cmp_trans,event_readmit)|>
@@ -643,101 +625,6 @@ data2 |>
 create tertiles for surgeon annual case volume:
 
 low volume (1-33^th^ percentile), medium volume (34-66^th^ percentile), high volume (67^th^ percentile and above)
-
-old codes: \>= 12 cases per year is defined as "high volume" based on a literature (English ebl MSQC paper)
-
-```{r}
-#calculate by year
-s_all <-
-  data|>
-  select(physician_cid)|>
-  group_by(physician_cid) |>
-  summarise(
-    frequency = n()
-  )  
-s2015 <-
-  data|>
-  filter(surgery_year==2015)|>
-  select(physician_cid)|>
-  group_by(physician_cid) |>
-  summarise(
-    frequency = n()
-  ) |>
-  ungroup() |>
-  mutate(surgeon2015=case_when(frequency<6 ~"low",
-                               frequency>=6 ~"high")) # 2015 data collected for 6 months not the whole year  
-s2016 <-
-  data|>
-  filter(surgery_year==2016)|>
-  select(physician_cid)|>
-  group_by(physician_cid) |>
-  summarise(
-    frequency = n()
-  ) |>
-  ungroup() |>
-  mutate(surgeon2016=case_when(frequency<12 ~"low",
-                           frequency>=12 ~"high"))
-
-s2017 <-
-  data|>
-  filter(surgery_year==2017)|>
-  select(physician_cid)|>
-  group_by(physician_cid) |>
-  summarise(
-    frequency = n()
-  ) |>
-  ungroup() |>
-  mutate(surgeon2017=case_when(frequency<12 ~"low",
-                               frequency>=12 ~"high"))
-
-s2018 <-
-  data|>
-  filter(surgery_year==2018)|>
-  select(physician_cid)|>
-  group_by(physician_cid) |>
-  summarise(
-    frequency = n()
-  ) |>
-  ungroup() |>
-  mutate(surgeon2018=case_when(frequency<12 ~"low",
-                               frequency>=12 ~"high"))
-test0 <-
-  s2015 |>
-  select(physician_cid, surgeon2015)|>
-  full_join(s_all, s2015,by=join_by(physician_cid), relationship="many-to-many")
-
-test <-
-  s2016 |>
-  select(physician_cid, surgeon2016)|>
-  full_join(test0, s2016,by=join_by(physician_cid), relationship="many-to-many")
-
-test1 <-
-  s2017 |>
-  select(physician_cid, surgeon2017)|>
-  full_join(test, s2017,  by=join_by(physician_cid), relationship="many-to-many")
-
-test2 <-
-  s2018 |>
-  select(physician_cid, surgeon2018)|>
-  full_join(test1, s2018,  by=join_by(physician_cid), relationship="many-to-many")
-
-data0 <-
-  full_join(data, test2,  by=join_by(physician_cid), relationship="many-to-many")
-
-data0<-
-  data0 |>
-  mutate(volume=case_when(c(surgery_year==2015 & surgeon2015=="low")~"low",
-                          c(surgery_year==2015 & surgeon2015=="high")~"high",
-                          c(surgery_year==2016 & surgeon2016=="low")~"low",
-                          c(surgery_year==2016 & surgeon2016=="high")~"high",
-                          c(surgery_year==2017 & surgeon2017=="low")~"low",
-                          c(surgery_year==2017 & surgeon2017=="high")~"high",
-                          c(surgery_year==2018 & surgeon2018=="low")~"low",
-                          c(surgery_year==2018 & surgeon2018=="high")~"high"))
-
-```
-
-New codes:
 
 For example, in 2016, total 5,545 surgeries, 712 unique surgeons, tertile surgeries T1=3, T2=7, max=104. #surgeries \<=3-low, \>3 and \<=7 medium, \>7-high. among those, 242 (34%) are high volume surgeon, 170 (24%) are medium, 300 (42%) are low volume. Median number of surgeries by high, medium, low volume surgeons are 13, 5, 2. Total number of surgeries by high, medium, low volume surgeons are 4102, 896, 547.
 
