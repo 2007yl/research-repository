@@ -1,6 +1,6 @@
 ---
 title: "Persistent Opioid Use Among Gynecologic Oncology Patients After Surgery"
-author:
+author: Yang Liu
 date: 08-29-2023
 format: html
 execute:
@@ -9,61 +9,7 @@ execute:
 editor: visual
 ---
 
-Notes
-
-1.  **Opioid use within 30 days of surgery?**
-
-    0% -no prescription or no opioid use before and after surgery?
-
-    -persistent opioid use: start right before surgery or right after surgery and continue to use 90 days after surgery
-
-    -answer "No" to this question excluded some(or many?) new persistent opioid users, therefore underestimated incidence of new persistent opioid use; reference: In gynecologic surgery, the rate of persistent opioid use 3--6 months after surgery is 6--7 % ([Wright et al., 2019](https://www.sciencedirect.com/science/article/pii/S2352578923000413?via%3Dihub#b0200), [Chan et al., 2021](https://www.sciencedirect.com/science/article/pii/S2352578923000413?via%3Dihub#b0050)). -opioid-naive patients: no prior opioid use before admission
-
-    -consider including patients that had prescriptions/opioid use -15 days +30 days surgery
-
-    update: this question is asking any opioid use 30 days before surgery.
-
-2.  Dr. Peahl and Dr. Dalton's paper as a reference for defining persistent opioid use
-
-    Peahl, A. F., Dalton, V. K., Montgomery, J. R., Lai, Y. L., Hu, H. M., & Waljee, J. F. (2019). Rates of New Persistent Opioid Use After Vaginal or Cesarean Birth Among US Women. *JAMA Network Open*, *2*(7). https://doi.org/10.1001/JAMANETWORKOPEN.2019.7863
-
-    **Inclusion criteria:** Peripartum opioid prescription (1 week before delivery to 3 days after discharge)
-
-    Rates of new persistent opioid use, defined as pharmacy claims for 1 or more opioid prescription 4 to 90 days after discharge and 1 or more prescription 91 to 365 days after discharge among women who filled peripartum opioid prescriptions.
-
-3.  Swenson, C. W., Kamdar, N. S., Seiler, K., Morgan, D. M., Lin, P., & As-Sanie, S. (2018). Definition development and prevalence of new persistent opioid use following hysterectomy. *American Journal of Obstetrics and Gynecology*, *219*(5), 486.e1-486.e7. https://doi.org/10.1016/J.AJOG.2018.06.010
-
-    **Inclusion criteria** included the following: age ≤63 years at hysterectomy, no opioid fills for 8 months preceding (excluding the 30 days immediately prior), and no additional surgical procedures within 6 months after hysterectomy. The perioperative period was defined as 30 days prior to 14 days after hysterectomy.
-
-    New persistent opioid use was defined as follows: ≥2 opioid fills within 6 months of hysterectomy with ≥1 fill every 3 months and either total oral morphine equivalent ≥1150 or days supplied ≥39.
-
-4.  thoughts
-
-    -reset inclusion criteria
-
-    -reach out to Dr. Peahl, Dr. Dalton, Dr. As-Sanie for help with inclusion criteria and defining new persistent opioid use.
-
-5.  meeting notes 09-27-23:
-
-    Mode of surgery: regroup
-
-    -Open
-
-    -MIS including vaginal hysterectomy, LAVH
-
-    -Vulvar/vaginal surgery
-
-    variable pain_pill_refill: opioid refill at discharge,
-
-    cancer type: CAH could be grouped with uterine cancer
-
-    cancer stage: check missing values
-
-    any complication within 30 days: check missing values
-
 ## Background
-
-Definition of persistent opioid use:
 
 Persistent opioid use refers to the long-term usage of opioid medications, even after a person has recovered from the condition for which the opioids were initially prescribed. This can be due to a multitude of factors such as individual's susceptibility, type of surgery, and the duration of initial prescription. Persistent opioid use is a major concern due to its correlation with opioid use disorder and the risk of overdose. some references:
 
@@ -87,13 +33,11 @@ REDCap database with all of the information included. The data was collected via
 
 ### What is the rate of persistent opioid use (at 30 days and 90 days postop) in opioid-naive patients undergoing surgery for a gynecologic malignancy?
 
-A: Nine hundred and twenty-eight opioid-naïve patients were included in the analysis. Ongoing opioid use at 30 days post-operative period was identified in 16 (1.7%) of patients, and persistent opioid use at 90 days was identified in only **4 (0.32%)** of patients. At 30 days, the reasons for persistent opioid use were as follows: 4/16 were still using opioids for pain related to adjuvant treatment, 2/16 from wound complications, 1/6 from postoperative pain, 4/16 from conditions unrelated to surgery/cancer, and 5/16 were not clear from the chart.
+A: Nine hundred and twenty-eight opioid-naïve patients were included in the analysis. Ongoing opioid use at 30 days post-operative period was identified in 16 (1.7%) patients, and persistent opioid use at 90 days was identified in only **4 (0.32%)** patients. At 30 days, the reasons for persistent opioid use were as follows: 4/16 were still using opioids for pain related to adjuvant treatment, 2/16 from wound complications, 1/6 from postoperative pain, 4/16 from conditions unrelated to surgery/cancer, and 5/16 were not clear from the chart.
 
 ### What are the risk factors for persistent opioid use amongst this population?
 
 would like to determine whether any of the following factors makes it more likely that patients will have persistent opioid use: age, race, insurance type, BMI, preoperative diagnosis, mode of surgery, postoperative complications, contraindications to NSAIDs, and pre-existing conditions such as depression, anxiety, substance use, and chronic pain.
-
-A: not able to answer this question due to few outcomes.
 
 ## Study design
 
@@ -106,9 +50,6 @@ Define persistent opioid use:
 opioid use 30 days after surgery AND
 
 opioid use 90 days after surgery
-
-```         
-```
 
 ```{r}
 library(DiagrammeR)
@@ -139,7 +80,7 @@ grViz("digraph flowchart {
 
 ## Objective
 
-to investigate the incidence of persistent opioid use in gynecology oncology patients.
+investigate the incidence of persistent opioid use in gynecologic oncology patients.
 
 ## Primary outcome
 
@@ -161,7 +102,7 @@ Continuous variables were presented in median(IQR) and categorical variables wer
 
 ## Propensity score match
 
-We used propensity score matching to balance two cohorts' demographic and clinical characteristics and ensure outcomes are comparable. The propensity scores were estimated using a generalized linear model and these covariates: age, race, BMI, Insurance, Cancer diagnosis, Cancer Stage, mode of surgery, and Charlson comorbidity score. The matching method was nearest neighbor matching. Patients in no opioid use group were matched to the nearest patients in opioid group at a 3:1 ratio.
+use propensity score matching to balance two cohorts' demographic and clinical characteristics and ensure outcomes are comparable. The propensity scores were estimated using a generalized linear model and these covariates: age, race, BMI, Insurance, Cancer diagnosis, Cancer Stage, mode of surgery, and Charlson comorbidity score. The matching method was nearest neighbor matching. Patients in no opioid use group were matched to the nearest patients in opioid group at a 3:1 ratio.
 
 **Matching variables:** Age, Race, BMI, Insurance, Cancer diagnosis, Cancer Stage, mode of surgery, Charlson comorbidity score
 
@@ -427,4 +368,4 @@ maligant_0424$charlson_score |> is.na() |>which()
 
 -5 covariates data for propensity score matching missing: 101293542 (age), 101080483 (bmi), 101124411, 36977498 (insurance), 16206593 (surgery mode)
 
-## 06/18/25
+
